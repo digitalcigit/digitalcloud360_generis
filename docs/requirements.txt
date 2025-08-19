@@ -1,0 +1,55 @@
+# =============================================================================
+# Genesis AI Deep Agents Service - Dependencies
+# =============================================================================
+
+# Core FastAPI & ASGI
+fastapi
+uvicorn[standard]
+python-multipart
+
+# LangGraph & AI Dependencies  
+langgraph
+langchain
+langchain-core
+langchain-openai
+langchain-anthropic
+pydantic
+
+# Database & ORM
+sqlalchemy
+alembic
+psycopg[binary]
+
+# Redis & Caching
+redis[hiredis]
+redis-om
+
+# HTTP Client & External APIs
+httpx
+tavily-python
+openai
+anthropic
+
+# Authentication & Security
+python-jose[cryptography]
+passlib[bcrypt]
+
+# Environment & Configuration
+python-dotenv
+pydantic-settings
+
+# Logging & Monitoring
+structlog
+prometheus-client
+
+# Testing
+pytest
+pytest-asyncio
+pytest-mock
+faker
+
+# Development
+black
+isort
+flake8
+pre-commit
