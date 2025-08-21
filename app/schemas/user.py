@@ -2,22 +2,33 @@
 
 from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, Dict, Any
-from datetime import datetime
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    user_id: Optional[int] = None
 
 class UserBase(BaseModel):
     """Base user schema"""
     email: EmailStr = Field(..., description="Email utilisateur")
-    name: str = Field(..., description="Nom complet")
 
 class UserCreate(UserBase):
     """Schema for user creation"""
-    dc360_user_id: int = Field(..., description="ID utilisateur DigitalCloud360")
-    
+    name: str = Field(..., description="Nom de l'utilisateur")
+    password: str = Field(..., min_length=8, description="Mot de passe")
+
+class User(UserBase):
+    """User schema for API responses"""
+    id: int
+    name: str
+
+    model_config = {"from_attributes": True}
+
 class UserProfile(BaseModel):
     """Profil utilisateur Genesis AI"""
     user_id: int = Field(..., description="ID utilisateur")
-    email: EmailStr = Field(..., description="Email utilisateur")
-    name: str = Field(..., description="Nom complet")
     
     # Location
     country: Optional[str] = Field(None, description="Pays")
@@ -37,14 +48,8 @@ class UserProfile(BaseModel):
     cultural_context: Optional[Dict[str, Any]] = Field(None, description="Contexte culturel")
     business_context: Optional[Dict[str, Any]] = Field(None, description="Contexte business")
 
-class UserResponse(BaseModel):
-    """Response schema for user data"""
-    id: int
-    dc360_user_id: int
-    email: str
-    name: str
-    created_at: datetime
+    model_config = {"from_attributes": True}
+
+class UserResponse(User):
+    """Response schema for user data, including profile"""
     profile: Optional[UserProfile] = None
-    
-    class Config:
-        from_attributes = True

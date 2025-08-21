@@ -1,55 +1,126 @@
 """Tests for business endpoints"""
 
 import pytest
-from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
+from httpx import AsyncClient
+from unittest.mock import patch, AsyncMock
+from app.models.user import User
+
+pytestmark = pytest.mark.asyncio
+
+# Mock data for testing
+mock_brief_id = "brief_mock_123"
+mock_session_id = "session_mock_123"
+
+mock_request_data = {
+    "session_id": mock_session_id,
+    "business_needs": "Créer une plateforme de e-commerce pour la mode africaine.",
+    "target_audience": "Jeunes adultes (18-35) intéressés par la mode durable.",
+    "business_name": "AfroChic",
+    "ton_of_voice": "Moderne, audacieux, et authentique.",
+    "key_features": ["Catalogue de produits", "Paiement en ligne", "Blog de mode"]
+}
+
+mock_final_state = {
+    "market_research": {"analysis": "Le marché est en pleine croissance..."},
+    "content_generation": {"homepage_text": "Bienvenue chez AfroChic..."},
+    "logo_creation": {"logo_url": "https://cdn.example.com/afrochic_logo.png"},
+    "seo_optimization": {"keywords": ["mode africaine", "e-commerce", "durable"]},
+    "template_selection": {"template_name": "DynamicFashion"}
+}
+
+
+@pytest.fixture
+def mock_brief_data():
+    """Mock business brief data for testing."""
+    return {
+        "brief_id": mock_brief_id,
+        "user_id": None,  # This will be set within the tests
+        "session_id": mock_session_id,
+        "results": mock_final_state
+    }
+
 
 class TestBusinessEndpoints:
-    """Test suite for business API endpoints"""
-    
-    def test_generate_business_brief_not_implemented(self, client: TestClient):
-        """Test that business brief generation returns 501 (placeholder)"""
-        request_data = {
-            "user_id": 1,
-            "session_id": "test-session-123",
-            "coaching_results": {
-                "vision": "Créer le meilleur restaurant de Dakar",
-                "mission": "Offrir une expérience culinaire authentique",
-                "target_audience": "Jeunes professionnels sénégalais",
-                "differentiation": "Fusion tradition-modernité",
-                "offer": "Plats traditionnels revisités"
-            }
-        }
-        response = client.post("/api/v1/business/brief/generate", json=request_data)
-        assert response.status_code == 501
-        assert "not implemented" in response.json()["detail"].lower()
-    
-    def test_get_business_brief_not_implemented(self, client: TestClient):
-        """Test that business brief retrieval returns 501 (placeholder)"""
-        response = client.get("/api/v1/business/brief/brief-123")
-        assert response.status_code == 501
-        assert "not implemented" in response.json()["detail"].lower()
-    
-    def test_get_subagent_results_not_implemented(self, client: TestClient):
-        """Test that sub-agent results retrieval returns 501 (placeholder)"""
-        response = client.get("/api/v1/business/subagents/test-session-123/results")
-        assert response.status_code == 501
-        assert "not implemented" in response.json()["detail"].lower()
-    
-    def test_regenerate_business_brief_not_implemented(self, client: TestClient):
-        """Test that business brief regeneration returns 501 (placeholder)"""
-        response = client.post(
-            "/api/v1/business/brief/brief-123/regenerate",
-            json=["research", "content"]
+    """Test suite for the implemented business API endpoints."""
+
+    async def test_generate_business_brief(self, client: AsyncClient, auth_headers: dict, test_user: User, mock_redis_vfs):
+        """Test successful business brief generation."""
+        response = await client.post("/api/v1/business/brief/generate", json=mock_request_data, headers=auth_headers)
+        
+        assert response.status_code == 200
+        response_json = response.json()
+        assert response_json["user_id"] == test_user.id
+        assert response_json["session_id"] == mock_session_id
+        assert "results" in response_json
+        mock_redis_vfs.write_session.assert_called_once()
+
+    async def test_get_business_brief_found(self, client: AsyncClient, auth_headers: dict, mock_brief_data: dict, test_user: User, mock_redis_vfs):
+        """Test retrieving an existing business brief."""
+        mock_brief_data["user_id"] = test_user.id
+        mock_redis_vfs.read_session.return_value = mock_brief_data
+        
+        response = await client.get(f"/api/v1/business/brief/{mock_brief_id}", headers=auth_headers)
+        
+        assert response.status_code == 200
+        assert response.json() == mock_brief_data
+        mock_redis_vfs.read_session.assert_called_once_with(test_user.id, mock_brief_id)
+
+    async def test_get_business_brief_not_found(self, client: AsyncClient, auth_headers: dict, mock_redis_vfs):
+        """Test retrieving a non-existent business brief."""
+        mock_redis_vfs.read_session.return_value = None
+        
+        response = await client.get(f"/api/v1/business/brief/non_existent_id", headers=auth_headers)
+        
+        assert response.status_code == 404
+        assert "not found" in response.json()["detail"].lower()
+
+    async def test_get_subagent_results(self, client: AsyncClient, auth_headers: dict, mock_brief_data: dict, test_user: User, mock_redis_vfs):
+        """Test retrieving sub-agent results for a brief."""
+        mock_brief_data["user_id"] = test_user.id
+        mock_redis_vfs.read_session.return_value = mock_brief_data
+
+        response = await client.get(f"/api/v1/business/brief/{mock_brief_id}/results", headers=auth_headers)
+
+        assert response.status_code == 200
+        assert response.json() == mock_final_state
+
+    async def test_regenerate_business_brief(self, client: AsyncClient, auth_headers: dict, mock_brief_data: dict, test_user: User, mock_redis_vfs, mock_orchestrator):
+        """Test successful regeneration of specific brief sections."""
+        mock_brief_data["user_id"] = test_user.id
+        mock_redis_vfs.read_session.return_value = mock_brief_data
+        mock_orchestrator.run.return_value = {"content_generation": {"homepage_text": "Nouveau texte de bienvenue..."}}
+
+        response = await client.post(
+            f"/api/v1/business/brief/{mock_brief_id}/regenerate",
+            json={"sections": ["content_generation"]},
+            headers=auth_headers
         )
-        assert response.status_code == 501
-        assert "not implemented" in response.json()["detail"].lower()
-    
-    def test_create_website_from_brief_not_implemented(self, client: TestClient):
-        """Test that website creation returns 501 (placeholder)"""
-        response = client.post("/api/v1/business/website/create?brief_id=brief-123")
-        assert response.status_code == 501
-        assert "not implemented" in response.json()["detail"].lower()
+
+        assert response.status_code == 200
+        response_json = response.json()
+        assert response_json["results"]["content_generation"]["homepage_text"] == "Nouveau texte de bienvenue..."
+        assert response_json["results"]["market_research"] == mock_final_state["market_research"] # Ensure other sections are preserved
+        mock_redis_vfs.write_session.assert_called_once()
+
+    async def test_create_website_from_brief(self, client: AsyncClient, auth_headers: dict, mock_brief_data: dict, test_user: User, mock_redis_vfs, mock_digitalcloud360_client):
+        """Test successful website creation from a brief."""
+        mock_brief_data["user_id"] = test_user.id
+        mock_redis_vfs.read_session.return_value = mock_brief_data
+
+        response = await client.post(f"/api/v1/business/website/create?brief_id={mock_brief_id}", headers=auth_headers)
+
+        assert response.status_code == 200
+        assert response.json()["message"] == "Website creation initiated successfully."
+        assert response.json()["website_id"] == "web_xyz"
+        mock_digitalcloud360_client.create_website.assert_called_once_with(mock_brief_data)
+
+    async def test_create_website_brief_not_found(self, client: AsyncClient, auth_headers: dict, mock_redis_vfs):
+        """Test website creation when the brief is not found."""
+        mock_redis_vfs.read_session.return_value = None
+
+        response = await client.post(f"/api/v1/business/website/create?brief_id=non_existent_id", headers=auth_headers)
+
+        assert response.status_code == 404
 
 # TO BE EXPANDED BY DEVELOPMENT TEAM
 # Ces tests doivent être complétés avec la vraie logique des sub-agents

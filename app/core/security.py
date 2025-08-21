@@ -8,11 +8,21 @@ from pydantic import BaseModel
 
 from app.config.settings import settings
 
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 ALGORITHM = "HS256"
 
 class TokenData(BaseModel):
     """Data model for JWT token payload"""
     user_id: Optional[int] = None
+
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     """Create a new access token"""

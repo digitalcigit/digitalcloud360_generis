@@ -17,6 +17,6 @@ async def create_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
     hashed_password = pwd_context.hash(user.password)
     db_user = User(email=user.email, hashed_password=hashed_password, name=user.name, dc360_user_id=user.dc360_user_id)
     db.add(db_user)
-    await db.commit()
+    await db.flush()
     await db.refresh(db_user)
-    return db_user
+    return UserResponse.from_orm(db_user)

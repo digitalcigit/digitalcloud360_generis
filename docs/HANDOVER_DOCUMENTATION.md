@@ -1,6 +1,6 @@
 # 🚀 Documentation de Transition Genesis AI Deep Agents
 
-**Date de transition :** Janvier 2025  
+**Date de transition :** Aout 2025  
 **Préparé par :** Cascade (Lead Technique & Architecte)  
 **Destinataire :** Équipe IA Senior Dev  
 **Statut projet :** Infrastructure complète - Prêt pour implémentation business logic
@@ -161,9 +161,9 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ### URLs Développement
-- 🌐 **API Docs :** http://localhost:8000/docs
-- 📊 **Métriques :** http://localhost:8000/metrics  
-- 🏥 **Health Check :** http://localhost:8000/health
+- 🌐 **API Docs :** http://localhost:8002/docs
+- 📊 **Métriques :** http://localhost:8002/metrics  
+- 🏥 **Health Check :** http://localhost:8002/health
 
 ---
 

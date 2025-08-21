@@ -1,77 +1,62 @@
 """Authentication endpoints for Genesis AI Service"""
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from app.schemas.user import UserResponse, UserProfile
-from app.schemas.responses import SuccessResponse, ErrorResponse
-from app.core.security import create_access_token, decode_access_token, TokenData
+from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 import structlog
 
+from app.config.database import get_db
+from app.core.security import create_access_token, get_password_hash, verify_password
+from app.models.user import User, UserProfile
+from app.schemas.user import UserCreate, UserResponse, Token
+from app.services.user_service import get_current_user
+
 router = APIRouter()
-security = HTTPBearer()
 logger = structlog.get_logger()
 
-async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> TokenData:
-    token = credentials.credentials
-    token_data = decode_access_token(token)
-    if not token_data:
+@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+async def register_user(user_in: UserCreate, db: AsyncSession = Depends(get_db)):
+    """Register a new user."""
+    result = await db.execute(select(User).filter(User.email == user_in.email))
+    if result.scalars().first():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The user with this email already exists in the system.",
+        )
+    
+    # Create user first
+    user = User(
+        email=user_in.email,
+        name=user_in.name,
+        hashed_password=get_password_hash(user_in.password)
+    )
+    db.add(user)
+    await db.flush()  # This assigns an ID to the user
+    
+    # Now create the profile with the user_id
+    profile = UserProfile(user_id=user.id)
+    user.profile = profile
+    await db.flush()
+    await db.refresh(user)
+    
+    return UserResponse.model_validate(user)
+
+@router.post("/token", response_model=Token)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
+    """OAuth2 compatible token login, get an access token for future requests."""
+    result = await db.execute(select(User).filter(User.email == form_data.username))
+    user = result.scalars().first()
+    if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
+            detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    return token_data
-
-
-@router.post("/validate", response_model=UserResponse)
-async def validate_token(
-    current_user: TokenData = Depends(get_current_user)
-):
-    """
-    Validate JWT token from DigitalCloud360
-    
-    This endpoint is now implemented to validate the token.
-    """
-    logger.info(f"Token validation for user_id: {current_user.user_id}")
-    
-    # In a real application, you would fetch the user from the database here
-    # For now, we will return a mock user response
-    user_profile = UserProfile(user_id=current_user.user_id, email=f"user_{current_user.user_id}@example.com", name="Test User")
-    return UserResponse(user=user_profile)
-
-@router.get("/profile", response_model=UserProfile)
-async def get_user_profile(
-    current_user: TokenData = Depends(get_current_user)
-):
-    """
-    Get current user profile
-    
-    This endpoint is now implemented to fetch the user profile.
-    """
-    logger.info(f"User profile requested for user_id: {current_user.user_id}")
-    
-    # In a real application, you would fetch the user from the database here
-    # For now, we will return a mock user profile
-    return UserProfile(user_id=current_user.user_id, email=f"user_{current_user.user_id}@example.com", name="Test User")
-
-@router.put("/profile", response_model=SuccessResponse)
-async def update_user_profile(
-    profile_update: dict,
-    current_user: TokenData = Depends(get_current_user)
-):
-    """
-    Update user profile for coaching personalization
-    
-    This endpoint is a placeholder for updating the user profile.
-    """
-    logger.info(f"User profile update requested for user_id: {current_user.user_id}")
-    
-    # In a real application, you would validate and update the profile in the database
-    # For now, we will just return a success response
-    return SuccessResponse(message="Profile updated successfully")
-
-# This is a temporary endpoint for testing to generate a token
-@router.post("/token")
-async def login_for_access_token(user_id: int):
-    access_token = create_access_token(data={"sub": str(user_id)})
+    access_token = create_access_token(data={"sub": str(user.id)})
     return {"access_token": access_token, "token_type": "bearer"}
+
+@router.get("/me", response_model=UserResponse)
+async def read_users_me(current_user: User = Depends(get_current_user)):
+    """Get current user."""
+    return UserResponse.model_validate(current_user)

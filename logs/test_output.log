@@ -1,0 +1,422 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.13, pytest-8.4.1, pluggy-1.6.0
+rootdir: /app
+configfile: pytest.ini
+plugins: mock-3.14.1, Faker-37.5.3, langsmith-0.4.15, anyio-4.10.0, asyncio-1.1.0
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 1 item
+
+tests/test_api/test_auth.py 2025-08-21 15:23:25 [info     ] Starting Genesis AI Service...
+2025-08-21 15:23:25,720 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+INFO:sqlalchemy.engine.Engine:select pg_catalog.version()
+2025-08-21 15:23:25,731 INFO sqlalchemy.engine.Engine [raw sql] ()
+INFO:sqlalchemy.engine.Engine:[raw sql] ()
+2025-08-21 15:23:25,734 INFO sqlalchemy.engine.Engine select current_schema()
+INFO:sqlalchemy.engine.Engine:select current_schema()
+2025-08-21 15:23:25,735 INFO sqlalchemy.engine.Engine [raw sql] ()
+INFO:sqlalchemy.engine.Engine:[raw sql] ()
+2025-08-21 15:23:25,738 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+INFO:sqlalchemy.engine.Engine:show standard_conforming_strings
+2025-08-21 15:23:25,740 INFO sqlalchemy.engine.Engine [raw sql] ()
+INFO:sqlalchemy.engine.Engine:[raw sql] ()
+2025-08-21 15:23:25,743 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+INFO:sqlalchemy.engine.Engine:BEGIN (implicit)
+2025-08-21 15:23:25,746 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+INFO:sqlalchemy.engine.Engine:SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2025-08-21 15:23:25,747 INFO sqlalchemy.engine.Engine [generated in 0.00100s] ('users', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+INFO:sqlalchemy.engine.Engine:[generated in 0.00100s] ('users', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2025-08-21 15:23:25,756 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+INFO:sqlalchemy.engine.Engine:SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2025-08-21 15:23:25,757 INFO sqlalchemy.engine.Engine [cached since 0.01085s ago] ('user_profiles', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+INFO:sqlalchemy.engine.Engine:[cached since 0.01085s ago] ('user_profiles', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2025-08-21 15:23:25,759 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+INFO:sqlalchemy.engine.Engine:SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2025-08-21 15:23:25,759 INFO sqlalchemy.engine.Engine [cached since 0.01345s ago] ('coaching_sessions', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+INFO:sqlalchemy.engine.Engine:[cached since 0.01345s ago] ('coaching_sessions', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2025-08-21 15:23:25,761 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+INFO:sqlalchemy.engine.Engine:SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2025-08-21 15:23:25,762 INFO sqlalchemy.engine.Engine [cached since 0.01577s ago] ('coaching_steps', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+INFO:sqlalchemy.engine.Engine:[cached since 0.01577s ago] ('coaching_steps', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2025-08-21 15:23:25,763 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+INFO:sqlalchemy.engine.Engine:SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2025-08-21 15:23:25,764 INFO sqlalchemy.engine.Engine [cached since 0.01772s ago] ('business_briefs', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+INFO:sqlalchemy.engine.Engine:[cached since 0.01772s ago] ('business_briefs', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2025-08-21 15:23:25,765 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+INFO:sqlalchemy.engine.Engine:SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2025-08-21 15:23:25,766 INFO sqlalchemy.engine.Engine [cached since 0.01969s ago] ('businesses', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+INFO:sqlalchemy.engine.Engine:[cached since 0.01969s ago] ('businesses', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2025-08-21 15:23:25,768 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+INFO:sqlalchemy.engine.Engine:SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2025-08-21 15:23:25,770 INFO sqlalchemy.engine.Engine [cached since 0.02429s ago] ('business_contexts', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+INFO:sqlalchemy.engine.Engine:[cached since 0.02429s ago] ('business_contexts', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2025-08-21 15:23:25,773 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+INFO:sqlalchemy.engine.Engine:SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2025-08-21 15:23:25,774 INFO sqlalchemy.engine.Engine [generated in 0.00075s] ('sessionstatusenum', 'pg_catalog')
+INFO:sqlalchemy.engine.Engine:[generated in 0.00075s] ('sessionstatusenum', 'pg_catalog')
+2025-08-21 15:23:25,777 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+INFO:sqlalchemy.engine.Engine:SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+2025-08-21 15:23:25,778 INFO sqlalchemy.engine.Engine [cached since 0.005119s ago] ('coachingstepenum', 'pg_catalog')
+INFO:sqlalchemy.engine.Engine:[cached since 0.005119s ago] ('coachingstepenum', 'pg_catalog')
+2025-08-21 15:23:25,780 INFO sqlalchemy.engine.Engine COMMIT
+INFO:sqlalchemy.engine.Engine:COMMIT
+2025-08-21 15:23:25 [info     ] Database tables created
+2025-08-21 15:23:25 [info     ] Database tables created
+2025-08-21 15:23:25 [info     ] Redis Virtual File System healthy
+2025-08-21 15:23:25 [info     ] Redis Virtual File System initialized
+2025-08-21 15:23:28 [warning  ] DigitalCloud360 API health check failed attempt=1 error='[Errno -2] Name or service not known' max_retries=3
+2025-08-21 15:23:29 [warning  ] DigitalCloud360 API health check failed attempt=2 error='[Errno -2] Name or service not known' max_retries=3
+E
+
+==================================== ERRORS ====================================
+____________ ERROR at setup of TestAuthEndpoints.test_register_user ____________
+
+fut = <Task cancelled name='Task-7' coro=<AsyncioEvent.wait() done, defined at /usr/local/lib/python3.11/site-packages/asgi_lifespan/_concurrency/asyncio.py:16>>
+timeout = 5
+
+    async def wait_for(fut, timeout):
+        """Wait for the single Future or coroutine to complete, with timeout.
+    
+        Coroutine will be wrapped in Task.
+    
+        Returns result of the Future or coroutine.  When a timeout occurs,
+        it cancels the task and raises TimeoutError.  To avoid the task
+        cancellation, wrap it in shield().
+    
+        If the wait is cancelled, the task is also cancelled.
+    
+        This function is a coroutine.
+        """
+        loop = events.get_running_loop()
+    
+        if timeout is None:
+            return await fut
+    
+        if timeout <= 0:
+            fut = ensure_future(fut, loop=loop)
+    
+            if fut.done():
+                return fut.result()
+    
+            await _cancel_and_wait(fut, loop=loop)
+            try:
+                return fut.result()
+            except exceptions.CancelledError as exc:
+                raise exceptions.TimeoutError() from exc
+    
+        waiter = loop.create_future()
+        timeout_handle = loop.call_later(timeout, _release_waiter, waiter)
+        cb = functools.partial(_release_waiter, waiter)
+    
+        fut = ensure_future(fut, loop=loop)
+        fut.add_done_callback(cb)
+    
+        try:
+            # wait until the future completes or the timeout
+            try:
+                await waiter
+            except exceptions.CancelledError:
+                if fut.done():
+                    return fut.result()
+                else:
+                    fut.remove_done_callback(cb)
+                    # We must ensure that the task is not running
+                    # after wait_for() returns.
+                    # See https://bugs.python.org/issue32751
+                    await _cancel_and_wait(fut, loop=loop)
+                    raise
+    
+            if fut.done():
+                return fut.result()
+            else:
+                fut.remove_done_callback(cb)
+                # We must ensure that the task is not running
+                # after wait_for() returns.
+                # See https://bugs.python.org/issue32751
+                await _cancel_and_wait(fut, loop=loop)
+                # In case task cancellation failed with some
+                # exception, we should re-raise it
+                # See https://bugs.python.org/issue40607
+                try:
+>                   return fut.result()
+                           ^^^^^^^^^^^^
+
+/usr/local/lib/python3.11/asyncio/tasks.py:500: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.11/site-packages/asgi_lifespan/_concurrency/asyncio.py:17: in wait
+    await self._event.wait()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <asyncio.locks.Event object at 0x7fb3ca945a50 [set]>
+
+    async def wait(self):
+        """Block until the internal flag is true.
+    
+        If the internal flag is true on entry, return True
+        immediately.  Otherwise, block until another coroutine calls
+        set() to set the flag to true, then return True.
+        """
+        if self._value:
+            return True
+    
+        fut = self._get_loop().create_future()
+        self._waiters.append(fut)
+        try:
+>           await fut
+E           asyncio.exceptions.CancelledError
+
+/usr/local/lib/python3.11/asyncio/locks.py:213: CancelledError
+
+The above exception was the direct cause of the following exception:
+
+self = <asgi_lifespan._concurrency.asyncio.AsyncioBackend object at 0x7fb3caadd690>
+seconds = 5
+coroutine = <bound method AsyncioEvent.wait of <asgi_lifespan._concurrency.asyncio.AsyncioEvent object at 0x7fb3ca9446d0>>
+
+    async def run_and_fail_after(
+        self,
+        seconds: typing.Optional[float],
+        coroutine: typing.Callable[[], typing.Awaitable[None]],
+    ) -> None:
+        try:
+>           await asyncio.wait_for(coroutine(), timeout=seconds)
+
+/usr/local/lib/python3.11/site-packages/asgi_lifespan/_concurrency/asyncio.py:44: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fut = <Task cancelled name='Task-7' coro=<AsyncioEvent.wait() done, defined at /usr/local/lib/python3.11/site-packages/asgi_lifespan/_concurrency/asyncio.py:16>>
+timeout = 5
+
+    async def wait_for(fut, timeout):
+        """Wait for the single Future or coroutine to complete, with timeout.
+    
+        Coroutine will be wrapped in Task.
+    
+        Returns result of the Future or coroutine.  When a timeout occurs,
+        it cancels the task and raises TimeoutError.  To avoid the task
+        cancellation, wrap it in shield().
+    
+        If the wait is cancelled, the task is also cancelled.
+    
+        This function is a coroutine.
+        """
+        loop = events.get_running_loop()
+    
+        if timeout is None:
+            return await fut
+    
+        if timeout <= 0:
+            fut = ensure_future(fut, loop=loop)
+    
+            if fut.done():
+                return fut.result()
+    
+            await _cancel_and_wait(fut, loop=loop)
+            try:
+                return fut.result()
+            except exceptions.CancelledError as exc:
+                raise exceptions.TimeoutError() from exc
+    
+        waiter = loop.create_future()
+        timeout_handle = loop.call_later(timeout, _release_waiter, waiter)
+        cb = functools.partial(_release_waiter, waiter)
+    
+        fut = ensure_future(fut, loop=loop)
+        fut.add_done_callback(cb)
+    
+        try:
+            # wait until the future completes or the timeout
+            try:
+                await waiter
+            except exceptions.CancelledError:
+                if fut.done():
+                    return fut.result()
+                else:
+                    fut.remove_done_callback(cb)
+                    # We must ensure that the task is not running
+                    # after wait_for() returns.
+                    # See https://bugs.python.org/issue32751
+                    await _cancel_and_wait(fut, loop=loop)
+                    raise
+    
+            if fut.done():
+                return fut.result()
+            else:
+                fut.remove_done_callback(cb)
+                # We must ensure that the task is not running
+                # after wait_for() returns.
+                # See https://bugs.python.org/issue32751
+                await _cancel_and_wait(fut, loop=loop)
+                # In case task cancellation failed with some
+                # exception, we should re-raise it
+                # See https://bugs.python.org/issue40607
+                try:
+                    return fut.result()
+                except exceptions.CancelledError as exc:
+>                   raise exceptions.TimeoutError() from exc
+E                   TimeoutError
+
+/usr/local/lib/python3.11/asyncio/tasks.py:502: TimeoutError
+
+During handling of the above exception, another exception occurred:
+
+fixturedef = <FixtureDef argname='client' scope='function' baseid='tests'>
+request = <SubRequest 'client' for <Coroutine test_register_user>>
+
+    @pytest.hookimpl(wrapper=True)
+    def pytest_fixture_setup(fixturedef: FixtureDef, request) -> object | None:
+        asyncio_mode = _get_asyncio_mode(request.config)
+        if not _is_asyncio_fixture_function(fixturedef.func):
+            if asyncio_mode == Mode.STRICT:
+                # Ignore async fixtures without explicit asyncio mark in strict mode
+                # This applies to pytest_trio fixtures, for example
+                return (yield)
+            if not _is_coroutine_or_asyncgen(fixturedef.func):
+                return (yield)
+        default_loop_scope = request.config.getini("asyncio_default_fixture_loop_scope")
+        loop_scope = (
+            getattr(fixturedef.func, "_loop_scope", None)
+            or default_loop_scope
+            or fixturedef.scope
+        )
+        runner_fixture_id = f"_{loop_scope}_scoped_runner"
+        runner = request.getfixturevalue(runner_fixture_id)
+        synchronizer = _fixture_synchronizer(fixturedef, runner, request)
+        _make_asyncio_fixture_function(synchronizer, loop_scope)
+        with MonkeyPatch.context() as c:
+            c.setattr(fixturedef, "func", synchronizer)
+>           hook_result = yield
+                          ^^^^^
+
+/usr/local/lib/python3.11/site-packages/pytest_asyncio/plugin.py:696: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.11/site-packages/pytest_asyncio/plugin.py:272: in _asyncgen_fixture_wrapper
+    result = runner.run(setup(), context=context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/asyncio/base_events.py:654: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/pytest_asyncio/plugin.py:268: in setup
+    res = await gen_obj.__anext__()  # type: ignore[union-attr]
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/conftest.py:71: in client
+    async with LifespanManager(app):
+/usr/local/lib/python3.11/site-packages/asgi_lifespan/_manager.py:99: in __aenter__
+    await self.startup()
+/usr/local/lib/python3.11/site-packages/asgi_lifespan/_manager.py:40: in startup
+    await self._concurrency_backend.run_and_fail_after(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <asgi_lifespan._concurrency.asyncio.AsyncioBackend object at 0x7fb3caadd690>
+seconds = 5
+coroutine = <bound method AsyncioEvent.wait of <asgi_lifespan._concurrency.asyncio.AsyncioEvent object at 0x7fb3ca9446d0>>
+
+    async def run_and_fail_after(
+        self,
+        seconds: typing.Optional[float],
+        coroutine: typing.Callable[[], typing.Awaitable[None]],
+    ) -> None:
+        try:
+            await asyncio.wait_for(coroutine(), timeout=seconds)
+        except asyncio.TimeoutError:
+>           raise TimeoutError
+E           TimeoutError
+
+/usr/local/lib/python3.11/site-packages/asgi_lifespan/_concurrency/asyncio.py:46: TimeoutError
+------------------------------ Captured log setup ------------------------------
+INFO     sqlalchemy.engine.Engine:base.py:1846 select pg_catalog.version()
+INFO     sqlalchemy.engine.Engine:base.py:1846 [raw sql] ()
+INFO     sqlalchemy.engine.Engine:base.py:1846 select current_schema()
+INFO     sqlalchemy.engine.Engine:base.py:1846 [raw sql] ()
+INFO     sqlalchemy.engine.Engine:base.py:1846 show standard_conforming_strings
+INFO     sqlalchemy.engine.Engine:base.py:1846 [raw sql] ()
+INFO     sqlalchemy.engine.Engine:base.py:2702 BEGIN (implicit)
+INFO     sqlalchemy.engine.Engine:base.py:1846 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1846 [generated in 0.00100s] ('users', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+INFO     sqlalchemy.engine.Engine:base.py:1846 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1846 [cached since 0.01085s ago] ('user_profiles', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+INFO     sqlalchemy.engine.Engine:base.py:1846 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1846 [cached since 0.01345s ago] ('coaching_sessions', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+INFO     sqlalchemy.engine.Engine:base.py:1846 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1846 [cached since 0.01577s ago] ('coaching_steps', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+INFO     sqlalchemy.engine.Engine:base.py:1846 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1846 [cached since 0.01772s ago] ('business_briefs', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+INFO     sqlalchemy.engine.Engine:base.py:1846 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1846 [cached since 0.01969s ago] ('businesses', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+INFO     sqlalchemy.engine.Engine:base.py:1846 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1846 [cached since 0.02429s ago] ('business_contexts', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+INFO     sqlalchemy.engine.Engine:base.py:1846 SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1846 [generated in 0.00075s] ('sessionstatusenum', 'pg_catalog')
+INFO     sqlalchemy.engine.Engine:base.py:1846 SELECT pg_catalog.pg_type.typname 
+FROM pg_catalog.pg_type JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_type.typnamespace 
+WHERE pg_catalog.pg_type.typname = $1::VARCHAR AND pg_catalog.pg_type_is_visible(pg_catalog.pg_type.oid) AND pg_catalog.pg_namespace.nspname != $2::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1846 [cached since 0.005119s ago] ('coachingstepenum', 'pg_catalog')
+INFO     sqlalchemy.engine.Engine:base.py:2708 COMMIT
+=============================== warnings summary ===============================
+../usr/local/lib/python3.11/site-packages/pydantic/_internal/_config.py:323
+../usr/local/lib/python3.11/site-packages/pydantic/_internal/_config.py:323
+  /usr/local/lib/python3.11/site-packages/pydantic/_internal/_config.py:323: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.11/migration/
+    warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
+
+../usr/local/lib/python3.11/site-packages/passlib/utils/__init__.py:854
+  /usr/local/lib/python3.11/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR tests/test_api/test_auth.py::TestAuthEndpoints::test_register_user - Ti...
+========================= 3 warnings, 1 error in 6.30s =========================

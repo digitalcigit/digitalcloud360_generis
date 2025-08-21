@@ -1,7 +1,7 @@
 """Base model class with common fields and utilities"""
 
 from sqlalchemy import Column, Integer, DateTime, String
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.sql import func
 from datetime import datetime
 

@@ -1,10 +1,11 @@
 """Database configuration and connection management"""
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import sessionmaker
 import structlog
 
 from app.config.settings import settings
+from app.models.base import Base
 
 logger = structlog.get_logger()
 
@@ -23,11 +24,12 @@ AsyncSessionLocal = sessionmaker(
     expire_on_commit=False
 )
 
-# Base model for all models
-Base = declarative_base()
-
 async def create_tables():
     """Create all tables in the database"""
+    # Import all models here so that they are registered with the Base metadata
+    import app.models.user
+    import app.models.business
+    import app.models.coaching
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     logger.info("Database tables created")

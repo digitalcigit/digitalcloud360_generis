@@ -24,10 +24,12 @@ class SessionStatusEnum(str, Enum):
 
 class CoachingRequest(BaseModel):
     """Requête démarrage ou continuation coaching"""
-    user_id: int = Field(..., description="ID utilisateur")
     session_id: Optional[str] = Field(None, description="ID session existante")
-    user_response: Optional[str] = Field(None, description="Réponse utilisateur")
-    current_step: Optional[CoachingStepEnum] = Field(None, description="Étape actuelle")
+
+class CoachingStepRequest(BaseModel):
+    """Requête pour soumettre une réponse à une étape de coaching"""
+    session_id: str = Field(..., description="ID de la session de coaching")
+    user_response: str = Field(..., description="Réponse de l'utilisateur à l'étape en cours")
 
 class CoachingResponse(BaseModel):
     """Réponse coaching intermédiaire"""

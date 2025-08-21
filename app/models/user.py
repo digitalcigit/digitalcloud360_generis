@@ -5,17 +5,17 @@ from sqlalchemy.orm import relationship
 from .base import BaseModel
 
 class User(BaseModel):
-    """User model - synced from DigitalCloud360"""
+    """User model for authentication"""
     __tablename__ = "users"
     
-    # Primary key matching DigitalCloud360
-    dc360_user_id = Column(Integer, unique=True, nullable=False, index=True)
+    id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, nullable=False, index=True)
     name = Column(String, nullable=False)
+    hashed_password = Column(String, nullable=False)
     
     # Relationship to profile
-    profile = relationship("UserProfile", back_populates="user", uselist=False)
-    coaching_sessions = relationship("CoachingSession", back_populates="user")
+    profile = relationship("UserProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    coaching_sessions = relationship("CoachingSession", back_populates="user", cascade="all, delete-orphan")
 
 class UserProfile(BaseModel):
     """Extended user profile for Genesis AI coaching"""

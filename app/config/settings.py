@@ -26,21 +26,22 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = "genesis_ai_db"
     POSTGRES_PORT: int = 5432
     DATABASE_URL: Optional[str] = None
+    TEST_DATABASE_URL: Optional[str] = None
     
     @field_validator("DATABASE_URL", mode='before')
-    def assemble_db_connection(cls, v: Optional[str], values: dict[str, any]) -> any:
+    def assemble_db_connection(cls, v: Optional[str], values: "ValidationInfo") -> any:
         """Construct database URL from components"""
         if isinstance(v, str):
             return v
         return (
-            f"postgresql+asyncpg://{values.get('POSTGRES_USER')}:"
-            f"{values.get('POSTGRES_PASSWORD')}@"
-            f"{values.get('POSTGRES_SERVER')}:"
-            f"{values.get('POSTGRES_PORT')}/{values.get('POSTGRES_DB')}"
+            f"postgresql+asyncpg://{values.data.get('POSTGRES_USER')}:"
+            f"{values.data.get('POSTGRES_PASSWORD')}@"
+            f"{values.data.get('POSTGRES_SERVER')}:"
+            f"{values.data.get('POSTGRES_PORT')}/{values.data.get('POSTGRES_DB')}"
         )
     
     # Redis Configuration
-    REDIS_URL: str = "redis://localhost:6379/0"
+    REDIS_URL: str = "redis://redis:6379/0"
     REDIS_GENESIS_AI_DB: int = 0
     REDIS_SESSION_TTL: int = 7200  # 2 hours
     
@@ -71,6 +72,7 @@ class Settings(BaseSettings):
     
     # Environment
     ENVIRONMENT: str = "development"
+    TESTING_MODE: bool = False
     
     class Config:
         env_file = ".env"
@@ -78,3 +80,4 @@ class Settings(BaseSettings):
 
 # Global settings instance
 settings = Settings()
+
