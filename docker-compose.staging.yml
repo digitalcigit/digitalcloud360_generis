@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  genesis-ai:
+    build: .
+    container_name: genesis-ai-staging
+    ports:
+      - "8001:8000"  # Port différent du DigitalCloud360 principal
+    environment:
+      - ENV=staging
+      - DATABASE_URL=postgresql://genesis_user:genesis_pass@genesis-db:5432/genesis_staging
+      - REDIS_URL=redis://genesis-redis:6379/0
+      - DIGITALCLOUD360_API_URL=http://digitalcloud360:8000  # URL interne Docker
+      - DIGITALCLOUD360_SERVICE_SECRET=${DIGITALCLOUD360_SERVICE_SECRET}
+      - GENESIS_AI_SECRET_KEY=${GENESIS_AI_SECRET_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+      - LOGOAI_API_KEY=${LOGOAI_API_KEY}
+    depends_on:
+      - genesis-db
+      - genesis-redis
+    networks:
+      - genesis-network
+      - digitalcloud360_default  # Réseau partagé avec DigitalCloud360
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  genesis-db:
+    image: postgres:15
+    container_name: genesis-db-staging
+    environment:
+      POSTGRES_DB: genesis_staging
+      POSTGRES_USER: genesis_user
+      POSTGRES_PASSWORD: genesis_pass
+    ports:
+      - "5433:5432"  # Port différent pour éviter conflit
+    volumes:
+      - genesis_db_staging:/var/lib/postgresql/data
+    networks:
+      - genesis-network
+    restart: unless-stopped
+
+  genesis-redis:
+    image: redis:7-alpine
+    container_name: genesis-redis-staging
+    ports:
+      - "6380:6379"  # Port différent pour éviter conflit
+    volumes:
+      - genesis_redis_staging:/data
+    networks:
+      - genesis-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+networks:
+  genesis-network:
+    driver: bridge
+  digitalcloud360_default:
+    external: true  # Réseau externe de DigitalCloud360
+
+volumes:
+  genesis_db_staging:
+  genesis_redis_staging:
