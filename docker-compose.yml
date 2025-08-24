@@ -12,7 +12,9 @@ services:
     env_file:
       - .env
     environment:
+      - DATABASE_URL=postgresql+asyncpg://genesis_user:your_secure_password_here@postgres:5432/genesis_db
       - TEST_DATABASE_URL=postgresql+asyncpg://test_user:test_password@test-db:5432/test_db
+      - REDIS_URL=redis://redis:6379/0
     restart: unless-stopped
     ports:
       - "8002:8000"
@@ -91,6 +93,8 @@ services:
       POSTGRES_USER: test_user
       POSTGRES_PASSWORD: test_password
       POSTGRES_DB: test_db
+    ports:
+      - "5433:5432"  # Exposition du port pour accès depuis l'hôte
     networks:
       - genesis-ai-network
     healthcheck:

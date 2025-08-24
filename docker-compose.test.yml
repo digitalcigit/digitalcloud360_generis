@@ -1,0 +1,180 @@
+# Docker Compose pour les Tests - Genesis AI Service
+# Work Order T4.2 - Docker Test Profile Complet
+
+services:
+  # =============================================================================
+  # Genesis AI Test Service
+  # =============================================================================
+  genesis-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: genesis-test
+    environment:
+      # Configuration spécifique tests
+      - TESTING_MODE=true
+      - ENVIRONMENT=testing_docker
+      - TEST_PROFILE=docker
+      - TEST_DATABASE_URL=postgresql+asyncpg://test_user:test_password@test-db:5432/test_db
+      - DATABASE_URL=postgresql+asyncpg://test_user:test_password@test-db:5432/test_db
+      - REDIS_URL=redis://redis:6379/0
+      
+      # Configuration test stricte
+      - STRICT_HEALTH_CHECKS=false
+      - VALIDATE_EXTERNAL_APIS=false
+      - LOG_LEVEL=DEBUG
+      
+      # API Keys test
+      - OPENAI_API_KEY=sk-test-openai-development-key
+      - ANTHROPIC_API_KEY=sk-ant-test-anthropic-development-key
+      - TAVILY_API_KEY=tvly-test-tavily-development-key
+      - DIGITALCLOUD360_SERVICE_SECRET=test-service-secret-genesis-ai
+    
+    # Commande par défaut : exécuter tous les tests
+    command: >
+      bash -c '
+        echo "🧪 Démarrage des tests Genesis AI" &&
+        echo "================================" &&
+        echo "Environment: $ENVIRONMENT" &&
+        echo "Test Profile: $TEST_PROFILE" &&
+        echo "Database: $TEST_DATABASE_URL" &&
+        echo "" &&
+        echo "📊 Exécution de la suite de tests complète..." &&
+        pytest tests/ -v --tb=short --disable-warnings
+      '
+    
+    depends_on:
+      test-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    
+    volumes:
+      - ./:/app
+      - ./logs/test:/app/logs
+    
+    networks:
+      - genesis-ai-network
+
+  # =============================================================================
+  # Services Tests Spécialisés
+  # =============================================================================
+  
+  # Tests d'authentification uniquement
+  genesis-test-auth:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: genesis-test-auth
+    environment:
+      - TESTING_MODE=true
+      - ENVIRONMENT=testing_docker
+      - TEST_PROFILE=docker
+      - TEST_DATABASE_URL=postgresql+asyncpg://test_user:test_password@test-db:5432/test_db
+      - REDIS_URL=redis://redis:6379/0
+      - STRICT_HEALTH_CHECKS=false
+      - VALIDATE_EXTERNAL_APIS=false
+    command: >
+      bash -c '
+        echo "🔐 Tests d authentification" &&
+        echo "===========================" &&
+        pytest tests/test_api/test_auth.py -v --tb=short
+      '
+    depends_on:
+      test-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./:/app
+    networks:
+      - genesis-ai-network
+
+  # Tests d'intégration uniquement
+  genesis-test-integrations:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: genesis-test-integrations
+    environment:
+      - TESTING_MODE=true
+      - ENVIRONMENT=testing_docker
+      - TEST_PROFILE=docker
+      - TEST_DATABASE_URL=postgresql+asyncpg://test_user:test_password@test-db:5432/test_db
+      - REDIS_URL=redis://redis:6379/0
+      - STRICT_HEALTH_CHECKS=false
+      - VALIDATE_EXTERNAL_APIS=false
+    command: >
+      bash -c '
+        echo "🔗 Tests d intégration" &&
+        echo "======================" &&
+        pytest tests/test_integrations/ -v --tb=short
+      '
+    depends_on:
+      test-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./:/app
+    networks:
+      - genesis-ai-network
+
+  # =============================================================================
+  # Test Database (PostgreSQL)
+  # =============================================================================
+  test-db:
+    image: postgres:15-alpine
+    container_name: test-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: test_db
+    ports:
+      - "5433:5432"  # Exposition pour tests locaux
+    networks:
+      - genesis-ai-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d test_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      # Volume temporaire pour les tests (pas de persistance)
+      - test_db_data:/var/lib/postgresql/data
+
+  # =============================================================================
+  # Redis pour Tests
+  # =============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: redis-test
+    restart: unless-stopped
+    command: redis-server --appendonly no --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6382:6379"  # Exposition pour tests locaux
+    networks:
+      - genesis-ai-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+# =============================================================================
+# Volumes pour Tests (temporaires)
+# =============================================================================
+volumes:
+  test_db_data:
+    driver: local
+
+# =============================================================================
+# Réseau Tests
+# =============================================================================
+networks:
+  genesis-ai-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

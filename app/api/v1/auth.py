@@ -25,22 +25,18 @@ async def register_user(user_in: UserCreate, db: AsyncSession = Depends(get_db))
             detail="The user with this email already exists in the system.",
         )
     
-    # Create user first
     user = User(
         email=user_in.email,
         name=user_in.name,
-        hashed_password=get_password_hash(user_in.password)
+        hashed_password=get_password_hash(user_in.password),
+        profile=UserProfile()
     )
     db.add(user)
-    await db.flush()  # This assigns an ID to the user
-    
-    # Now create the profile with the user_id
-    profile = UserProfile(user_id=user.id)
-    user.profile = profile
-    await db.flush()
+    await db.commit()
     await db.refresh(user)
-    
-    return UserResponse.model_validate(user)
+    await db.refresh(user, ["profile"])
+
+    return user
 
 @router.post("/token", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):

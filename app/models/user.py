@@ -29,9 +29,7 @@ class UserProfile(BaseModel):
     region = Column(String)
     
     # Business context
-    sector = Column(String)
-    experience_level = Column(String, default="débutant")
-    business_stage = Column(String)
+    business_context = Column(JSON)
     
     # Coaching preferences
     preferred_language = Column(String, default="fr")
@@ -39,7 +37,6 @@ class UserProfile(BaseModel):
     
     # Additional context as JSON
     cultural_context = Column(JSON)
-    business_context = Column(JSON)
     
     # Relationships
     user = relationship("User", back_populates="profile")

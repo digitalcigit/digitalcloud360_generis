@@ -1,0 +1,1 @@
+"""Tests pour les intégrations API Genesis AI"""

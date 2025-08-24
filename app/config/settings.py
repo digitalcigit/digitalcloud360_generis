@@ -29,16 +29,23 @@ class Settings(BaseSettings):
     TEST_DATABASE_URL: Optional[str] = None
     
     @field_validator("DATABASE_URL", mode='before')
-    def assemble_db_connection(cls, v: Optional[str], values: "ValidationInfo") -> any:
-        """Construct database URL from components"""
-        if isinstance(v, str):
+    @classmethod
+    def assemble_db_connection(cls, v: Optional[str]) -> str:
+        """Construct database URL from components - PostgreSQL only"""
+        if isinstance(v, str) and v:
             return v
-        return (
-            f"postgresql+asyncpg://{values.data.get('POSTGRES_USER')}:"
-            f"{values.data.get('POSTGRES_PASSWORD')}@"
-            f"{values.data.get('POSTGRES_SERVER')}:"
-            f"{values.data.get('POSTGRES_PORT')}/{values.data.get('POSTGRES_DB')}"
-        )
+        
+        # Configuration par défaut PostgreSQL pour développement
+        return "postgresql+asyncpg://genesis_user:your_secure_password_here@localhost:5435/genesis_db"
+
+    @field_validator("TEST_DATABASE_URL", mode='before') 
+    @classmethod
+    def assemble_test_db_connection(cls, v: Optional[str]) -> str:
+        """Construct test database URL from components - PostgreSQL only"""
+        if isinstance(v, str) and v:
+            return v
+        # Utilise test-db pour Docker, localhost:5433 pour tests locaux
+        return "postgresql+asyncpg://test_user:test_password@localhost:5433/test_db"
     
     # Redis Configuration
     REDIS_URL: str = "redis://redis:6379/0"
@@ -73,6 +80,10 @@ class Settings(BaseSettings):
     # Environment
     ENVIRONMENT: str = "development"
     TESTING_MODE: bool = False
+    
+    # Health Checks & Validation
+    STRICT_HEALTH_CHECKS: bool = False
+    VALIDATE_EXTERNAL_APIS: bool = False
     
     class Config:
         env_file = ".env"

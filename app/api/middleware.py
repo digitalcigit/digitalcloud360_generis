@@ -18,11 +18,17 @@ class LoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         start_time = time.time()
         
+        # Safely get URL for logging (handle test environment)
+        try:
+            url_str = str(request.url)
+        except (KeyError, AttributeError):
+            url_str = request.scope.get("path", "unknown")
+        
         # Log request
         logger.info(
             "Request started",
             method=request.method,
-            url=str(request.url),
+            url=url_str,
             client_ip=request.client.host if request.client else None
         )
         
@@ -35,7 +41,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         logger.info(
             "Request completed",
             method=request.method,
-            url=str(request.url),
+            url=url_str,
             status_code=response.status_code,
             duration_seconds=duration
         )
@@ -48,8 +54,12 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         start_time = time.time()
         
-        # Extract endpoint for metrics
-        endpoint = request.url.path
+        # Extract endpoint for metrics (handle test environment)
+        try:
+            endpoint = request.url.path
+        except (KeyError, AttributeError):
+            endpoint = request.scope.get("path", "/unknown")
+        
         method = request.method
         
         response = await call_next(request)

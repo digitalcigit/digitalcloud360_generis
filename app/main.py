@@ -13,7 +13,7 @@ from contextlib import asynccontextmanager
 from app.config.settings import settings
 from app.config.database import engine, create_tables
 from app.api.middleware import PrometheusMiddleware, LoggingMiddleware
-from app.api.v1 import auth, coaching, business, users
+from app.api.v1 import auth, coaching, business, users, integrations
 from app.utils.exceptions import GenesisAIException
 from app.utils.logger import setup_logging
 from app.core.integrations.redis_fs import RedisVirtualFileSystem
@@ -40,7 +40,7 @@ async def lifespan(app: FastAPI):
     logger.info("Redis Virtual File System initialized")
     
     # Validate external API connections
-    if not settings.TESTING_MODE:
+    if settings.VALIDATE_EXTERNAL_APIS and not settings.TESTING_MODE:
         await validate_external_apis()
     
     yield
@@ -97,11 +97,17 @@ app.add_middleware(LoggingMiddleware)
 @app.exception_handler(GenesisAIException)
 async def genesis_ai_exception_handler(request: Request, exc: GenesisAIException):
     """Handle custom Genesis AI exceptions"""
+    # Safely get request path for logging (handle test environment)
+    try:
+        request_path = request.url.path
+    except (KeyError, AttributeError):
+        request_path = request.scope.get("path", "/unknown")
+    
     logger.error(
         "Genesis AI Exception", 
         error_type=exc.__class__.__name__,
         error_message=str(exc),
-        request_path=request.url.path,
+        request_path=request_path,
         request_method=request.method
     )
     return JSONResponse(
@@ -117,11 +123,17 @@ async def genesis_ai_exception_handler(request: Request, exc: GenesisAIException
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception):
     """Handle unexpected exceptions"""
+    # Safely get request path for logging (handle test environment)
+    try:
+        request_path = request.url.path
+    except (KeyError, AttributeError):
+        request_path = request.scope.get("path", "/unknown")
+    
     logger.error(
         "Unexpected Exception",
         error_type=exc.__class__.__name__,
         error_message=str(exc),
-        request_path=request.url.path,
+        request_path=request_path,
         request_method=request.method
     )
     return JSONResponse(
@@ -145,6 +157,26 @@ async def health_check():
         "timestamp": time.time()
     }
 
+@app.get("/health/detailed", tags=["Health"])
+async def detailed_health_check():
+    """Detailed health check for all integrations"""
+    from app.core.health import health_checker
+    return await health_checker.check_all_integrations()
+
+@app.get("/health/integrations", tags=["Health"])
+async def integrations_health_check():
+    """Health check specific to integrations"""
+    from app.core.health import health_checker
+    
+    # Check seulement les intégrations critiques
+    redis_healthy, redis_info = await health_checker.check_redis_integration()
+    
+    return {
+        "redis": redis_info,
+        "critical_services_healthy": redis_healthy,
+        "timestamp": time.time()
+    }
+
 # API Routers - TO BE IMPLEMENTED BY TEAM
 app.include_router(
     auth.router, 
@@ -160,6 +192,11 @@ app.include_router(
     business.router, 
     prefix=f"{settings.API_V1_STR}/business", 
     tags=["Business Brief"]
+)
+app.include_router(
+    integrations.router, 
+    prefix=f"{settings.API_V1_STR}/integrations", 
+    tags=["Integrations"]
 )
 
 # Root endpoint

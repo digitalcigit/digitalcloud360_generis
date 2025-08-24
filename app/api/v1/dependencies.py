@@ -8,6 +8,7 @@ from app.config.database import get_db
 from app.core.orchestration.langgraph_orchestrator import LangGraphOrchestrator
 from app.core.integrations.redis_fs import RedisVirtualFileSystem
 from app.core.integrations.digitalcloud360 import DigitalCloud360APIClient
+from app.core.integrations.tavily import TavilyClient
 from app.config.settings import settings
 import redis.asyncio as redis
 
@@ -45,6 +46,10 @@ def get_redis_vfs() -> RedisVirtualFileSystem:
 def get_digitalcloud360_client() -> DigitalCloud360APIClient:
     """FastAPI dependency to get an instance of the DigitalCloud360APIClient."""
     return DigitalCloud360APIClient()
+
+def get_tavily_client() -> TavilyClient:
+    """FastAPI dependency to get an instance of the TavilyClient."""
+    return TavilyClient()
 
 def get_redis_client() -> redis.Redis:
     """Dependency function to get the Redis client instance."""

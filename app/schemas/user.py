@@ -35,11 +35,6 @@ class UserProfile(BaseModel):
     city: Optional[str] = Field(None, description="Ville")
     region: Optional[str] = Field(None, description="Région")
     
-    # Business context
-    sector: Optional[str] = Field(None, description="Secteur d'activité")
-    experience_level: str = Field("débutant", description="Niveau expérience")
-    business_stage: Optional[str] = Field(None, description="Stade business")
-    
     # Preferences
     preferred_language: str = Field("fr", description="Langue préférée")
     coaching_style: Optional[str] = Field(None, description="Style coaching préféré")
