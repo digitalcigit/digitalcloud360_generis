@@ -32,7 +32,7 @@ async def generate_business_brief(
     """
     logger.info("Business brief generation requested", 
                user_id=current_user.id,
-               session_id=request.session_id)
+               session_id=request.coaching_session_id)
     
     try:
         # 1. Run the orchestration
