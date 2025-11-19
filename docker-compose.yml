@@ -94,7 +94,7 @@ services:
       POSTGRES_PASSWORD: test_password
       POSTGRES_DB: test_db
     ports:
-      - "5433:5432"  # Exposition du port pour accès depuis l'hôte
+      - "5443:5432"  # Exposition du port pour accès depuis l'hôte
     networks:
       - genesis-ai-network
     healthcheck:
@@ -168,4 +168,4 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.20.0.0/16
+        - subnet: 172.30.0.0/16
