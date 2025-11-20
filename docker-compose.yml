@@ -26,7 +26,9 @@ services:
       test-db:
         condition: service_healthy
     volumes:
-      - ./:/app
+      - ./app:/app/app
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini
       - ./logs:/app/logs
     networks:
       - genesis-ai-network
@@ -168,4 +170,4 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.30.0.0/16
+        - subnet: 172.31.0.0/16
