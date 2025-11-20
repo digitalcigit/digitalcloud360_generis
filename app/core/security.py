@@ -1,5 +1,6 @@
 """JWT token handling and security utilities"""
 
+import bcrypt
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -8,10 +9,6 @@ from pydantic import BaseModel
 
 from app.config.settings import settings
 
-from passlib.context import CryptContext
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 ALGORITHM = "HS256"
 
 class TokenData(BaseModel):
@@ -19,10 +16,20 @@ class TokenData(BaseModel):
     user_id: Optional[int] = None
 
 def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    """Hash password using bcrypt. Truncate to 72 bytes max (bcrypt limit)."""
+    # Bcrypt has a 72 byte limit, truncate if necessary
+    password_bytes = password.encode('utf-8')
+    if len(password_bytes) > 72:
+        password_bytes = password_bytes[:72]
+    return bcrypt.hashpw(password_bytes, bcrypt.gensalt()).decode('utf-8')
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    """Verify password against hash. Truncate to 72 bytes max (bcrypt limit)."""
+    # Bcrypt has a 72 byte limit, truncate if necessary
+    password_bytes = plain_password.encode('utf-8')
+    if len(password_bytes) > 72:
+        password_bytes = password_bytes[:72]
+    return bcrypt.checkpw(password_bytes, hashed_password.encode('utf-8'))
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     """Create a new access token"""

@@ -13,12 +13,12 @@ pytestmark = pytest.mark.asyncio
 class TestAuthEndpoints:
     """Test suite for authentication API endpoints"""
 
-    async def test_register_user(self, client: AsyncClient):
+    async def test_register_user(self, client: AsyncClient, test_password: str):
         """Test successful user registration."""
         user_data = {
             "email": "register_test@example.com",
             "name": "Test User",
-            "password": "testpassword"
+            "password": test_password
         }
         response = await client.post("/api/v1/auth/register", json=user_data)
         assert response.status_code == 201
@@ -26,21 +26,21 @@ class TestAuthEndpoints:
         assert response_data["email"] == user_data["email"]
         assert "id" in response_data
 
-    async def test_register_existing_user(self, client: AsyncClient, test_user: User):
+    async def test_register_existing_user(self, client: AsyncClient, test_user: User, test_password: str):
         """Test registration with an existing email."""
         user_data = {
-            "email": "test@example.com",
+            "email": test_user.email,
             "name": "Test User",
-            "password": "testpassword"
+            "password": test_password
         }
         response = await client.post("/api/v1/auth/register", json=user_data)
         assert response.status_code == 400
 
-    async def test_login_for_access_token(self, client: AsyncClient, test_user: User):
+    async def test_login_for_access_token(self, client: AsyncClient, test_user: User, test_password: str):
         """Test successful login and token generation."""
         login_data = {
-            "username": "test@example.com",
-            "password": "testpassword"
+            "username": test_user.email,
+            "password": test_password
         }
         response = await client.post("/api/v1/auth/token", data=login_data)
         assert response.status_code == 200
@@ -51,8 +51,8 @@ class TestAuthEndpoints:
     async def test_login_incorrect_password(self, client: AsyncClient, test_user: User):
         """Test login with an incorrect password."""
         login_data = {
-            "username": "test@example.com",
-            "password": "wrongpassword"
+            "username": test_user.email,
+            "password": "wrongpassword123"
         }
         response = await client.post("/api/v1/auth/token", data=login_data)
         assert response.status_code == 401
