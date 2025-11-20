@@ -13,7 +13,7 @@ from contextlib import asynccontextmanager
 from app.config.settings import settings
 from app.config.database import engine, create_tables
 from app.api.middleware import PrometheusMiddleware, LoggingMiddleware
-from app.api.v1 import auth, coaching, business, users, integrations
+from app.api.v1 import auth, coaching, business, users, integrations, genesis
 from app.utils.exceptions import GenesisAIException
 from app.utils.logger import setup_logging
 from app.core.integrations.redis_fs import RedisVirtualFileSystem
@@ -192,6 +192,11 @@ app.include_router(
     business.router, 
     prefix=f"{settings.API_V1_STR}/business", 
     tags=["Business Brief"]
+)
+app.include_router(
+    genesis.router,
+    prefix=f"{settings.API_V1_STR}/genesis",
+    tags=["Genesis - DC360 Aligned"]
 )
 app.include_router(
     integrations.router, 

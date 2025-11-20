@@ -27,6 +27,7 @@ services:
         condition: service_healthy
     volumes:
       - ./app:/app/app
+      - ./tests:/app/tests
       - ./alembic:/app/alembic
       - ./alembic.ini:/app/alembic.ini
       - ./logs:/app/logs

@@ -120,8 +120,8 @@ async def test_user(db_session: AsyncSession, test_password: str) -> User:
         name="Test User",
     )
     db_session.add(user)
-    await db_session.commit()
-    await db_session.refresh(user)
+    await db_session.flush()  # Flush instead of commit to stay in transaction
+    await db_session.refresh(user)  # Refresh to get ID
     return user
 
 
