@@ -16,11 +16,13 @@ import uuid
 from app.core.orchestration.langgraph_orchestrator import LangGraphOrchestrator
 from app.core.integrations.redis_fs import RedisVirtualFileSystem
 from app.core.integrations.digitalcloud360 import DigitalCloud360APIClient
+from app.core.quota import QuotaManager, QuotaExceededException
 from app.api.v1.dependencies import (
     get_orchestrator, 
     get_redis_vfs, 
     get_digitalcloud360_client, 
-    get_current_user
+    get_current_user,
+    get_quota_manager
 )
 
 router = APIRouter()
@@ -113,7 +115,8 @@ async def generate_business_brief(
     request: BusinessBriefGenerateRequest,
     current_user: dict = Depends(get_current_user),
     orchestrator: LangGraphOrchestrator = Depends(get_orchestrator),
-    redis_fs: RedisVirtualFileSystem = Depends(get_redis_vfs)
+    redis_fs: RedisVirtualFileSystem = Depends(get_redis_vfs),
+    quota_manager: QuotaManager = Depends(get_quota_manager)
 ):
     """
     POST /api/v1/genesis/business-brief/
@@ -122,11 +125,13 @@ async def generate_business_brief(
     Coordonne les 5 sub-agents (Research, Content, Logo, SEO, Template).
     
     **Workflow:**
-    1. Validation payload
-    2. Orchestration sub-agents (Sprint 1: mocks)
-    3. Assemblage résultat final
-    4. Persistance Redis Virtual FS
-    5. Retour business brief structuré
+    1. Vérification quota utilisateur (P0.5)
+    2. Validation payload
+    3. Orchestration sub-agents (Sprint 1: mocks)
+    4. Assemblage résultat final
+    5. Persistance Redis Virtual FS
+    6. Incrémentation usage
+    7. Retour business brief structuré
     """
     logger.info(
         "Business brief generation requested", 
@@ -136,21 +141,42 @@ async def generate_business_brief(
     )
     
     try:
-        # 1. Générer ID unique brief
+        # 1. Vérifier quotas AVANT génération (P0.5)
+        try:
+            quota_status = await quota_manager.check_quota(request.user_id)
+            logger.info(
+                "Quota check passed",
+                user_id=request.user_id,
+                plan=quota_status["plan"],
+                usage=f"{quota_status['current_usage']}/{quota_status['max_monthly_sessions'] or 'unlimited'}"
+            )
+        except QuotaExceededException as qe:
+            # Quota dépassé - retourner 403 avec détails
+            logger.warning(
+                "Quota exceeded - request denied",
+                user_id=request.user_id,
+                error=qe.message
+            )
+            raise HTTPException(
+                status_code=403,
+                detail=qe.details
+            )
+        
+        # 2. Générer ID unique brief
         brief_id = f"brief_{uuid.uuid4().hex[:12]}"
         
-        # 2. Préparer payload orchestrateur
+        # 3. Préparer payload orchestrateur
         orchestration_input = {
             "user_id": request.user_id,
             "brief_id": brief_id,
-            "business_brief": request.brief_data.dict(),
+            "business_brief": request.brief_data.model_dump(),
             "coaching_session_id": request.coaching_session_id
         }
         
-        # 3. Exécuter orchestration (Sprint 1: mocks)
+        # 4. Exécuter orchestration (Sprint 1: mocks)
         final_state = await orchestrator.run(orchestration_input)
         
-        # 4. Assembler réponse structurée
+        # 5. Assembler réponse structurée
         response_data = {
             "brief_id": brief_id,
             "user_id": request.user_id,
@@ -187,8 +213,19 @@ async def generate_business_brief(
             "updated_at": datetime.utcnow()
         }
         
-        # 5. Sauvegarder dans Redis VFS
+        # 6. Sauvegarder dans Redis VFS
         await redis_fs.write_session(request.user_id, brief_id, response_data)
+        
+        # 7. Incrémenter usage (best-effort, ne pas bloquer si échec)
+        try:
+            await quota_manager.increment_usage(request.user_id, brief_id)
+        except Exception as inc_err:
+            logger.warning(
+                "Failed to increment usage counter",
+                error=str(inc_err),
+                user_id=request.user_id,
+                brief_id=brief_id
+            )
         
         logger.info(
             "Business brief generated successfully",
@@ -199,6 +236,10 @@ async def generate_business_brief(
         
         return response_data
         
+    except QuotaExceededException:
+        raise  # Déjà géré ci-dessus
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(
             "Failed to generate business brief",
@@ -327,5 +368,52 @@ async def delete_business_brief(
             detail={
                 "error": "GENESIS_BRIEF_DELETION_FAILED",
                 "message": f"Échec suppression business brief: {str(e)}"
+            }
+        )
+
+
+@router.get("/quota/status", response_model=Dict[str, Any])
+async def get_quota_status(
+    current_user: dict = Depends(get_current_user),
+    quota_manager: QuotaManager = Depends(get_quota_manager)
+):
+    """
+    GET /api/v1/genesis/quota/status
+    
+    Récupère le statut quota actuel de l'utilisateur.
+    
+    **Returns:**
+    - user_id: ID utilisateur
+    - plan: Plan tarifaire (trial, basic, pro, enterprise)
+    - current_usage: Nombre sessions utilisées ce mois
+    - max_monthly_sessions: Limite mensuelle (null si illimité)
+    - remaining: Sessions restantes
+    - reset_date: Date reset quota (ISO format)
+    - percentage_used: Pourcentage quota utilisé
+    
+    **Usage frontend:**
+    Permet d'afficher barre progression quota dans dashboard.
+    """
+    logger.info("Quota status requested", user_id=current_user.id)
+    
+    try:
+        quota_status = await quota_manager.get_quota_status(current_user.id)
+        
+        logger.info(
+            "Quota status retrieved",
+            user_id=current_user.id,
+            plan=quota_status.get("plan"),
+            usage=f"{quota_status.get('current_usage')}/{quota_status.get('max_monthly_sessions') or 'unlimited'}"
+        )
+        
+        return quota_status
+        
+    except Exception as e:
+        logger.error("Failed to get quota status", error=str(e), user_id=current_user.id)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "error": "GENESIS_QUOTA_STATUS_FAILED",
+                "message": f"Échec récupération statut quota: {str(e)}"
             }
         )

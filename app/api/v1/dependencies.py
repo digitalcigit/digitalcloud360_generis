@@ -9,6 +9,7 @@ from app.core.orchestration.langgraph_orchestrator import LangGraphOrchestrator
 from app.core.integrations.redis_fs import RedisVirtualFileSystem
 from app.core.integrations.digitalcloud360 import DigitalCloud360APIClient
 from app.core.integrations.tavily import TavilyClient
+from app.core.quota import QuotaManager
 from app.config.settings import settings
 import redis.asyncio as redis
 
@@ -54,3 +55,7 @@ def get_tavily_client() -> TavilyClient:
 def get_redis_client() -> redis.Redis:
     """Dependency function to get the Redis client instance."""
     return redis.from_url(settings.REDIS_URL, decode_responses=True)
+
+def get_quota_manager() -> QuotaManager:
+    """FastAPI dependency to get an instance of the QuotaManager."""
+    return QuotaManager()
