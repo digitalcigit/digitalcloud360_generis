@@ -41,8 +41,9 @@ TEST_DATABASE_URL = os.getenv(
 
 @pytest.fixture(scope="session")
 def event_loop():
-    """Create an instance of the default event loop for each test case."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
+    """Create an instance of the default event loop for the entire test session."""
+    policy = asyncio.get_event_loop_policy()
+    loop = policy.new_event_loop()
     yield loop
     loop.close()
 
@@ -69,10 +70,15 @@ async def db_session(test_engine) -> AsyncGenerator[AsyncSession, None]:
         autocommit=False,
         autoflush=False,
         bind=test_engine,
-        expire_on_commit=False
+        expire_on_commit=False,
+        class_=AsyncSession
     )
+    
     async with TestingSessionLocal() as session:
-        yield session
+        async with session.begin():
+            yield session
+            # Rollback automatique à la fin du test
+            await session.rollback()
 
 @pytest.fixture(scope="function")
 async def client(db_session: AsyncSession, test_engine) -> AsyncGenerator[AsyncClient, None]:
@@ -100,7 +106,8 @@ async def client(db_session: AsyncSession, test_engine) -> AsyncGenerator[AsyncC
 
 @pytest.fixture(scope="function")
 def test_password() -> str:
-    return "testpassword"
+    """Password for test users (max 72 bytes for bcrypt)"""
+    return "test1234"
 
 
 
