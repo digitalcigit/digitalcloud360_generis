@@ -178,6 +178,47 @@ Cette section liste les **épics / stories** prioritaires. Elle sera détaillée
   - Implémenter les logiques de base (sans toutes les optimisations dans un premier temps).
   - Vérifier que leurs sorties sont bien intégrées dans la réponse globale du Deep Agent.
 
+## 6.4. Epic P2 – Assistance IA champ par champ dans le wizard Genesis (ciblé Sprint 3)
+
+- **Story P2.1 – Assistance IA Vision & Mission**
+  - Concevoir, avec le Scrum Master et l'UX/front, l'expérience d'assistance IA sur les champs `Vision` et `Mission` (bouton « Demander l'aide de l'IA », panneau/modal avec explications, questions, suggestions).
+  - Implémenter côté frontend un composant réutilisable `AIFieldAssistant` et l'intégrer dans l'étape *Informations Business* du wizard Genesis AI Coach.
+  - Exposer côté backend un endpoint minimal `POST /api/v1/genesis/assist-field/` permettant de générer des suggestions de texte à partir du contexte business.
+
+- **Story P2.2 – Extension aux champs Marché & Avantage Concurrentiel**
+  - Étendre l'assistance IA aux champs `Marché Cible` et `Avantage Concurrentiel` dans l'étape *Marché & Clientèle*.
+  - Adapter les prompts et la logique côté backend pour tenir compte de ces nouveaux types de champ.
+  - Couvrir ces parcours par des tests d'intégration/E2E basiques (au moins un happy path par type de champ assisté).
+
+- **Story P2.3 – Quotas, monitoring & qualité de réponse**
+  - Définir, avec le Scrum Master, les règles de quotas et de limites pour les appels `assist-field` (fréquence par utilisateur, impact éventuel sur les plans Trial/Basic/Pro/Enterprise).
+  - Instrumenter ces appels (logs + métriques) pour suivre les coûts LLM et la qualité perçue.
+  - Tenir à jour la documentation associée (ce guide et la doc d'API) pour décrire clairement le comportement de la feature.
+
+## 6.5. Sprint 2 – Plan (coeur technique Genesis)
+
+**Sprint Goal** : mettre en service un **coeur Deep Agents réel** (orchestrateur + sous-agents principaux) intégrable par DigitalCloud360 en environnement de test/staging, avec persistance Redis FS et intégration de base aux providers & APIs DC360.
+
+- **Story S2.1 – Orchestrateur GenesisDeepAgentOrchestrator opérationnel**
+  - Reprendre `GenesisDeepAgentOrchestrator` depuis `ORCHESTRATEUR_DEEP_AGENT.py` et l'intégrer dans le code réel du service.
+  - Brancher au minimum les sous-agents `ResearchSubAgent` et `ContentSubAgent` avec des implémentations réelles (ou semi-réelles) en s'appuyant sur l'architecture multi-provider.
+  - Mettre en place des tests automatisés ciblant le flux principal de l'orchestrateur (sans viser encore l'exhaustivité de tous les cas d'erreur).
+
+- **Story S2.2 – Intégration providers LLM réels (Deepseek, Kimi, etc.)**
+  - Configurer et sécuriser les clés API nécessaires pour au moins un provider principal.
+  - Implémenter une couche d'abstraction provider (déjà amorcée en Sprint 1) avec sélection/fallback simple.
+  - Ajouter des tests unitaires pour garantir un comportement prévisible en cas d'erreur provider (timeouts, quotas provider, etc.).
+
+- **Story S2.3 – Persistance Redis FS et correction de la signature**
+  - Finaliser l'intégration du Virtual File System Redis pour les sessions de coaching (business_brief, metadata, logs d'agent).
+  - Corriger la signature Redis FS (2 vs 3 paramètres) et aligner l'implémentation réelle sur les templates.
+  - Vérifier via tests d'intégration que les sessions complètes sont bien enregistrées et relisibles.
+
+- **Story S2.4 – Intégration réelle DC360 (auth, quotas, usage)**
+  - Implémenter l'authentification service-to-service avec DigitalCloud360 conformément aux spécifications (JWT, endpoints internes, etc.).
+  - Remplacer les mocks existants pour les quotas par de vrais appels à l'API DC360 dès que disponible (ou documenter clairement les limitations si ce n'est pas possible en totalité pendant le sprint).
+  - Mettre à jour les tests d'intégration/E2E pour valider le flux complet DC360 → Genesis → Redis FS avec l'orchestrateur réel.
+
 ---
 
 # 7. Mode de collaboration & attentes
