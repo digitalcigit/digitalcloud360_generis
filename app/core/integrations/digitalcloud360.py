@@ -167,3 +167,99 @@ class DigitalCloud360APIClient:
         except Exception as e:
             logger.error("Error validating JWT token", error=str(e))
             return None
+    
+    async def get_user_subscription(self, user_id: int) -> Dict[str, Any]:
+        """
+        Récupérer abonnement + quotas utilisateur DigitalCloud360.
+        
+        Utilisé par QuotaManager pour vérifier quotas Genesis AI.
+        
+        Returns:
+            Dict contenant:
+                - plan: str (trial|basic|pro|enterprise)
+                - genesis_sessions_used: int
+                - quota_reset_date: str (ISO format)
+                - subscription_status: str (active|cancelled|expired)
+        """
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                response = await client.get(
+                    f"{self.base_url}/api/v1/users/{user_id}/subscription",
+                    headers=self.headers
+                )
+                
+                if response.status_code == 200:
+                    subscription_data = response.json()
+                    logger.info(
+                        "User subscription retrieved",
+                        user_id=user_id,
+                        plan=subscription_data.get('plan'),
+                        usage=subscription_data.get('genesis_sessions_used', 0)
+                    )
+                    return subscription_data
+                elif response.status_code == 404:
+                    logger.warning("User subscription not found, defaulting to trial", user_id=user_id)
+                    # Fallback: utilisateur sans abonnement = trial
+                    return {
+                        "plan": "trial",
+                        "genesis_sessions_used": 0,
+                        "quota_reset_date": None,
+                        "subscription_status": "trial"
+                    }
+                else:
+                    logger.error(
+                        "Failed to retrieve user subscription",
+                        user_id=user_id,
+                        status_code=response.status_code
+                    )
+                    raise Exception(f"API returned status {response.status_code}")
+        except Exception as e:
+            logger.error("Error retrieving user subscription", user_id=user_id, error=str(e))
+            raise
+    
+    async def increment_genesis_usage(self, user_id: int, session_id: str) -> Dict[str, Any]:
+        """
+        Incrémenter compteur usage Genesis AI après session réussie.
+        
+        Utilisé par QuotaManager après génération business brief.
+        
+        Args:
+            user_id: ID utilisateur
+            session_id: ID session/brief généré
+            
+        Returns:
+            Dict avec genesis_sessions_used mis à jour
+        """
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                response = await client.post(
+                    f"{self.base_url}/api/v1/users/{user_id}/genesis-usage",
+                    headers=self.headers,
+                    json={
+                        "session_id": session_id,
+                        "session_type": "business_brief",
+                        "timestamp": httpx._utils.utcnow().isoformat() if hasattr(httpx._utils, 'utcnow') else None
+                    }
+                )
+                
+                if response.status_code == 200:
+                    usage_data = response.json()
+                    logger.info(
+                        "Genesis usage incremented",
+                        user_id=user_id,
+                        session_id=session_id,
+                        new_usage=usage_data.get('genesis_sessions_used')
+                    )
+                    return usage_data
+                else:
+                    logger.error(
+                        "Failed to increment genesis usage",
+                        user_id=user_id,
+                        status_code=response.status_code
+                    )
+                    # Best-effort: ne pas bloquer si incrémentation échoue
+                    return {"genesis_sessions_used": 0, "error": "increment_failed"}
+        except Exception as e:
+            logger.error("Error incrementing genesis usage", user_id=user_id, error=str(e))
+            # Best-effort: ne pas bloquer
+            return {"genesis_sessions_used": 0, "error": str(e)}

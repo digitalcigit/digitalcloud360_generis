@@ -53,7 +53,9 @@ class Settings(BaseSettings):
     REDIS_SESSION_TTL: int = 7200  # 2 hours
     
     # DigitalCloud360 Integration
-    DIGITALCLOUD360_API_URL: str = "https://api.digitalcloud360.com"
+    # En développement local: DC360 tourne sur http://localhost:8000 (Docker)
+    # En production: https://api.digitalcloud360.ci
+    DIGITALCLOUD360_API_URL: str = "http://localhost:8000"
     DIGITALCLOUD360_SERVICE_SECRET: str = "change-me-in-production"
     DIGITALCLOUD360_TIMEOUT: int = 30
     
