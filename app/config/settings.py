@@ -101,6 +101,41 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+    
+    def get_provider_api_keys(self) -> dict:
+        """
+        Construit dict API keys pour ProviderFactory
+        
+        Returns:
+            Dict mapping provider name → API key
+            
+        Usage:
+            factory = ProviderFactory(api_keys=settings.get_provider_api_keys())
+        """
+        api_keys = {}
+        
+        # LLM Providers
+        if self.DEEPSEEK_API_KEY and not self.DEEPSEEK_API_KEY.startswith("your-"):
+            api_keys["deepseek"] = self.DEEPSEEK_API_KEY
+        
+        if self.KIMI_API_KEY and not self.KIMI_API_KEY.startswith("your-"):
+            api_keys["kimi"] = self.KIMI_API_KEY
+        
+        if self.OPENAI_API_KEY and not self.OPENAI_API_KEY.startswith("your-"):
+            api_keys["openai"] = self.OPENAI_API_KEY
+            api_keys["dalle-3"] = self.OPENAI_API_KEY  # DALL-E utilise OpenAI key
+        
+        if self.ANTHROPIC_API_KEY and not self.ANTHROPIC_API_KEY.startswith("your-"):
+            api_keys["anthropic"] = self.ANTHROPIC_API_KEY
+        
+        if self.GOOGLE_API_KEY:
+            api_keys["google"] = self.GOOGLE_API_KEY
+        
+        # Search Providers
+        if self.TAVILY_API_KEY and not self.TAVILY_API_KEY.startswith("your-"):
+            api_keys["tavily"] = self.TAVILY_API_KEY
+        
+        return api_keys
 
 # Global settings instance
 settings = Settings()
