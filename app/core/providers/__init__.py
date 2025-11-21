@@ -9,6 +9,7 @@ from .base import BaseLLMProvider, BaseSearchProvider, BaseImageProvider
 from .factory import ProviderFactory
 from .config import ProviderConfig, PLAN_PROVIDER_MAPPING
 from .deepseek import DeepseekProvider
+from .kimi import KimiProvider
 
 __all__ = [
     'BaseLLMProvider',
@@ -17,5 +18,6 @@ __all__ = [
     'ProviderFactory',
     'ProviderConfig',
     'PLAN_PROVIDER_MAPPING',
-    'DeepseekProvider'
+    'DeepseekProvider',
+    'KimiProvider'
 ]

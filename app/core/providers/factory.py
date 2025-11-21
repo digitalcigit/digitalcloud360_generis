@@ -12,6 +12,7 @@ from .base import BaseLLMProvider, BaseSearchProvider, BaseImageProvider
 from .config import ProviderConfig, SubscriptionPlan
 from .mock import MockLLMProvider, MockSearchProvider, MockImageProvider
 from .deepseek import DeepseekProvider
+from .kimi import KimiProvider
 
 logger = structlog.get_logger(__name__)
 
@@ -39,9 +40,9 @@ class ProviderFactory:
     
     _search_providers: Dict[str, type] = {
         "mock": MockSearchProvider,
+        "kimi": KimiProvider,
         # Implémentations futures:
         # "tavily": TavilyProvider,
-        # "kimi": KimiProvider,
     }
     
     _image_providers: Dict[str, type] = {
