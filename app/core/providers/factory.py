@@ -11,6 +11,7 @@ import structlog
 from .base import BaseLLMProvider, BaseSearchProvider, BaseImageProvider
 from .config import ProviderConfig, SubscriptionPlan
 from .mock import MockLLMProvider, MockSearchProvider, MockImageProvider
+from .deepseek import DeepseekProvider
 
 logger = structlog.get_logger(__name__)
 
@@ -29,10 +30,10 @@ class ProviderFactory:
     # Registry des providers disponibles
     _llm_providers: Dict[str, type] = {
         "mock": MockLLMProvider,
+        "deepseek": DeepseekProvider,
         # Implémentations futures:
         # "openai": OpenAIProvider,
         # "anthropic": AnthropicProvider,
-        # "deepseek": DeepseekProvider,
         # "gemini": GeminiProvider,
     }
     

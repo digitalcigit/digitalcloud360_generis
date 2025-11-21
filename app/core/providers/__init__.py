@@ -8,6 +8,7 @@ Designed for extensibility and cost optimization.
 from .base import BaseLLMProvider, BaseSearchProvider, BaseImageProvider
 from .factory import ProviderFactory
 from .config import ProviderConfig, PLAN_PROVIDER_MAPPING
+from .deepseek import DeepseekProvider
 
 __all__ = [
     'BaseLLMProvider',
@@ -15,5 +16,6 @@ __all__ = [
     'BaseImageProvider',
     'ProviderFactory',
     'ProviderConfig',
-    'PLAN_PROVIDER_MAPPING'
+    'PLAN_PROVIDER_MAPPING',
+    'DeepseekProvider'
 ]
