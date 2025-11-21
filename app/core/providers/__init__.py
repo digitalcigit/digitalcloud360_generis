@@ -10,6 +10,7 @@ from .factory import ProviderFactory
 from .config import ProviderConfig, PLAN_PROVIDER_MAPPING
 from .deepseek import DeepseekProvider
 from .kimi import KimiProvider
+from .dalle import DALLEImageProvider
 
 __all__ = [
     'BaseLLMProvider',
@@ -19,5 +20,6 @@ __all__ = [
     'ProviderConfig',
     'PLAN_PROVIDER_MAPPING',
     'DeepseekProvider',
-    'KimiProvider'
+    'KimiProvider',
+    'DALLEImageProvider'
 ]

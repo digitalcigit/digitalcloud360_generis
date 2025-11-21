@@ -13,6 +13,7 @@ from .config import ProviderConfig, SubscriptionPlan
 from .mock import MockLLMProvider, MockSearchProvider, MockImageProvider
 from .deepseek import DeepseekProvider
 from .kimi import KimiProvider
+from .dalle import DALLEImageProvider
 
 logger = structlog.get_logger(__name__)
 
@@ -47,9 +48,9 @@ class ProviderFactory:
     
     _image_providers: Dict[str, type] = {
         "mock": MockImageProvider,
+        "dalle-3": DALLEImageProvider,
         # Implémentations futures:
-        # "dalle-3": DallE3Provider,
-        # "dalle-mini": DallE2Provider,
+        # "dalle-2": DallE2Provider,
         # "gemini": GeminiImageProvider,
     }
     
