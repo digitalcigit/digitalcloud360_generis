@@ -57,14 +57,25 @@ class Settings(BaseSettings):
     DIGITALCLOUD360_SERVICE_SECRET: str = "change-me-in-production"
     DIGITALCLOUD360_TIMEOUT: int = 30
     
-    # AI Services
+    # AI Services - Sprint 2 Multi-Provider Architecture
+    # LLM Providers
+    DEEPSEEK_API_KEY: str = "your-deepseek-key"
+    KIMI_API_KEY: str = "your-kimi-key"  # Moonshot AI
     OPENAI_API_KEY: str = "your-openai-key"
     ANTHROPIC_API_KEY: str = "your-anthropic-key"
-    TAVILY_API_KEY: str = "your-tavily-key"
-    LOGOAI_API_KEY: str = "your-logoai-key"
+    GOOGLE_API_KEY: Optional[str] = None  # Optional - Gemini
     
-    # External Services URLs
-    LOGOAI_BASE_URL: str = "https://api.logoai.com"
+    # Search Providers
+    TAVILY_API_KEY: str = "your-tavily-key"
+    
+    # Provider Configuration
+    PRIMARY_LLM_PROVIDER: str = "deepseek"  # deepseek|openai|anthropic
+    PRIMARY_SEARCH_PROVIDER: str = "tavily"  # tavily|kimi
+    ENABLE_PROVIDER_FALLBACK: bool = True
+    
+    # Provider Base URLs
+    DEEPSEEK_BASE_URL: str = "https://api.deepseek.com"
+    KIMI_BASE_URL: str = "https://api.moonshot.cn"
     TAVILY_BASE_URL: str = "https://api.tavily.com"
     
     # Security & CORS
