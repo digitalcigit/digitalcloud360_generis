@@ -32,7 +32,7 @@ class KimiProvider(BaseSearchProvider):
         self,
         api_key: str,
         model: str = "moonshot-v1-8k",
-        base_url: str = "https://api.moonshot.cn",
+        base_url: str = "https://api.moonshot.ai",
         timeout: int = 45,
         **kwargs
     ):
@@ -115,13 +115,15 @@ class KimiProvider(BaseSearchProvider):
                 "messages": messages,
                 "temperature": 0.3,  # Plus bas pour recherche factuelle
                 "max_tokens": 4000,
-                # Kimi specific: enable web search
+                # Kimi specific: utiliser function type avec web_search
                 "tools": [{
-                    "type": "web_search",
-                    "web_search": {
-                        "search_query": query
+                    "type": "function",
+                    "function": {
+                        "name": "web_search",
+                        "description": "Perform web search to find current information"
                     }
-                }]
+                }],
+                "tool_choice": "auto"
             }
             
             async with httpx.AsyncClient(timeout=self.timeout) as client:
@@ -271,11 +273,13 @@ FORMAT RÉPONSE (JSON):
                 "temperature": 0.3,
                 "max_tokens": 4000,
                 "tools": [{
-                    "type": "web_search",
-                    "web_search": {
-                        "search_query": market_query
+                    "type": "function",
+                    "function": {
+                        "name": "web_search",
+                        "description": "Perform web search to find current market data"
                     }
-                }]
+                }],
+                "tool_choice": "auto"
             }
             
             async with httpx.AsyncClient(timeout=self.timeout) as client:
