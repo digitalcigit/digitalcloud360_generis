@@ -43,104 +43,112 @@ class TestRedisVirtualFileSystem:
     
     @pytest.mark.asyncio
     async def test_write_session_success(self, redis_fs, mock_redis):
-        """Test écriture session réussie"""
-        session_id = "test_session_123"
-        test_data = {"user_id": 1, "step": "vision"}
+        """Test écriture session réussie - S2.3 nouvelle signature"""
+        user_id = 1
+        brief_id = "brief_123"
+        test_data = {"user_id": user_id, "brief_id": brief_id, "results": {}}
         ttl = 3600
         
         mock_redis.set.return_value = True
         
-        result = await redis_fs.write_session(session_id, test_data, ttl)
+        result = await redis_fs.write_session(user_id, brief_id, test_data, ttl)
         
         assert result is True
-        expected_key = f"{redis_fs.session_prefix}:{session_id}"
+        expected_key = f"{redis_fs.session_prefix}:{user_id}:{brief_id}"
         expected_data = json.dumps(test_data, default=str)
         mock_redis.set.assert_called_once_with(expected_key, expected_data, ex=ttl)
     
     @pytest.mark.asyncio
     async def test_write_session_failure(self, redis_fs, mock_redis):
-        """Test écriture session échouée"""
-        session_id = "test_session_123"
-        test_data = {"user_id": 1, "step": "vision"}
+        """Test écriture session échouée - S2.3"""
+        user_id = 1
+        brief_id = "brief_123"
+        test_data = {"user_id": user_id, "brief_id": brief_id}
         
         mock_redis.set.side_effect = Exception("Redis error")
         
-        result = await redis_fs.write_session(session_id, test_data)
+        result = await redis_fs.write_session(user_id, brief_id, test_data)
         
         assert result is False
     
     @pytest.mark.asyncio
     async def test_read_session_success(self, redis_fs, mock_redis):
-        """Test lecture session réussie"""
-        session_id = "test_session_123"
-        test_data = {"user_id": 1, "step": "vision"}
+        """Test lecture session réussie - S2.3"""
+        user_id = 1
+        brief_id = "brief_123"
+        test_data = {"user_id": user_id, "brief_id": brief_id, "results": {}}
         
         mock_redis.get.return_value = json.dumps(test_data)
         
-        result = await redis_fs.read_session(session_id)
+        result = await redis_fs.read_session(user_id, brief_id)
         
         assert result == test_data
-        expected_key = f"{redis_fs.session_prefix}:{session_id}"
+        expected_key = f"{redis_fs.session_prefix}:{user_id}:{brief_id}"
         mock_redis.get.assert_called_once_with(expected_key)
     
     @pytest.mark.asyncio
     async def test_read_session_not_found(self, redis_fs, mock_redis):
-        """Test lecture session non trouvée"""
-        session_id = "nonexistent_session"
+        """Test lecture session non trouvée - S2.3"""
+        user_id = 1
+        brief_id = "nonexistent_brief"
         
         mock_redis.get.return_value = None
         
-        result = await redis_fs.read_session(session_id)
+        result = await redis_fs.read_session(user_id, brief_id)
         
         assert result is None
     
     @pytest.mark.asyncio
     async def test_read_session_failure(self, redis_fs, mock_redis):
-        """Test lecture session échouée"""
-        session_id = "test_session_123"
+        """Test lecture session échouée - S2.3"""
+        user_id = 1
+        brief_id = "brief_123"
         
         mock_redis.get.side_effect = Exception("Redis error")
         
-        result = await redis_fs.read_session(session_id)
+        result = await redis_fs.read_session(user_id, brief_id)
         
         assert result is None
     
     @pytest.mark.asyncio
     async def test_delete_session_success(self, redis_fs, mock_redis):
-        """Test suppression session réussie"""
-        session_id = "test_session_123"
+        """Test suppression session réussie - S2.3"""
+        user_id = 1
+        brief_id = "brief_123"
         
         mock_redis.delete.return_value = 1  # 1 clé supprimée
         
-        result = await redis_fs.delete_session(session_id)
+        result = await redis_fs.delete_session(user_id, brief_id)
         
         assert result is True
-        expected_key = f"{redis_fs.session_prefix}:{session_id}"
+        expected_key = f"{redis_fs.session_prefix}:{user_id}:{brief_id}"
         mock_redis.delete.assert_called_once_with(expected_key)
     
     @pytest.mark.asyncio
     async def test_delete_session_not_found(self, redis_fs, mock_redis):
-        """Test suppression session non trouvée"""
-        session_id = "nonexistent_session"
+        """Test suppression session non trouvée - S2.3"""
+        user_id = 1
+        brief_id = "nonexistent_brief"
         
         mock_redis.delete.return_value = 0  # 0 clé supprimée
         
-        result = await redis_fs.delete_session(session_id)
+        result = await redis_fs.delete_session(user_id, brief_id)
         
         assert result is False
     
     @pytest.mark.asyncio
     async def test_extend_session_ttl_success(self, redis_fs, mock_redis):
-        """Test extension TTL session réussie"""
-        session_id = "test_session_123"
+        """Test extension TTL session réussie - S2.3"""
+        user_id = 1
+        brief_id = "brief_123"
         ttl = 7200
         
         mock_redis.expire.return_value = True
         
-        result = await redis_fs.extend_session_ttl(session_id, ttl)
+        result = await redis_fs.extend_session_ttl(user_id, brief_id, ttl)
         
         assert result is True
-        expected_key = f"{redis_fs.session_prefix}:{session_id}"
+        expected_key = f"{redis_fs.session_prefix}:{user_id}:{brief_id}"
         mock_redis.expire.assert_called_once_with(expected_key, ttl)
     
     @pytest.mark.asyncio
