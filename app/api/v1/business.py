@@ -20,7 +20,66 @@ router = APIRouter()
 logger = structlog.get_logger()
 
 
-@router.post("/brief/generate", response_model=BusinessBriefResponse)
+@router.post(
+    "/brief/generate",
+    response_model=BusinessBriefResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Générer un business brief complet",
+    description="""
+    Génère un business brief complet avec orchestration intelligente des sub-agents LangGraph.
+    
+    **Workflow** :
+    1. Orchestrateur LangGraph coordonne les sub-agents (Research, Content, Logo, SEO, Template)
+    2. Analyse marché via Tavily/Kimi (tendances, concurrents, opportunités)
+    3. Génération contenu multilingue (fr, wo, en) via Deepseek/OpenAI
+    4. Création logo via DALL-E 3 (7 styles disponibles)
+    5. Optimisation SEO locale (mots-clés, meta tags)
+    6. Sélection template adaptée au secteur
+    7. Persistance dans Redis Virtual FS (TTL 7 jours)
+    
+    **Temps génération** : ~20-40 secondes
+    
+    **Quotas** :
+    - Trial : 10 briefs/mois
+    - Basic : 25 briefs/mois
+    - Pro : 50 briefs/mois
+    - Enterprise : Illimité
+    """,
+    responses={
+        201: {
+            "description": "Business brief généré avec succès",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "brief_id": "brief_550e8400-e29b-41d4-a716-446655440000",
+                        "user_id": 123,
+                        "session_id": "session_789",
+                        "results": {
+                            "research": {
+                                "market_size": "15M FCFA marché local Dakar",
+                                "competitors": ["Competitor A", "Competitor B"],
+                                "opportunities": ["Mobile-first", "Paiement Orange Money"]
+                            },
+                            "content": {
+                                "homepage": {"fr": "Bienvenue...", "wo": "Dalal ak jàmm..."},
+                                "about": {"fr": "Notre histoire..."},
+                                "services": {"fr": "Nos services..."}
+                            },
+                            "logo": {"url": "https://...", "style": "modern-minimalist"},
+                            "seo": {"keywords": ["startup tech dakar", "innovation sénégal"]},
+                            "template": {"id": "tech-startup-v2", "name": "Tech Startup Modern"}
+                        }
+                    }
+                }
+            }
+        },
+        400: {"description": "Requête invalide (champs manquants ou format incorrect)"},
+        401: {"description": "Non authentifié (JWT token manquant ou invalide)"},
+        403: {"description": "Quota atteint pour ce plan"},
+        429: {"description": "Rate limit dépassé (max 5 req/min)"},
+        500: {"description": "Erreur serveur (provider API fail, timeout orchestrateur)"}
+    }
+)
 async def generate_business_brief(
     request: BusinessBriefRequest,
     current_user: dict = Depends(get_current_user),
@@ -62,7 +121,53 @@ async def generate_business_brief(
             detail=f"Failed to generate business brief: {str(e)}"
         )
 
-@router.get("/brief/{brief_id}", response_model=BusinessBriefResponse)
+@router.get(
+    "/brief/{brief_id}",
+    response_model=BusinessBriefResponse,
+    summary="Récupérer un business brief existant",
+    description="""
+    Récupère un business brief complet depuis Redis Virtual File System.
+    
+    **Autorisation** : Seul le propriétaire (user_id) peut accéder à ses briefs.
+    
+    **Clé Redis** : `genesis:session:{user_id}:{brief_id}`
+    
+    **TTL** : 7 jours par défaut (extensible via `/extend-ttl`)
+    
+    **Cas d'usage** :
+    - Consulter brief généré précédemment
+    - Partager brief avec équipe DC360
+    - Regénérer sections spécifiques
+    - Créer site web depuis brief
+    """,
+    responses={
+        200: {
+            "description": "Business brief récupéré avec succès",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "brief_id": "brief_550e8400-e29b-41d4-a716-446655440000",
+                        "user_id": 123,
+                        "session_id": "session_789",
+                        "results": {
+                            "research": {"market_size": "..."},
+                            "content": {"homepage": {"fr": "..."}},
+                            "logo": {"url": "..."},
+                            "seo": {"keywords": ["..."]},
+                            "template": {"id": "..."}
+                        },
+                        "created_at": "2025-11-22T02:30:00Z",
+                        "updated_at": "2025-11-22T02:30:00Z"
+                    }
+                }
+            }
+        },
+        401: {"description": "Non authentifié (JWT token manquant ou invalide)"},
+        403: {"description": "Accès refusé (brief appartient à un autre utilisateur)"},
+        404: {"description": "Brief non trouvé (ID invalide ou expiré)"},
+        500: {"description": "Erreur serveur (Redis unavailable)"}
+    }
+)
 async def get_business_brief(
     brief_id: str,
     current_user: dict = Depends(get_current_user),

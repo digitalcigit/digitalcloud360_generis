@@ -71,13 +71,90 @@ async def validate_external_apis():
 
 # FastAPI application instance
 app = FastAPI(
-    title="Genesis AI Deep Agents Service",
-    description="Premier Coach IA Personnel pour Entrepreneurs Africains avec Deep Agents LangGraph",
+    title="Genesis AI - Deep Agents Service",
+    description="""
+    # Premier Coach IA Personnel pour Entrepreneurs Africains 🌍
+    
+    ## Vue d'ensemble
+    
+    Genesis AI est un service d'orchestration intelligente utilisant **LangGraph** pour coordonner
+    des agents spécialisés dans la génération complète de business briefs et création de sites web.
+    
+    ## Architecture
+    
+    - **Orchestrateur LangGraph** : Coordination state machine des sub-agents
+    - **Sub-Agents spécialisés** :
+      - ResearchSubAgent : Analyse marché (Tavily/Kimi)
+      - ContentSubAgent : Génération contenu multilingue (Deepseek/OpenAI)
+      - LogoSubAgent : Création logos (DALL-E 3)
+      - SEOSubAgent : Optimisation SEO locale
+      - TemplateSubAgent : Sélection templates adaptés
+    
+    ## Providers LLM
+    
+    - **Deepseek** : Primary LLM (économique, rapide)
+    - **Kimi/Moonshot** : Search + LLM natif (web_search intégré)
+    - **DALL-E 3** : Génération images/logos (7 styles)
+    - **Tavily** : Fallback search spécialisé
+    - **OpenAI GPT-4** : Fallback LLM (fiable)
+    
+    ## Intégrations
+    
+    - **Redis Virtual FS** : Persistance sessions (TTL 7 jours)
+    - **DigitalCloud360 API** : Service-to-service (quotas, création sites)
+    - **PostgreSQL** : Données métier
+    
+    ## Fonctionnalités
+    
+    - ✅ Génération business brief complet (~20-40s)
+    - ✅ Analyse marché temps réel (Tavily/Kimi)
+    - ✅ Contenu multilingue (Français, Wolof, Anglais)
+    - ✅ Logos professionnels (7 styles DALL-E)
+    - ✅ SEO optimisé local (mots-clés, meta tags)
+    - ✅ Templates adaptés par secteur
+    - ✅ Persistance Redis (7 jours TTL)
+    - ✅ Intégration DC360 (quotas, création sites)
+    
+    ## Quotas
+    
+    | Plan | Briefs/mois | Rate Limit |
+    |------|-------------|------------|
+    | Trial | 10 | 5 req/min |
+    | Basic | 25 | 10 req/min |
+    | Pro | 50 | 20 req/min |
+    | Enterprise | Illimité | 50 req/min |
+    
+    ## Authentification
+    
+    - **JWT Bearer Token** : Authentification utilisateurs DC360
+    - **X-Service-Secret** : Authentification service-to-service
+    
+    ## Support
+    
+    - **Documentation** : [GitHub Wiki](https://github.com/digitalcigit/digitalcloud360_generis)
+    - **Issues** : [GitHub Issues](https://github.com/digitalcigit/digitalcloud360_generis/issues)
+    - **Contact** : support@digitalcloud360.com
+    
+    ## Version & Environnement
+    
+    - **Version** : {version}
+    - **Environnement** : {environment}
+    - **Health Check** : `GET /health`
+    """.format(version=settings.APP_VERSION, environment=settings.ENVIRONMENT),
     version=settings.APP_VERSION,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     docs_url="/docs" if settings.DEBUG else None,
     redoc_url="/redoc" if settings.DEBUG else None,
-    lifespan=lifespan
+    lifespan=lifespan,
+    contact={
+        "name": "DigitalCloud360 - Genesis AI Team",
+        "url": "https://digitalcloud360.com",
+        "email": "support@digitalcloud360.com"
+    },
+    license_info={
+        "name": "Proprietary",
+        "url": "https://digitalcloud360.com/license"
+    }
 )
 
 # CORS Middleware

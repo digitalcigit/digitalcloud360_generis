@@ -6,19 +6,95 @@ from datetime import datetime
 
 class BusinessBrief(BaseModel):
     """Brief business complet"""
-    business_name: str = Field(..., description="Nom business")
-    vision: str = Field(..., description="Vision entrepreneur")
-    mission: str = Field(..., description="Mission business")
-    target_audience: str = Field(..., description="Clientèle cible")
-    differentiation: str = Field(..., description="Différenciation")
-    value_proposition: str = Field(..., description="Proposition valeur")
-    sector: str = Field(..., description="Secteur activité")
-    location: Dict[str, str] = Field(..., description="Localisation")
+    business_name: str = Field(
+        ..., 
+        description="Nom business",
+        example="TechStartup Dakar"
+    )
+    vision: str = Field(
+        ..., 
+        description="Vision entrepreneur",
+        example="Devenir le leader de l'innovation technologique en Afrique de l'Ouest d'ici 2030"
+    )
+    mission: str = Field(
+        ..., 
+        description="Mission business",
+        example="Démocratiser l'accès aux solutions tech pour les PME sénégalaises"
+    )
+    target_audience: str = Field(
+        ..., 
+        description="Clientèle cible",
+        example="PME et entrepreneurs au Sénégal, 25-45 ans, secteur tertiaire"
+    )
+    differentiation: str = Field(
+        ..., 
+        description="Différenciation",
+        example="Support client en wolof et français, paiement mobile intégré, accompagnement personnalisé"
+    )
+    value_proposition: str = Field(
+        ..., 
+        description="Proposition valeur",
+        example="Solutions tech abordables et adaptées au contexte africain avec support multilingue"
+    )
+    sector: str = Field(
+        ..., 
+        description="Secteur activité",
+        example="Technology / SaaS"
+    )
+    location: Dict[str, str] = Field(
+        ..., 
+        description="Localisation",
+        example={"city": "Dakar", "country": "Sénégal", "region": "Afrique de l'Ouest"}
+    )
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "business_name": "TechStartup Dakar",
+                "vision": "Devenir le leader de l'innovation technologique en Afrique de l'Ouest d'ici 2030",
+                "mission": "Démocratiser l'accès aux solutions tech pour les PME sénégalaises",
+                "target_audience": "PME et entrepreneurs au Sénégal, 25-45 ans, secteur tertiaire",
+                "differentiation": "Support client en wolof et français, paiement mobile intégré",
+                "value_proposition": "Solutions tech abordables et adaptées au contexte africain",
+                "sector": "Technology / SaaS",
+                "location": {"city": "Dakar", "country": "Sénégal", "region": "Afrique de l'Ouest"}
+            }
+        }
 
 class BusinessBriefRequest(BaseModel):
     """Request schema for creating a business brief"""
-    coaching_session_id: int
-    business_brief: BusinessBrief
+    coaching_session_id: int = Field(
+        ...,
+        description="ID de la session coaching DC360",
+        example=789
+    )
+    business_brief: BusinessBrief = Field(
+        ...,
+        description="Données business brief complètes"
+    )
+    session_id: Optional[str] = Field(
+        None,
+        description="ID session optionnel pour traçabilité",
+        example="session_550e8400-e29b-41d4-a716-446655440000"
+    )
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "coaching_session_id": 789,
+                "session_id": "session_550e8400-e29b-41d4-a716-446655440000",
+                "business_brief": {
+                    "business_name": "TechStartup Dakar",
+                    "vision": "Devenir le leader de l'innovation technologique en Afrique de l'Ouest d'ici 2030",
+                    "mission": "Démocratiser l'accès aux solutions tech pour les PME sénégalaises",
+                    "target_audience": "PME et entrepreneurs au Sénégal, 25-45 ans, secteur tertiaire",
+                    "differentiation": "Support client en wolof et français, paiement mobile intégré",
+                    "value_proposition": "Solutions tech abordables et adaptées au contexte africain",
+                    "sector": "Technology / SaaS",
+                    "location": {"city": "Dakar", "country": "Sénégal", "region": "Afrique de l'Ouest"}
+                }
+            }
+        }
 
 class BusinessBriefResponse(BaseModel):
     """Réponse avec brief business complet"""
