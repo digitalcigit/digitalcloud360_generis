@@ -33,15 +33,22 @@ class ResearchSubAgent:
     
     def __init__(self):
         """Initialise le sub-agent avec providers configurés"""
-        self.provider_factory = ProviderFactory()
+        from app.config.settings import settings
         
-        # Providers search (Tavily primary)
-        self.search_provider: BaseSearchProvider = self.provider_factory.get_search_provider()
+        # Initialize factory with real API keys from settings
+        self.provider_factory = ProviderFactory(api_keys=settings.get_provider_api_keys())
+        
+        # Providers search (Kimi primary with web_search tool)
+        self.search_provider: BaseSearchProvider = self.provider_factory.create_search_provider(
+            plan="genesis_basic",  # Use basic plan for Kimi search
+            override_provider="kimi"  # Force Kimi for web search capability
+        )
         
         # Providers LLM (Deepseek primary pour analyse)
-        self.llm_provider: BaseLLMProvider = self.provider_factory.get_llm_provider(
-            provider_name="deepseek",
-            fallback=True
+        self.llm_provider: BaseLLMProvider = self.provider_factory.create_llm_provider(
+            plan="genesis_basic",  # Use basic plan for Deepseek model
+            override_provider="deepseek",
+            override_model="deepseek-chat"  # Use correct Deepseek model
         )
         
         # Domaines africains prioritaires pour recherche

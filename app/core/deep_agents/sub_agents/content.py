@@ -33,12 +33,16 @@ class ContentSubAgent:
     
     def __init__(self):
         """Initialise le sub-agent avec providers configurés"""
-        self.provider_factory = ProviderFactory()
+        from app.config.settings import settings
+        
+        # Initialize factory with real API keys from settings
+        self.provider_factory = ProviderFactory(api_keys=settings.get_provider_api_keys())
         
         # Provider LLM primary (Deepseek pour contenu)
-        self.llm_provider: BaseLLMProvider = self.provider_factory.get_llm_provider(
-            provider_name="deepseek",
-            fallback=True
+        self.llm_provider: BaseLLMProvider = self.provider_factory.create_llm_provider(
+            plan="genesis_basic",  # Use basic plan for Deepseek model
+            override_provider="deepseek",
+            override_model="deepseek-chat"  # Use correct Deepseek model
         )
         
         # Langues locales supportées
