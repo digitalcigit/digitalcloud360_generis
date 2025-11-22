@@ -26,65 +26,149 @@ class RedisVirtualFileSystem:
             logger.error("Redis connection failed", error=str(e))
             return False
     
-    async def write_session(self, session_id: str, data: Dict[str, Any], ttl: int = 7200) -> bool:
-        """Écrire session coaching (TTL 2h par défaut)"""
+    async def write_session(self, user_id: int, brief_id: str, data: Dict[str, Any], ttl: int = 7200) -> bool:
+        """
+        Écrire session coaching (TTL 2h par défaut)
+        
+        Args:
+            user_id: ID utilisateur propriétaire
+            brief_id: ID unique du business brief
+            data: Données session à persister
+            ttl: Time-to-live en secondes (default 2h)
+            
+        Returns:
+            bool: True si succès, False sinon
+        """
         try:
-            key = f"{self.session_prefix}:{session_id}"
+            key = f"{self.session_prefix}:{user_id}:{brief_id}"
             serialized_data = json.dumps(data, default=str)
             await self.redis.set(key, serialized_data, ex=ttl)
-            logger.info("Session written to Redis", session_id=session_id, ttl=ttl)
+            logger.info(
+                "Session written to Redis",
+                user_id=user_id,
+                brief_id=brief_id,
+                ttl=ttl
+            )
             return True
         except Exception as e:
-            logger.error("Failed to write session to Redis", session_id=session_id, error=str(e))
+            logger.error(
+                "Failed to write session to Redis",
+                user_id=user_id,
+                brief_id=brief_id,
+                error=str(e)
+            )
             return False
     
-    async def read_session(self, session_id: str) -> Optional[Dict[str, Any]]:
-        """Lire session coaching"""
+    async def read_session(self, user_id: int, brief_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Lire session coaching
+        
+        Args:
+            user_id: ID utilisateur propriétaire
+            brief_id: ID unique du business brief
+            
+        Returns:
+            Dict des données session ou None si non trouvé
+        """
         try:
-            key = f"{self.session_prefix}:{session_id}"
+            key = f"{self.session_prefix}:{user_id}:{brief_id}"
             data = await self.redis.get(key)
             if data:
                 return json.loads(data)
             return None
         except Exception as e:
-            logger.error("Failed to read session from Redis", session_id=session_id, error=str(e))
+            logger.error(
+                "Failed to read session from Redis",
+                user_id=user_id,
+                brief_id=brief_id,
+                error=str(e)
+            )
             return None
     
     async def list_user_sessions(self, user_id: int) -> List[str]:
-        """Lister sessions utilisateur"""
+        """
+        Lister sessions utilisateur
+        
+        Args:
+            user_id: ID utilisateur
+            
+        Returns:
+            Liste des brief_ids pour cet utilisateur
+        """
         try:
-            pattern = f"{self.session_prefix}:*"
-            keys = []
+            pattern = f"{self.session_prefix}:{user_id}:*"
+            brief_ids = []
             async for key in self.redis.scan_iter(match=pattern):
-                # Récupérer la session et vérifier si elle appartient à l'utilisateur
-                session_data = await self.read_session(key.decode().split(":")[-1])
-                if session_data and session_data.get("user_id") == user_id:
-                    keys.append(key.decode().split(":")[-1])
-            return keys
+                # Extraire brief_id depuis clé genesis:session:{user_id}:{brief_id}
+                key_parts = key.decode().split(":")
+                if len(key_parts) >= 4:
+                    brief_id = key_parts[3]
+                    brief_ids.append(brief_id)
+            logger.info("User sessions listed", user_id=user_id, count=len(brief_ids))
+            return brief_ids
         except Exception as e:
             logger.error("Failed to list user sessions", user_id=user_id, error=str(e))
             return []
     
-    async def delete_session(self, session_id: str) -> bool:
-        """Supprimer session coaching"""
+    async def delete_session(self, user_id: int, brief_id: str) -> bool:
+        """
+        Supprimer session coaching
+        
+        Args:
+            user_id: ID utilisateur propriétaire
+            brief_id: ID unique du business brief
+            
+        Returns:
+            bool: True si supprimé, False sinon
+        """
         try:
-            key = f"{self.session_prefix}:{session_id}"
+            key = f"{self.session_prefix}:{user_id}:{brief_id}"
             result = await self.redis.delete(key)
-            logger.info("Session deleted from Redis", session_id=session_id, deleted=bool(result))
+            logger.info(
+                "Session deleted from Redis",
+                user_id=user_id,
+                brief_id=brief_id,
+                deleted=bool(result)
+            )
             return bool(result)
         except Exception as e:
-            logger.error("Failed to delete session from Redis", session_id=session_id, error=str(e))
+            logger.error(
+                "Failed to delete session from Redis",
+                user_id=user_id,
+                brief_id=brief_id,
+                error=str(e)
+            )
             return False
     
-    async def extend_session_ttl(self, session_id: str, ttl: int = 7200) -> bool:
-        """Étendre TTL d'une session"""
+    async def extend_session_ttl(self, user_id: int, brief_id: str, ttl: int = 7200) -> bool:
+        """
+        Étendre TTL d'une session
+        
+        Args:
+            user_id: ID utilisateur propriétaire
+            brief_id: ID unique du business brief
+            ttl: Nouveau time-to-live en secondes
+            
+        Returns:
+            bool: True si TTL mis à jour, False sinon
+        """
         try:
-            key = f"{self.session_prefix}:{session_id}"
+            key = f"{self.session_prefix}:{user_id}:{brief_id}"
             result = await self.redis.expire(key, ttl)
-            logger.info("Session TTL extended", session_id=session_id, ttl=ttl)
+            logger.info(
+                "Session TTL extended",
+                user_id=user_id,
+                brief_id=brief_id,
+                ttl=ttl
+            )
             return bool(result)
         except Exception as e:
-            logger.error("Failed to extend session TTL", session_id=session_id, error=str(e))
+            logger.error(
+                "Failed to extend session TTL",
+                user_id=user_id,
+                brief_id=brief_id,
+                error=str(e)
+            )
             return False
     
     async def write_user_state(self, user_id: int, state: Dict[str, Any], ttl: int = 86400) -> bool:

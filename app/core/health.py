@@ -25,10 +25,14 @@ class HealthChecker:
             
             if is_healthy:
                 # Test écriture/lecture pour validation complète
+                # Utiliser user_id=0 et brief_id="health_check" pour test
+                test_user_id = 0
+                test_brief_id = "health_check_test"
                 test_data = {"test": "health_check", "timestamp": "now"}
-                await self.redis_fs.write_session("health_check_test", test_data, ttl=60)
-                read_data = await self.redis_fs.read_session("health_check_test")
-                await self.redis_fs.delete_session("health_check_test")
+                
+                await self.redis_fs.write_session(test_user_id, test_brief_id, test_data, ttl=60)
+                read_data = await self.redis_fs.read_session(test_user_id, test_brief_id)
+                await self.redis_fs.delete_session(test_user_id, test_brief_id)
                 
                 return True, {
                     "status": "healthy",
