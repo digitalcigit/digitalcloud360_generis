@@ -8,12 +8,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import structlog
 import time
+import os
 from contextlib import asynccontextmanager
 
 from app.config.settings import settings
 from app.config.database import engine, create_tables
 from app.api.middleware import PrometheusMiddleware, LoggingMiddleware
 from app.api.v1 import auth, coaching, business, users, integrations, genesis
+from app.api import dc360_adapter
 from app.utils.exceptions import GenesisAIException
 from app.utils.logger import setup_logging
 from app.core.integrations.redis_fs import RedisVirtualFileSystem
@@ -29,19 +31,27 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting Genesis AI Service...")
     
-    # Initialize database
-    if settings.ENVIRONMENT != "testing":
-        await create_tables()
-        logger.info("Database tables created")
+    # Initialize database (skip if SKIP_DB_INIT=true for manual testing)
+    skip_db_init = os.getenv("SKIP_DB_INIT", "false").lower() == "true"
+    if settings.ENVIRONMENT != "testing" and not skip_db_init:
+        try:
+            await create_tables()
+            logger.info("Database tables created")
+        except Exception as e:
+            logger.warning("Database initialization skipped", error=str(e))
 
     # Initialize Redis connection
     redis_fs = RedisVirtualFileSystem()
     await redis_fs.health_check()
     logger.info("Redis Virtual File System initialized")
     
-    # Validate external API connections
-    if settings.VALIDATE_EXTERNAL_APIS and not settings.TESTING_MODE:
-        await validate_external_apis()
+    # Validate external API connections (skip for manual testing)
+    skip_api_validation = os.getenv("SKIP_API_VALIDATION", "false").lower() == "true"
+    if settings.VALIDATE_EXTERNAL_APIS and not settings.TESTING_MODE and not skip_api_validation:
+        try:
+            await validate_external_apis()
+        except Exception as e:
+            logger.warning("External API validation skipped", error=str(e))
     
     yield
     
@@ -279,6 +289,13 @@ app.include_router(
     integrations.router, 
     prefix=f"{settings.API_V1_STR}/integrations", 
     tags=["Integrations"]
+)
+
+# DC360 Adapter Router (sans préfixe /v1/ - endpoint alias)
+app.include_router(
+    dc360_adapter.router,
+    prefix="/api/genesis",
+    tags=["DC360 Integration"]
 )
 
 # Root endpoint
