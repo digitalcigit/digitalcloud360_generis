@@ -15,6 +15,7 @@ from app.config.settings import settings
 from app.config.database import engine, create_tables
 from app.api.middleware import PrometheusMiddleware, LoggingMiddleware
 from app.api.v1 import auth, coaching, business, users, integrations, genesis
+from app.api import dc360_adapter
 from app.utils.exceptions import GenesisAIException
 from app.utils.logger import setup_logging
 from app.core.integrations.redis_fs import RedisVirtualFileSystem
