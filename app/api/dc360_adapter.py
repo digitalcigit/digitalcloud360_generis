@@ -351,7 +351,10 @@ async def generate_brief_dc360(
         )
         
         # 6. Incrémenter usage quota
-        await quota_manager.increment_usage(request.user_id)
+        await quota_manager.increment_usage(
+            user_id=request.user_id,
+            session_id=genesis_input["coaching_session_id"]
+        )
         
         # 7. Assembler réponse format Genesis (DC360 compatible)
         current_time = datetime.utcnow().isoformat() + "Z"
