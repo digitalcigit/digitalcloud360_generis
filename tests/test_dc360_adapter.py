@@ -4,7 +4,7 @@ Tests du WO-GENESIS-DC360-ADAPTER-S3-001
 """
 
 import pytest
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 from app.main import app
 from app.api.dc360_adapter import adapt_dc360_to_genesis, DC360GenerateBriefRequest, DC360BusinessInfo, DC360MarketInfo
 from app.config.settings import settings
@@ -115,7 +115,8 @@ class TestDC360AdapterEndpoint:
     @pytest.mark.asyncio
     async def test_generate_brief_missing_service_secret(self):
         """Test refus sans X-Service-Secret"""
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
             payload = {
                 "user_id": 123,
                 "business_info": {
@@ -140,7 +141,8 @@ class TestDC360AdapterEndpoint:
     @pytest.mark.asyncio
     async def test_generate_brief_invalid_service_secret(self):
         """Test refus avec X-Service-Secret invalide"""
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
             payload = {
                 "user_id": 123,
                 "business_info": {
@@ -167,7 +169,8 @@ class TestDC360AdapterEndpoint:
     @pytest.mark.asyncio
     async def test_generate_brief_invalid_payload(self):
         """Test refus avec payload invalide"""
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
             # Payload incomplet (manque business_info)
             payload = {
                 "user_id": 123,
@@ -224,7 +227,8 @@ class TestDC360AdapterEndpoint:
         monkeypatch.setattr(dc360_adapter, "get_redis_vfs", lambda: MockRedisVFS())
         monkeypatch.setattr(dc360_adapter, "get_quota_manager", lambda: MockQuotaManager())
         
-        async with AsyncClient(app=app, base_url="http://test") as client:
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
             payload = {
                 "user_id": 123,
                 "business_info": {
