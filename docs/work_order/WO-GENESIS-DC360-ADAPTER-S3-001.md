@@ -8,7 +8,9 @@ date: "2025-11-26"
 sprint: "Sprint 3 - Intégration DC360"
 estimated_effort: "2h30"
 tags: ["api", "integration", "dc360", "adapter", "fastapi"]
-status: "ready_for_dev"
+status: "completed"
+completion_date: "2025-11-26"
+merge_commit: "572c43c4"
 ---
 
 # 🎯 WORK ORDER : Endpoint Alias DC360 + Adaptateur
