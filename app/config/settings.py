@@ -59,6 +59,10 @@ class Settings(BaseSettings):
     DIGITALCLOUD360_SERVICE_SECRET: str = "change-me-in-production"
     DIGITALCLOUD360_TIMEOUT: int = 30
     
+    # Genesis Service Secret (pour authentification service-to-service)
+    # Doit être identique côté Genesis et DC360
+    GENESIS_SERVICE_SECRET: str = "change-me-in-production"
+    
     # AI Services - Sprint 2 Multi-Provider Architecture
     # LLM Providers
     DEEPSEEK_API_KEY: str = "your-deepseek-key"
