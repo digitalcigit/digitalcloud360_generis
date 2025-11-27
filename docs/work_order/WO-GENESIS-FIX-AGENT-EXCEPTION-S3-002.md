@@ -8,7 +8,9 @@ date: "2025-11-27"
 sprint: "Sprint 3 - Stabilisation"
 estimated_effort: "1h"
 tags: ["bugfix", "exception", "logo_agent", "seo_agent"]
-status: "ready_for_dev"
+status: "completed"
+completion_date: "2025-11-27"
+merge_commit: "02055d50"
 ---
 
 # 🐛 WORK ORDER : Correction Bug AgentException
