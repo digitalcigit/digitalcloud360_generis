@@ -45,9 +45,9 @@ class SeoAgent:
         except Exception as e:
             logger.error("Error during SEO agent execution", error=str(e))
             raise AgentException(
-                "SEO_AGENT_ERROR",
-                "Failed to generate SEO data.",
-                details=str(e)
+                message="Failed to generate SEO data.",
+                error_code="SEO_AGENT_ERROR",
+                details={"error": str(e)}
             )
 
     def _generate_meta_description(self, description: str, keywords_data: dict) -> str:

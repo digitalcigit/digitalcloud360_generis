@@ -42,9 +42,9 @@ class TemplateAgent:
         except Exception as e:
             logger.error("Error during template agent execution", error=str(e))
             raise AgentException(
-                "TEMPLATE_AGENT_ERROR",
-                "Failed to select a website template.",
-                details=str(e)
+                message="Failed to select a website template.",
+                error_code="TEMPLATE_AGENT_ERROR",
+                details={"error": str(e)}
             )
 
     def _select_template(self, business_type: str) -> dict:

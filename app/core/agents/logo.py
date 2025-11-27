@@ -38,7 +38,7 @@ class LogoAgent:
         except Exception as e:
             logger.error("Error during logo agent execution", error=str(e))
             raise AgentException(
-                "LOGO_AGENT_ERROR",
-                "Failed to generate logo.",
-                details=str(e)
+                message="Failed to generate logo.",
+                error_code="LOGO_AGENT_ERROR",
+                details={"error": str(e)}
             )

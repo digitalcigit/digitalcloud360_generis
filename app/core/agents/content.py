@@ -41,9 +41,9 @@ class ContentAgent:
         except Exception as e:
             logger.error("Error during content agent execution", error=str(e))
             raise AgentException(
-                "CONTENT_AGENT_ERROR",
-                "Failed to generate website content.",
-                details=str(e)
+                message="Failed to generate website content.",
+                error_code="CONTENT_AGENT_ERROR",
+                details={"error": str(e)}
             )
 
     def _build_prompt(self, business_brief: dict, market_research: dict) -> str:

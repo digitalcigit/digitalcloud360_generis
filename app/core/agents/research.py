@@ -52,7 +52,7 @@ class ResearchAgent:
         except Exception as e:
             logger.error("Error during research agent execution", error=str(e))
             raise AgentException(
-                "RESEARCH_AGENT_ERROR",
-                "Failed to execute market research.",
-                details=str(e)
+                message="Failed to execute market research.",
+                error_code="RESEARCH_AGENT_ERROR",
+                details={"error": str(e)}
             )

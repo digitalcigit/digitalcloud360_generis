@@ -74,6 +74,10 @@ class Settings(BaseSettings):
     # Search Providers
     TAVILY_API_KEY: str = "your-tavily-key"
     
+    # Image Providers
+    LOGOAI_API_KEY: str = "your-logoai-key"
+    LOGOAI_BASE_URL: str = "https://api.logoai.com/v1"  # URL placeholder
+    
     # Provider Configuration
     PRIMARY_LLM_PROVIDER: str = "deepseek"  # deepseek|openai|anthropic
     PRIMARY_SEARCH_PROVIDER: str = "tavily"  # tavily|kimi
@@ -138,6 +142,10 @@ class Settings(BaseSettings):
         # Search Providers
         if self.TAVILY_API_KEY and not self.TAVILY_API_KEY.startswith("your-"):
             api_keys["tavily"] = self.TAVILY_API_KEY
+
+        # Image Providers
+        if self.LOGOAI_API_KEY and not self.LOGOAI_API_KEY.startswith("your-"):
+            api_keys["logoai"] = self.LOGOAI_API_KEY
         
         return api_keys
 
