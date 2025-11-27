@@ -50,6 +50,7 @@ async def generate_site(
     site = Site(
         user_id=current_user.id,
         brief_id=brief.id,
+        name=brief.business_name or "Mon Site",
         definition=site_definition,
         status=SiteStatusEnum.READY
     )
