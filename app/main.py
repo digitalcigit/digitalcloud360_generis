@@ -14,7 +14,7 @@ from contextlib import asynccontextmanager
 from app.config.settings import settings
 from app.config.database import engine, create_tables
 from app.api.middleware import PrometheusMiddleware, LoggingMiddleware
-from app.api.v1 import auth, coaching, business, users, integrations, genesis, modules
+from app.api.v1 import auth, coaching, business, users, integrations, genesis, modules, sites
 from app.api import dc360_adapter
 from app.utils.exceptions import GenesisAIException
 from app.utils.logger import setup_logging
@@ -294,6 +294,11 @@ app.include_router(
     modules.router,
     prefix=f"{settings.API_V1_STR}/modules",
     tags=["User Modules"]
+)
+app.include_router(
+    sites.router,
+    prefix=f"{settings.API_V1_STR}/sites",
+    tags=["Sites"]
 )
 
 # DC360 Adapter Router (sans préfixe /v1/ - endpoint alias)
