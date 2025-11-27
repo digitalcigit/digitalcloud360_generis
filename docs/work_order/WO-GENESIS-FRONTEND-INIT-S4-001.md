@@ -60,17 +60,24 @@ Définir l'interface TypeScript `SiteDefinition` qui sera le cœur du système.
 *   Créer le modèle SQLAlchemy `UserModule` dans le backend existant (`genesis-ai`).
 *   Ajouter l'API endpoint `GET /api/v1/modules/my-modules` pour que le frontend sache quoi afficher.
 
+### 2.6 Infrastructure Docker (Critique)
+*   Le projet Frontend doit être **immédiatement conteneurisé**.
+*   Ajouter un `Dockerfile` optimisé (multi-stage) dans `genesis-frontend/`.
+*   Mettre à jour le `docker-compose.yml` racine pour inclure le service `frontend` (port 3000).
+*   Assurer la communication réseau entre `frontend` (SSR) et `backend`.
+
 ## 3. Tâches Détaillées
 
 1.  [ ] **Setup Repo :** `npx create-next-app@latest` avec options TypeScript, Tailwind, App Router.
-2.  [ ] **UI Kit :** Installation `shadcn/ui` et composants de base (Button, Card, Input, Sidebar).
-3.  [ ] **Auth Handshake :** Page de réception SSO (`/auth/callback`) qui stocke le token.
-4.  [ ] **Type Definition :** Rédaction du fichier `site-definition.ts` complet.
-5.  [ ] **Backend Update :** Migration DB pour ajouter la table `user_modules`.
+2.  [ ] **Docker Setup :** Création `Dockerfile` et Update `docker-compose.yml`.
+3.  [ ] **UI Kit :** Installation `shadcn/ui` et composants de base (Button, Card, Input, Sidebar).
+4.  [ ] **Auth Handshake :** Page de réception SSO (`/auth/callback`) qui stocke le token.
+5.  [ ] **Type Definition :** Rédaction du fichier `site-definition.ts` complet.
+6.  [ ] **Backend Update :** Migration DB pour ajouter la table `user_modules`.
 
 ## 4. Critères d'Acceptation (DoD)
 
-- [ ] Le projet Next.js démarre sans erreur (`npm run dev`).
+- [ ] Le projet démarre via `docker-compose up -d` et est accessible sur `http://localhost:3000`.
 - [ ] Les composants shadcn sont installés et fonctionnels.
 - [ ] Une page protégée redirige vers login si pas de token.
 - [ ] Le type `SiteDefinition` est validé et documenté.
