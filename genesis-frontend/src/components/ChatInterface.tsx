@@ -55,7 +55,7 @@ export default function ChatInterface({ userId, onBriefGenerated }: ChatInterfac
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     message: input,
-                    userId,
+                    // userId supprimé : Le backend extrait l'identité du JWT (Security Fix)
                     history: messages
                 })
             });
