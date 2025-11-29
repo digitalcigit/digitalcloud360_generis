@@ -140,13 +140,19 @@ services:
     container_name: genesis-frontend
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3002:3000"
     environment:
+      - HOSTNAME=0.0.0.0
+      # DC360 Hub
+      - DC360_API_URL=http://web:8000/api
+      - NEXT_PUBLIC_DC360_URL=http://localhost:3000
+      # Genesis Backend
+      - GENESIS_API_URL=http://genesis-api:8000
       - NEXT_PUBLIC_API_URL=http://localhost:8002/api/v1
     depends_on:
       - genesis-api
     networks:
-      - genesis-ai-network
+      - dc360-ecosystem-net
 
   # =============================================================================
   # Grafana Dashboard (Optionnel)
@@ -187,6 +193,8 @@ volumes:
 networks:
   genesis-ai-network:
     driver: bridge
+  dc360-ecosystem-net:
+    external: true
     ipam:
       config:
         - subnet: 172.31.0.0/16
