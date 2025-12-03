@@ -1,22 +1,89 @@
+import {
+  HeaderSectionContent,
+  HeroSectionContent,
+  AboutSectionContent,
+  ServicesSectionContent,
+  FeaturesSectionContent,
+  TestimonialsSectionContent,
+  ContactSectionContent,
+  GallerySectionContent,
+  CTASectionContent,
+  FooterSectionContent
+} from './blocks';
+
+// ===== BLOCK TYPES =====
+export type BlockType =
+  | 'header'
+  | 'hero'
+  | 'about'
+  | 'services'
+  | 'features'
+  | 'testimonials'
+  | 'contact'
+  | 'gallery'
+  | 'cta'
+  | 'footer';
+
+// ===== BLOCK CONTENT MAP =====
+export interface BlockContentMap {
+  header: HeaderSectionContent;
+  hero: HeroSectionContent;
+  about: AboutSectionContent;
+  services: ServicesSectionContent;
+  features: FeaturesSectionContent;
+  testimonials: TestimonialsSectionContent;
+  contact: ContactSectionContent;
+  gallery: GallerySectionContent;
+  cta: CTASectionContent;
+  footer: FooterSectionContent;
+}
+
+// ===== SECTION GÉNÉRIQUE TYPÉE =====
+export interface SiteSection<T extends BlockType = BlockType> {
+  id: string;
+  type: T;
+  content: BlockContentMap[T];
+  styles?: SectionStyles;
+}
+
+// ===== STYLES =====
+export interface SectionStyles {
+  backgroundColor?: string;
+  padding?: string;
+  margin?: string;
+  className?: string;
+}
+
+// ===== SITE DEFINITION =====
 export interface SiteDefinition {
-  metadata: {
-    title: string;
-    description: string;
-    favicon?: string;
-  };
-  theme: {
-    colors: {
-      primary: string;
-      secondary: string;
-      background: string;
-      text: string;
-    };
-    fonts: {
-      heading: string;
-      body: string;
-    };
-  };
+  metadata: SiteMetadata;
+  theme: SiteTheme;
   pages: SitePage[];
+}
+
+export interface SiteMetadata {
+  title: string;
+  description: string;
+  favicon?: string;
+  ogImage?: string;
+}
+
+export interface SiteTheme {
+  colors: ThemeColors;
+  fonts: ThemeFonts;
+}
+
+export interface ThemeColors {
+  primary: string;
+  secondary: string;
+  accent?: string;
+  background: string;
+  text: string;
+}
+
+export interface ThemeFonts {
+  heading: string;
+  body: string;
 }
 
 export interface SitePage {
@@ -26,9 +93,5 @@ export interface SitePage {
   sections: SiteSection[];
 }
 
-export interface SiteSection {
-  id: string;
-  type: string;
-  content: Record<string, any>;
-  styles?: Record<string, any>;
-}
+// ===== IMPORTS DES BLOCK CONTENTS =====
+export * from './blocks';
