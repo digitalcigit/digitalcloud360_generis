@@ -1,3 +1,5 @@
+import { SocialLink } from './contact';
+
 export interface FooterSectionContent {
     logo?: string;
     companyName?: string;        // Optional pour compatibilité

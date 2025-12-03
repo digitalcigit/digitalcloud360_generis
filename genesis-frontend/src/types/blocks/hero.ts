@@ -1,6 +1,6 @@
 export interface HeroSectionContent {
     title: string;              // Aligné sur HeroBlock.tsx
-    subtitle?: string;          // Aligné sur HeroBlock.tsx
+    subtitle: string;           // Aligné sur HeroBlock.tsx (Required)
     description?: string;
     image?: string;             // Aligné sur HeroBlock.tsx (pas backgroundImage)
     backgroundVideo?: string;

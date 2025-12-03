@@ -39,12 +39,25 @@ export interface BlockContentMap {
 }
 
 // ===== SECTION GÉNÉRIQUE TYPÉE =====
-export interface SiteSection<T extends BlockType = BlockType> {
+export interface SiteSectionGeneric<T extends BlockType> {
   id: string;
   type: T;
   content: BlockContentMap[T];
   styles?: SectionStyles;
 }
+
+// ===== SITE SECTION UNION (Discriminated Union) =====
+export type SiteSection =
+  | SiteSectionGeneric<'header'>
+  | SiteSectionGeneric<'hero'>
+  | SiteSectionGeneric<'about'>
+  | SiteSectionGeneric<'services'>
+  | SiteSectionGeneric<'features'>
+  | SiteSectionGeneric<'testimonials'>
+  | SiteSectionGeneric<'contact'>
+  | SiteSectionGeneric<'gallery'>
+  | SiteSectionGeneric<'cta'>
+  | SiteSectionGeneric<'footer'>;
 
 // ===== STYLES =====
 export interface SectionStyles {
