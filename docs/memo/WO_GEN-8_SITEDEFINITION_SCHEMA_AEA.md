@@ -30,9 +30,21 @@ Définir le schéma complet `SiteDefinition` avec tous les types de blocks (sect
 
 | Métrique | Valeur |
 |----------|--------|
-| **Deadline** | **03/12/2025** (aujourd'hui) |
-| **Estimation** | 6-7h |
+| **Deadline** | **04/12/2025** |
+| **Estimation** | 8-9h |
 | **Priorité** | 🔴 Highest |
+
+### 2.1 Non-Objectifs (Hors Scope GEN-8)
+
+> ⚠️ **Ne PAS faire dans cette story :**
+
+- ❌ Modifier les composants React (`HeroBlock.tsx`, `FeaturesBlock.tsx`, etc.)
+- ❌ Modifier le `BlockRenderer.tsx`
+- ❌ Créer de nouveaux blocks React (scope GEN-9)
+- ❌ Implémenter le Transformer (scope GEN-7)
+- ❌ Créer des endpoints API (scope GEN-10)
+
+> **Note architecturale :** Pour Sprint 5, les types TypeScript et Pydantic sont maintenus en synchronisation manuelle. À terme (Phase 2+), Pydantic/OpenAPI sera la source de vérité et les types TS seront générés automatiquement via `openapi-typescript`.
 
 ---
 
@@ -92,8 +104,11 @@ Voici le mapping entre les sous-tâches Asana et le travail à faire :
 | 8 | `Typer CTASectionContent` | `src/types/blocks/cta.ts` | 0.5h |
 | 9 | `Typer ContactSectionContent` | `src/types/blocks/contact.ts` | 0.5h |
 | 10 | `Typer FooterSectionContent` | `src/types/blocks/footer.ts` | 0.5h |
-| 11 | `Créer index barrel export` | `src/types/blocks/index.ts` | 0.5h |
-| 12 | `Créer Pydantic schema miroir (backend)` | `app/schemas/site_definition.py` | 1h |
+| 11 | `Typer HeaderSectionContent` | `src/types/blocks/header.ts` | 0.5h |
+| 12 | `Créer index barrel export` | `src/types/blocks/index.ts` | 0.5h |
+| 13 | `Créer Pydantic schema miroir (backend)` | `app/schemas/site_definition.py` | 1h |
+| 14 | `Ajouter export dans __init__.py` | `app/schemas/__init__.py` | 0.25h |
+| 15 | `Créer tests unitaires schema` | `tests/schemas/test_site_definition.py` | 1h |
 
 ---
 
@@ -114,7 +129,8 @@ genesis-frontend/src/types/
     ├── contact.ts
     ├── gallery.ts
     ├── cta.ts
-    └── footer.ts
+    ├── footer.ts
+    └── header.ts
 
 app/schemas/
 └── site_definition.py       # CRÉER - Pydantic mirror
@@ -127,6 +143,7 @@ app/schemas/
 ```typescript
 // ===== BLOCK TYPES =====
 export type BlockType = 
+  | 'header'
   | 'hero' 
   | 'about' 
   | 'services' 
@@ -139,6 +156,7 @@ export type BlockType =
 
 // ===== BLOCK CONTENT MAP =====
 export interface BlockContentMap {
+  header: HeaderSectionContent;
   hero: HeroSectionContent;
   about: AboutSectionContent;
   services: ServicesSectionContent;
@@ -211,21 +229,23 @@ export * from './blocks';
 
 #### `src/types/blocks/hero.ts`
 
+> ⚠️ **IMPORTANT :** Les noms de champs sont alignés sur `HeroBlock.tsx` existant pour éviter les breaking changes.
+
 ```typescript
 export interface HeroSectionContent {
-  headline: string;
-  subheadline?: string;
+  title: string;              // Aligné sur HeroBlock.tsx
+  subtitle?: string;          // Aligné sur HeroBlock.tsx
   description?: string;
-  backgroundImage?: string;
+  image?: string;             // Aligné sur HeroBlock.tsx (pas backgroundImage)
   backgroundVideo?: string;
-  ctaButtons?: HeroCTA[];
+  cta?: HeroCTA;              // Single object, aligné sur HeroBlock.tsx
   alignment?: 'left' | 'center' | 'right';
   overlay?: boolean;
 }
 
 export interface HeroCTA {
   text: string;
-  href: string;
+  link: string;               // Aligné sur HeroBlock.tsx (pas href)
   variant?: 'primary' | 'secondary' | 'outline';
 }
 ```
@@ -388,15 +408,17 @@ export interface CTAButton {
 
 #### `src/types/blocks/footer.ts`
 
+> ⚠️ **IMPORTANT :** `FooterLink.url` aligné sur `FooterBlock.tsx` existant.
+
 ```typescript
 export interface FooterSectionContent {
   logo?: string;
-  companyName: string;
+  companyName?: string;        // Optional pour compatibilité
   description?: string;
   columns?: FooterColumn[];
-  copyright?: string;
+  copyright: string;           // Required, aligné sur FooterBlock.tsx
   socialLinks?: SocialLink[];
-  legalLinks?: FooterLink[];
+  links?: FooterLink[];        // Aligné sur FooterBlock.tsx (pas legalLinks)
 }
 
 export interface FooterColumn {
@@ -406,17 +428,42 @@ export interface FooterColumn {
 
 export interface FooterLink {
   text: string;
-  href: string;
+  url: string;                 // Aligné sur FooterBlock.tsx (pas href)
 }
 
 // Réutiliser SocialLink de contact.ts
 export type { SocialLink } from './contact';
 ```
 
+#### `src/types/blocks/header.ts`
+
+```typescript
+export interface HeaderSectionContent {
+  logo?: string;
+  companyName: string;
+  navigation: NavItem[];
+  ctaButton?: HeaderCTA;
+  sticky?: boolean;
+}
+
+export interface NavItem {
+  label: string;
+  href: string;
+  children?: NavItem[];
+}
+
+export interface HeaderCTA {
+  text: string;
+  href: string;
+  variant?: 'primary' | 'secondary' | 'outline';
+}
+```
+
 #### `src/types/blocks/index.ts` (Barrel Export)
 
 ```typescript
 // Block Contents
+export * from './header';
 export * from './hero';
 export * from './about';
 export * from './services';
@@ -442,6 +489,7 @@ from enum import Enum
 
 # ===== BLOCK TYPES =====
 class BlockType(str, Enum):
+    HEADER = "header"
     HERO = "hero"
     ABOUT = "about"
     SERVICES = "services"
@@ -453,20 +501,42 @@ class BlockType(str, Enum):
     FOOTER = "footer"
 
 
-# ===== HERO =====
-class HeroCTA(BaseModel):
+# ===== HEADER =====
+class NavItem(BaseModel):
+    label: str
+    href: str
+    children: Optional[List["NavItem"]] = None
+
+
+class HeaderCTA(BaseModel):
     text: str
     href: str
     variant: Optional[Literal["primary", "secondary", "outline"]] = "primary"
 
 
+class HeaderSectionContent(BaseModel):
+    logo: Optional[str] = None
+    companyName: str = Field(..., description="Nom de l'entreprise")
+    navigation: List[NavItem]
+    ctaButton: Optional[HeaderCTA] = None
+    sticky: Optional[bool] = False
+
+
+# ===== HERO =====
+# ⚠️ IMPORTANT: Aligné sur HeroBlock.tsx existant
+class HeroCTA(BaseModel):
+    text: str
+    link: str  # Aligné sur HeroBlock.tsx (pas href)
+    variant: Optional[Literal["primary", "secondary", "outline"]] = "primary"
+
+
 class HeroSectionContent(BaseModel):
-    headline: str = Field(..., description="Titre principal du hero")
-    subheadline: Optional[str] = None
+    title: str = Field(..., description="Titre principal du hero")  # Aligné sur HeroBlock.tsx
+    subtitle: Optional[str] = None  # Aligné sur HeroBlock.tsx
     description: Optional[str] = None
-    backgroundImage: Optional[str] = None
+    image: Optional[str] = None  # Aligné sur HeroBlock.tsx (pas backgroundImage)
     backgroundVideo: Optional[str] = None
-    ctaButtons: Optional[List[HeroCTA]] = None
+    cta: Optional[HeroCTA] = None  # Single object, aligné sur HeroBlock.tsx
     alignment: Optional[Literal["left", "center", "right"]] = "center"
     overlay: Optional[bool] = False
 
@@ -607,9 +677,10 @@ class CTASectionContent(BaseModel):
 
 
 # ===== FOOTER =====
+# ⚠️ IMPORTANT: Aligné sur FooterBlock.tsx existant
 class FooterLink(BaseModel):
     text: str
-    href: str
+    url: str  # Aligné sur FooterBlock.tsx (pas href)
 
 
 class FooterColumn(BaseModel):
@@ -619,16 +690,17 @@ class FooterColumn(BaseModel):
 
 class FooterSectionContent(BaseModel):
     logo: Optional[str] = None
-    companyName: str = Field(..., description="Nom de l'entreprise")
+    companyName: Optional[str] = None  # Optional pour compatibilité
     description: Optional[str] = None
     columns: Optional[List[FooterColumn]] = None
-    copyright: Optional[str] = None
+    copyright: str = Field(..., description="Copyright text")  # Required, aligné sur FooterBlock.tsx
     socialLinks: Optional[List[SocialLink]] = None
-    legalLinks: Optional[List[FooterLink]] = None
+    links: Optional[List[FooterLink]] = None  # Aligné sur FooterBlock.tsx (pas legalLinks)
 
 
 # ===== SECTION CONTENT UNION =====
 SectionContent = Union[
+    HeaderSectionContent,
     HeroSectionContent,
     AboutSectionContent,
     ServicesSectionContent,
@@ -721,6 +793,120 @@ class SiteDefinition(BaseModel):
         }
 ```
 
+### 5.4 Export dans `__init__.py`
+
+Ajouter dans `app/schemas/__init__.py` :
+
+```python
+from .site_definition import (
+    SiteDefinition,
+    SiteSection,
+    SitePage,
+    SiteMetadata,
+    SiteTheme,
+    BlockType,
+    # Block contents
+    HeaderSectionContent,
+    HeroSectionContent,
+    AboutSectionContent,
+    ServicesSectionContent,
+    FeaturesSectionContent,
+    TestimonialsSectionContent,
+    ContactSectionContent,
+    GallerySectionContent,
+    CTASectionContent,
+    FooterSectionContent,
+)
+```
+
+### 5.5 Tests Backend
+
+Créer `tests/schemas/test_site_definition.py` :
+
+```python
+"""Tests unitaires pour SiteDefinition schema"""
+
+import pytest
+from app.schemas.site_definition import (
+    SiteDefinition,
+    SiteSection,
+    SitePage,
+    BlockType,
+    HeroSectionContent,
+    FooterSectionContent,
+    TestimonialItem,
+)
+
+
+class TestSiteDefinitionSchema:
+    """Tests pour SiteDefinition"""
+    
+    def test_site_definition_valid(self):
+        """Test création SiteDefinition valide"""
+        data = {
+            "metadata": {
+                "title": "Test Site",
+                "description": "Test description"
+            },
+            "theme": {
+                "colors": {
+                    "primary": "#2563eb",
+                    "secondary": "#7c3aed",
+                    "background": "#ffffff",
+                    "text": "#1a1a1a"
+                },
+                "fonts": {"heading": "Inter", "body": "Inter"}
+            },
+            "pages": [{
+                "id": "home",
+                "slug": "/",
+                "title": "Accueil",
+                "sections": []
+            }]
+        }
+        site = SiteDefinition(**data)
+        assert site.metadata.title == "Test Site"
+        assert len(site.pages) == 1
+
+    def test_hero_section_content(self):
+        """Test HeroSectionContent avec props alignées sur HeroBlock.tsx"""
+        hero = HeroSectionContent(
+            title="Bienvenue",
+            subtitle="Description courte",
+            image="https://example.com/hero.jpg",
+            cta={"text": "En savoir plus", "link": "/about"}
+        )
+        assert hero.title == "Bienvenue"
+        assert hero.cta.link == "/about"
+
+    def test_footer_section_content(self):
+        """Test FooterSectionContent avec props alignées sur FooterBlock.tsx"""
+        footer = FooterSectionContent(
+            copyright="© 2025 Company",
+            links=[{"text": "Privacy", "url": "/privacy"}]
+        )
+        assert footer.copyright == "© 2025 Company"
+        assert footer.links[0].url == "/privacy"
+
+    def test_testimonial_rating_validation(self):
+        """Test que rating doit être entre 1 et 5"""
+        # Valid
+        valid = TestimonialItem(id="1", quote="Great!", author="John", rating=5)
+        assert valid.rating == 5
+        
+        # Invalid - should raise
+        with pytest.raises(ValueError):
+            TestimonialItem(id="2", quote="Bad", author="Jane", rating=6)
+        
+        with pytest.raises(ValueError):
+            TestimonialItem(id="3", quote="Bad", author="Jane", rating=0)
+
+    def test_page_with_empty_sections(self):
+        """Test qu'une page sans sections est valide"""
+        page = SitePage(id="empty", slug="/empty", title="Empty", sections=[])
+        assert len(page.sections) == 0
+```
+
 ---
 
 ## 6. Workflow Git
@@ -763,10 +949,12 @@ Puis crée une **Pull Request** vers `master` avec :
 
 ## 7. Critères d'Acceptation
 
-- [ ] **Frontend :** Tous les fichiers `src/types/blocks/*.ts` créés
+- [ ] **Frontend :** Tous les fichiers `src/types/blocks/*.ts` créés (10 fichiers incluant header.ts)
 - [ ] **Frontend :** `src/types/site-definition.ts` mis à jour avec `BlockType` union
 - [ ] **Frontend :** `src/types/blocks/index.ts` barrel export fonctionnel
-- [ ] **Backend :** `app/schemas/site_definition.py` créé
+- [ ] **Backend :** `app/schemas/site_definition.py` créé avec props alignées sur code existant
+- [ ] **Backend :** Export ajouté dans `app/schemas/__init__.py`
+- [ ] **Backend :** Tests dans `tests/schemas/test_site_definition.py` passent
 - [ ] **TypeScript :** Pas d'erreurs de compilation (`npm run build` ou `tsc --noEmit`)
 - [ ] **Asana :** Toutes les sous-tâches marquées comme complétées
 - [ ] **Git :** PR créée et prête pour review
@@ -798,13 +986,17 @@ Puis crée une **Pull Request** vers `master` avec :
 Avant de soumettre ta PR, vérifie :
 
 - [ ] Tu as créé le dossier `genesis-frontend/src/types/blocks/`
-- [ ] Tu as créé les 9 fichiers de types de blocks
+- [ ] Tu as créé les **10 fichiers** de types de blocks (incluant `header.ts`)
 - [ ] Tu as créé le barrel export `index.ts`
 - [ ] Tu as modifié `site-definition.ts` pour utiliser les nouveaux types
-- [ ] Tu as créé `app/schemas/site_definition.py`
+- [ ] Tu as créé `app/schemas/site_definition.py` avec les **props alignées sur le code existant**
+- [ ] Tu as ajouté l'export dans `app/schemas/__init__.py`
+- [ ] Tu as créé `tests/schemas/test_site_definition.py` et les tests passent
 - [ ] `npm run build` passe sans erreur (si possible)
 - [ ] Tu as mis à jour les sous-tâches Asana en "Completed"
 - [ ] Tu as créé la PR avec un titre clair
+
+> ⚠️ **Rappel :** Les props de `HeroSectionContent` et `FooterSectionContent` doivent être alignées sur les composants React existants (`title`/`subtitle`/`image`/`cta.link` pour Hero, `copyright`/`links`/`url` pour Footer).
 
 ---
 
