@@ -1,1 +1,12 @@
-"""API v1 endpoints"""
+from . import (
+    auth,
+    business,
+    chat,
+    coaching,
+    dependencies,
+    genesis,
+    integrations,
+    modules,
+    sites,
+    users,
+)
