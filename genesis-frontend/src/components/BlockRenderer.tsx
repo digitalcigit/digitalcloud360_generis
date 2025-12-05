@@ -1,42 +1,36 @@
 import { SiteSection } from '@/types/site-definition';
-import HeroBlock from './blocks/HeroBlock';
-import FeaturesBlock from './blocks/FeaturesBlock';
-import FooterBlock from './blocks/FooterBlock';
+import dynamic from 'next/dynamic';
+import { ComponentType } from 'react';
+
+// Import dynamique pour code splitting et éviter de charger tous les blocks
+const blockComponents: Record<string, ComponentType<any>> = {
+    header: dynamic(() => import('./blocks/HeaderBlock')),
+    hero: dynamic(() => import('./blocks/HeroBlock')),
+    about: dynamic(() => import('./blocks/AboutBlock')),
+    services: dynamic(() => import('./blocks/ServicesBlock')),
+    features: dynamic(() => import('./blocks/FeaturesBlock')),
+    testimonials: dynamic(() => import('./blocks/TestimonialsBlock')),
+    contact: dynamic(() => import('./blocks/ContactBlock')),
+    gallery: dynamic(() => import('./blocks/GalleryBlock')),
+    cta: dynamic(() => import('./blocks/CTABlock')),
+    footer: dynamic(() => import('./blocks/FooterBlock')),
+};
 
 interface BlockRendererProps {
     section: SiteSection;
 }
 
 export default function BlockRenderer({ section }: BlockRendererProps) {
-    switch (section.type) {
-        case 'hero':
-            return (
-                <HeroBlock
-                    title={section.content.title}
-                    subtitle={section.content.subtitle}
-                    image={section.content.image}
-                    cta={section.content.cta}
-                />
-            );
+    const BlockComponent = blockComponents[section.type];
 
-        case 'features':
-            return (
-                <FeaturesBlock
-                    title={section.content.title}
-                    features={section.content.features}
-                />
-            );
-
-        case 'footer':
-            return (
-                <FooterBlock
-                    copyright={section.content.copyright}
-                    links={section.content.links}
-                />
-            );
-
-        default:
-            console.warn(`Unknown section type: ${section.type}`);
-            return null;
+    if (!BlockComponent) {
+        console.warn(`Unknown section type: ${section.type}`);
+        return null;
     }
+
+    return (
+        <section id={section.id} className={section.styles?.className}>
+            <BlockComponent {...section.content} />
+        </section>
+    );
 }
