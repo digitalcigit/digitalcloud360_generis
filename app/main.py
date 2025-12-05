@@ -281,6 +281,11 @@ app.include_router(
     tags=["Business Brief"]
 )
 app.include_router(
+    sites.router,
+    prefix=f"{settings.API_V1_STR}/sites",
+    tags=["Sites"]
+)
+app.include_router(
     genesis.router,
     prefix=f"{settings.API_V1_STR}/genesis",
     tags=["Genesis - DC360 Aligned"]
