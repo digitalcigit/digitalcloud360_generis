@@ -4,8 +4,9 @@ Ce module transforme un BusinessBrief (généré par les sub-agents IA) en un
 SiteDefinition JSON utilisable par le Block Renderer frontend.
 """
 
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Union
 from app.models.coaching import BusinessBrief
+from app.schemas.business_brief_data import BusinessBriefData
 from app.schemas.site_definition import SiteDefinition
 from app.services.sector_mappings import get_sector_config, get_sector_colors, get_sector_icons
 import json
@@ -14,7 +15,7 @@ import json
 class BriefToSiteTransformer:
     """Transform a BusinessBrief into a SiteDefinition JSON structure"""
     
-    def transform(self, brief: BusinessBrief) -> Dict[str, Any]:
+    def transform(self, brief: Union[BusinessBrief, BusinessBriefData]) -> Dict[str, Any]:
         """
         Convert a BusinessBrief to a SiteDefinition.
         
