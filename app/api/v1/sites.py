@@ -50,21 +50,28 @@ def _build_business_brief_from_redis(redis_data: Dict[str, Any]) -> BusinessBrie
     """
     Construit un BusinessBriefData depuis les données Redis.
     
-    Structure Redis attendue:
-    - redis_data["business_brief"] : données de base du brief
-    - redis_data["content"]["data"] : résultats ContentSubAgent
-    - redis_data["logo"]["data"] : résultats LogoSubAgent
-    - redis_data["seo"]["data"] : résultats SEOSubAgent
-    - redis_data["template"]["data"] : résultats TemplateSubAgent
+    Supporte deux formats :
+    - Format business.py (HOTFIX): redis_data["content_generation"], redis_data["logo_creation"], etc.
+    - Format legacy sub-agents: redis_data["content"]["data"], redis_data["logo"]["data"], etc.
     """
-    # Données de base (from coaching session)
+    # Données de base - support des deux formats
     brief = redis_data.get("business_brief", {})
     
-    # Résultats sub-agents (structure: {"status": ..., "data": {...}})
-    content_data = redis_data.get("content", {}).get("data", {})
-    logo_data = redis_data.get("logo", {}).get("data", {})
-    seo_data = redis_data.get("seo", {}).get("data", {})
-    template_data = redis_data.get("template", {}).get("data", {})
+    # Si business_brief est un objet Pydantic sérialisé, extraire le dict
+    if isinstance(brief, str):
+        import json
+        try:
+            brief = json.loads(brief)
+        except:
+            brief = {}
+    
+    # Résultats sub-agents - support des deux formats
+    # Format 1 (business.py HOTFIX): content_generation, logo_creation, etc.
+    # Format 2 (legacy): content.data, logo.data, etc.
+    content_data = redis_data.get("content_generation") or redis_data.get("content", {}).get("data", {}) or {}
+    logo_data = redis_data.get("logo_creation") or redis_data.get("logo", {}).get("data", {}) or {}
+    seo_data = redis_data.get("seo_optimization") or redis_data.get("seo", {}).get("data", {}) or {}
+    template_data = redis_data.get("template_selection") or redis_data.get("template", {}).get("data", {}) or {}
     
     # Extraire les services
     services_raw = brief.get("services", [])
