@@ -17,7 +17,33 @@ Le **Block Renderer** est le moteur de rendu frontend qui affiche les sites gén
 |-------|-----------|
 | **Asana** | Task GID `1212242758897911` |
 | **Jira** | [GEN-9](https://digitalcloud360.atlassian.net/browse/GEN-9) |
-| **Dépendance** | GEN-8 ✅ (SiteDefinition Schema complété) |
+| **Dépendances** | GEN-7 ✅, GEN-8 ✅, GEN-10 ✅ (tous complétés) |
+
+### 🚀 API Disponible (GEN-10 Complété)
+
+L'API backend est **opérationnelle**. Le dev peut tester directement avec :
+
+```bash
+# 1. Obtenir un token
+curl -X POST http://localhost:8002/api/v1/auth/token \
+  -d "username=test.po@example.com&password=Mot2Passe!"
+
+# 2. Générer un brief (retourne brief_id)
+curl -X POST http://localhost:8002/api/v1/business/brief/generate \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"coaching_session_id": 123, "session_id": "test", "business_brief": {"business_name": "Test", "sector": "Tech"}}'
+
+# 3. Générer un site (retourne site_id)
+curl -X POST http://localhost:8002/api/v1/sites/generate \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"brief_id": "<BRIEF_ID>"}'
+
+# 4. Récupérer le SiteDefinition JSON
+curl http://localhost:8002/api/v1/sites/<SITE_ID>/preview \
+  -H "Authorization: Bearer <TOKEN>"
+```
 
 ---
 
@@ -98,6 +124,79 @@ switch (section.type) {
 
 Les types TypeScript sont définis dans `src/types/blocks/*.ts` :
 - `HeroSectionContent`, `AboutSectionContent`, `ServicesSectionContent`, etc.
+
+### 📦 Exemple JSON Réel (retourné par l'API)
+
+Voici un exemple **réel** de `SiteDefinition` retourné par `GET /api/v1/sites/{id}/preview` :
+
+```json
+{
+  "metadata": {
+    "title": "TechStartup Dakar",
+    "description": "Solutions tech abordables",
+    "favicon": null,
+    "ogImage": null
+  },
+  "theme": {
+    "colors": {
+      "primary": "#3B82F6",
+      "secondary": "#10B981",
+      "background": "#FFFFFF",
+      "text": "#1F2937"
+    },
+    "fonts": {
+      "heading": "Inter",
+      "body": "Inter"
+    }
+  },
+  "pages": [
+    {
+      "id": "home",
+      "slug": "/",
+      "title": "Accueil",
+      "sections": [
+        {
+          "id": "hero",
+          "type": "hero",
+          "content": {
+            "title": "TechStartup Dakar",
+            "subtitle": "Solutions abordables",
+            "cta": { "text": "Contactez-nous", "link": "#contact" }
+          }
+        },
+        {
+          "id": "about",
+          "type": "about",
+          "content": {
+            "title": "À propos",
+            "description": "Notre mission...",
+            "mission": "Démocratiser l'accès digital",
+            "vision": "Leader tech"
+          }
+        },
+        {
+          "id": "contact",
+          "type": "contact",
+          "content": {
+            "title": "Contactez-nous",
+            "email": "contact@example.com",
+            "phone": "+221 XX XXX XX XX"
+          }
+        },
+        {
+          "id": "footer",
+          "type": "footer",
+          "content": {
+            "copyright": "© 2025 TechStartup Dakar"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+> ⚠️ **Note** : Certains champs peuvent être `null` si non générés par l'IA. Les composants doivent gérer ces cas.
 
 ---
 
