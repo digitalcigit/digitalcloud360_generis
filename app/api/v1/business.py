@@ -99,12 +99,21 @@ async def generate_business_brief(
         final_state = await orchestrator.run(business_brief_data)
 
         # 2. Assemble the final brief
-        brief_id = f"brief_{uuid.uuid4()}"
+        brief_id = uuid.uuid4().int >> 96  # simple int-based id for response schema
+        created_at = datetime.utcnow()
+
         response_data = {
-            "brief_id": brief_id,
-            "user_id": current_user.id,
-            "session_id": request.session_id,
-            "results": final_state
+            "id": brief_id,
+            "coaching_session_id": request.coaching_session_id,
+            "business_brief": request.business_brief,
+            "market_research": final_state.get("market_research"),
+            "content_generation": final_state.get("content_generation"),
+            "logo_creation": final_state.get("logo_creation"),
+            "seo_optimization": final_state.get("seo_optimization"),
+            "template_selection": final_state.get("template_selection"),
+            "overall_confidence": final_state.get("overall_confidence", 0.0),
+            "is_ready_for_website": final_state.get("is_ready_for_website", False),
+            "created_at": created_at,
         }
 
         # 3. Save to Redis Virtual File System
