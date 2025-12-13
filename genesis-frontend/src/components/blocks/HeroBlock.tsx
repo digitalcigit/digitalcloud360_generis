@@ -1,6 +1,7 @@
+import Image from 'next/image';
 import { HeroSectionContent } from '@/types/blocks/hero';
 
-interface HeroBlockProps extends HeroSectionContent { }
+type HeroBlockProps = HeroSectionContent;
 
 export default function HeroBlock({
     title,
@@ -22,10 +23,12 @@ export default function HeroBlock({
             {/* Background Image with Overlay */}
             {image && overlay && (
                 <div className="absolute inset-0 z-0">
-                    <img
+                    <Image
                         src={image}
                         alt={title}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
+                        sizes="100vw"
                     />
                     <div className="absolute inset-0 bg-black/60" />
                 </div>
@@ -63,10 +66,12 @@ export default function HeroBlock({
                     {/* Side Image (only if not overlay) */}
                     {image && !overlay && (
                         <div className="relative h-96 rounded-2xl overflow-hidden shadow-2xl">
-                            <img
+                            <Image
                                 src={image}
                                 alt={title}
-                                className="w-full h-full object-cover"
+                                fill
+                                className="object-cover"
+                                sizes="(min-width: 1024px) 50vw, 100vw"
                             />
                         </div>
                     )}

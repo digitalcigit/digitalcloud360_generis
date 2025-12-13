@@ -1,12 +1,12 @@
+import Image from 'next/image';
 import { GallerySectionContent, GalleryImage } from '@/types/blocks/gallery';
 
-interface GalleryBlockProps extends GallerySectionContent { }
+type GalleryBlockProps = GallerySectionContent;
 
 export default function GalleryBlock({
     title,
     subtitle,
     images,
-    layout = 'grid',
     columns = 3
 }: GalleryBlockProps) {
     const gridCols = {
@@ -46,10 +46,12 @@ export default function GalleryBlock({
 function GalleryItem({ image }: { image: GalleryImage }) {
     const content = (
         <div className="relative group overflow-hidden rounded-lg h-64">
-            <img
+            <Image
                 src={image.src}
                 alt={image.alt}
+                fill
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                sizes="(min-width: 1024px) 25vw, 50vw"
             />
             {image.caption && (
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-end">

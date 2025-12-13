@@ -1,8 +1,9 @@
 import { HeaderSectionContent } from '@/types/blocks/header';
+import Image from 'next/image';
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 
-interface HeaderBlockProps extends HeaderSectionContent { }
+type HeaderBlockProps = HeaderSectionContent;
 
 export default function HeaderBlock({
     logo,
@@ -20,7 +21,14 @@ export default function HeaderBlock({
                     {/* Logo */}
                     <div className="flex-shrink-0 flex items-center">
                         {logo ? (
-                            <img className="h-8 w-auto" src={logo} alt={companyName} />
+                            <Image
+                                src={logo}
+                                alt={companyName}
+                                width={128}
+                                height={32}
+                                className="h-8 w-auto"
+                                priority
+                            />
                         ) : (
                             <span className="text-2xl font-bold text-[var(--color-primary)] font-[family-name:var(--font-heading)]">
                                 {companyName}

@@ -12,7 +12,7 @@ const socialIconMap: Record<string, LucideIcon> = {
     youtube: Youtube,
 };
 
-interface ContactBlockProps extends ContactSectionContent { }
+type ContactBlockProps = ContactSectionContent;
 
 export default function ContactBlock({
     title,

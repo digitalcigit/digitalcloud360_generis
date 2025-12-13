@@ -1,36 +1,59 @@
-import { SiteSection } from '@/types/site-definition';
+import {
+    BlockContentMap,
+    BlockType,
+    SiteSection,
+    SectionStyles,
+    SiteSectionGeneric
+} from '@/types/site-definition';
 import dynamic from 'next/dynamic';
 import { ComponentType } from 'react';
 
-// Import dynamique pour code splitting et éviter de charger tous les blocks
-const blockComponents: Record<string, ComponentType<any>> = {
-    header: dynamic(() => import('./blocks/HeaderBlock')),
-    hero: dynamic(() => import('./blocks/HeroBlock')),
-    about: dynamic(() => import('./blocks/AboutBlock')),
-    services: dynamic(() => import('./blocks/ServicesBlock')),
-    features: dynamic(() => import('./blocks/FeaturesBlock')),
-    testimonials: dynamic(() => import('./blocks/TestimonialsBlock')),
-    contact: dynamic(() => import('./blocks/ContactBlock')),
-    gallery: dynamic(() => import('./blocks/GalleryBlock')),
-    cta: dynamic(() => import('./blocks/CTABlock')),
-    footer: dynamic(() => import('./blocks/FooterBlock')),
+type BlockComponentMap = {
+    [K in BlockType]: ComponentType<BlockContentMap[K]>;
 };
 
+type UnknownSection = {
+    id: string;
+    type: string;
+    content: Record<string, unknown>;
+    styles?: SectionStyles;
+};
+
+// Import dynamique pour code splitting et éviter de charger tous les blocks
+const blockComponents: BlockComponentMap = {
+    header: dynamic<BlockContentMap['header']>(() => import('./blocks/HeaderBlock')),
+    hero: dynamic<BlockContentMap['hero']>(() => import('./blocks/HeroBlock')),
+    about: dynamic<BlockContentMap['about']>(() => import('./blocks/AboutBlock')),
+    services: dynamic<BlockContentMap['services']>(() => import('./blocks/ServicesBlock')),
+    features: dynamic<BlockContentMap['features']>(() => import('./blocks/FeaturesBlock')),
+    testimonials: dynamic<BlockContentMap['testimonials']>(() => import('./blocks/TestimonialsBlock')),
+    contact: dynamic<BlockContentMap['contact']>(() => import('./blocks/ContactBlock')),
+    gallery: dynamic<BlockContentMap['gallery']>(() => import('./blocks/GalleryBlock')),
+    cta: dynamic<BlockContentMap['cta']>(() => import('./blocks/CTABlock')),
+    footer: dynamic<BlockContentMap['footer']>(() => import('./blocks/FooterBlock')),
+};
+
+const isKnownSection = (section: SiteSection | UnknownSection): section is SiteSection =>
+    (section.type as string) in blockComponents;
+
 interface BlockRendererProps {
-    section: SiteSection;
+    section: SiteSection | UnknownSection;
 }
 
 export default function BlockRenderer({ section }: BlockRendererProps) {
-    const BlockComponent = blockComponents[section.type];
-
-    if (!BlockComponent) {
+    if (!isKnownSection(section)) {
         console.warn(`Unknown section type: ${section.type}`);
         return null;
     }
 
+    return renderKnownSection(section);
+}
+
+function renderKnownSection<T extends BlockType>(section: SiteSectionGeneric<T>) {
+    const BlockComponent = blockComponents[section.type] as ComponentType<BlockContentMap[T]>;
     return (
         <section id={section.id} className={section.styles?.className}>
-            <BlockComponent {...section.content} />
+            <BlockComponent {...(section.content as BlockContentMap[T])} />
         </section>
     );
 }

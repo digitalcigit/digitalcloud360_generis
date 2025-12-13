@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 
 const DC360_API_URL = process.env.DC360_API_URL || 'http://web:8000/api';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
     const cookieStore = await cookies();
     const token = cookieStore.get('my-app-auth')?.value 
                 || cookieStore.get('access_token')?.value;

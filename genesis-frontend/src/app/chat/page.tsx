@@ -4,11 +4,12 @@ import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { redirect } from 'next/navigation';
 import ChatInterface from '@/components/ChatInterface';
+import { SiteDefinition } from '@/types/site-definition';
 
 export default function ChatPage() {
     const { user, isLoading, isAuthenticated } = useAuth();
     const [briefGenerated, setBriefGenerated] = useState(false);
-    const [siteData, setSiteData] = useState(null);
+    const [siteData, setSiteData] = useState<SiteDefinition | null>(null);
     
     if (isLoading) {
         return <LoadingSpinner />;
@@ -41,7 +42,6 @@ export default function ChatPage() {
                 {/* Chat Panel */}
                 <div className="w-1/2 border-r border-gray-700">
                     <ChatInterface 
-                        userId={user?.id}
                         onBriefGenerated={(data) => {
                             setBriefGenerated(true);
                             setSiteData(data);
@@ -76,7 +76,8 @@ function LoadingSpinner() {
     );
 }
 
-function SitePreview({ data }: { data: any }) {
+function SitePreview({ data }: { data: SiteDefinition }) {
+    void data;
     return (
         <div className="p-8">
             <div className="bg-gray-800 rounded-lg p-6">

@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { FooterSectionContent } from '@/types/blocks/footer';
 import { Facebook, Twitter, Instagram, Linkedin, Youtube, MapPin } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
@@ -11,7 +12,7 @@ const socialIconMap: Record<string, LucideIcon> = {
     youtube: Youtube,
 };
 
-interface FooterBlockProps extends FooterSectionContent { }
+type FooterBlockProps = FooterSectionContent;
 
 export default function FooterBlock({
     copyright,
@@ -29,7 +30,13 @@ export default function FooterBlock({
                     {/* Brand Column */}
                     <div className="space-y-4">
                         {logo ? (
-                            <img src={logo} alt={companyName} className="h-8 w-auto brightness-0 invert" />
+                            <Image
+                                src={logo}
+                                alt={companyName ?? 'Logo de la marque'}
+                                width={128}
+                                height={32}
+                                className="h-8 w-auto brightness-0 invert"
+                            />
                         ) : (
                             <span className="text-2xl font-bold font-[family-name:var(--font-heading)]">{companyName}</span>
                         )}

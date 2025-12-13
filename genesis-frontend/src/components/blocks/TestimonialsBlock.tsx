@@ -1,7 +1,8 @@
 import { TestimonialsSectionContent, TestimonialItem } from '@/types/blocks/testimonials';
+import Image from 'next/image';
 import { Star } from 'lucide-react';
 
-interface TestimonialsBlockProps extends TestimonialsSectionContent { }
+type TestimonialsBlockProps = TestimonialsSectionContent;
 
 export default function TestimonialsBlock({
     title,
@@ -60,11 +61,15 @@ function TestimonialCard({ testimonial }: { testimonial: TestimonialItem }) {
             {/* Author */}
             <div className="flex items-center">
                 {testimonial.avatar && (
-                    <img
-                        src={testimonial.avatar}
-                        alt={testimonial.author}
-                        className="w-12 h-12 rounded-full object-cover mr-4"
-                    />
+                    <div className="relative w-12 h-12 mr-4">
+                        <Image
+                            src={testimonial.avatar}
+                            alt={testimonial.author}
+                            fill
+                            sizes="48px"
+                            className="rounded-full object-cover"
+                        />
+                    </div>
                 )}
                 <div>
                     <p className="font-semibold text-[var(--color-text)]">

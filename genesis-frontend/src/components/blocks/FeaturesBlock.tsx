@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { FeaturesSectionContent, FeatureItem } from '@/types/blocks/features';
 import { Star, Zap, Shield, Heart, Users, Settings, Globe, Mail, Phone } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
@@ -15,7 +16,7 @@ const iconMap: Record<string, LucideIcon> = {
     phone: Phone,
 };
 
-interface FeaturesBlockProps extends FeaturesSectionContent { }
+type FeaturesBlockProps = FeaturesSectionContent;
 
 export default function FeaturesBlock({ title, subtitle, features, layout = 'grid' }: FeaturesBlockProps) {
     return (
@@ -58,11 +59,15 @@ function FeatureCard({ feature }: { feature: FeatureItem }) {
                 </div>
             )}
             {feature.image && (
-                <img
-                    src={feature.image}
-                    alt={feature.title}
-                    className="w-full h-48 object-cover rounded-lg mb-4"
-                />
+                <div className="w-full h-48 relative rounded-lg mb-4">
+                    <Image
+                        src={feature.image}
+                        alt={feature.title}
+                        fill
+                        className="object-cover rounded-lg"
+                        sizes="(min-width: 1024px) 33vw, 100vw"
+                    />
+                </div>
             )}
             <h3 className="text-xl font-semibold text-[var(--color-text)] mb-3">
                 {feature.title}

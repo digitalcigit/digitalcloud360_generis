@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { SiteDefinition } from '@/types/site-definition';
 
 interface Message {
     id: string;
@@ -10,11 +11,10 @@ interface Message {
 }
 
 interface ChatInterfaceProps {
-    userId?: number;
-    onBriefGenerated: (data: any) => void;
+    onBriefGenerated: (data: SiteDefinition) => void;
 }
 
-export default function ChatInterface({ userId, onBriefGenerated }: ChatInterfaceProps) {
+export default function ChatInterface({ onBriefGenerated }: ChatInterfaceProps) {
     const [messages, setMessages] = useState<Message[]>([
         {
             id: '1',

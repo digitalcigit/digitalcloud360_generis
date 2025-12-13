@@ -1,6 +1,7 @@
+import Image from 'next/image';
 import { AboutSectionContent } from '@/types/blocks/about';
 
-interface AboutBlockProps extends AboutSectionContent { }
+type AboutBlockProps = AboutSectionContent;
 
 export default function AboutBlock({
     title,
@@ -47,10 +48,12 @@ export default function AboutBlock({
                     {/* Image */}
                     {image && (
                         <div className="relative h-96 rounded-2xl overflow-hidden shadow-xl">
-                            <img
+                            <Image
                                 src={image}
                                 alt={title}
-                                className="w-full h-full object-cover"
+                                fill
+                                className="object-cover"
+                                sizes="(min-width: 1024px) 50vw, 100vw"
                             />
                         </div>
                     )}

@@ -112,7 +112,7 @@ describe('BlockRenderer Smoke Tests', () => {
         const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => { });
         const unknownSection = {
             id: 'unknown-1',
-            type: 'unknown-type' as any,
+            type: 'unknown-type',
             content: {}
         };
 

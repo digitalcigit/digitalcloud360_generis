@@ -1,4 +1,5 @@
 import { ServicesSectionContent, ServiceItem } from '@/types/blocks/services';
+import Image from 'next/image';
 import { Star, Zap, Shield, Heart, Users, Settings, Globe, Mail, Phone } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 
@@ -15,7 +16,7 @@ const iconMap: Record<string, LucideIcon> = {
     phone: Phone,
 };
 
-interface ServicesBlockProps extends ServicesSectionContent { }
+type ServicesBlockProps = ServicesSectionContent;
 
 export default function ServicesBlock({
     title,
@@ -63,11 +64,16 @@ function ServiceCard({ service }: { service: ServiceItem }) {
                 </div>
             )}
             {service.image && (
-                <img
-                    src={service.image}
-                    alt={service.title}
-                    className="w-full h-48 object-cover rounded-lg mb-4"
-                />
+                <div className="w-full h-48 relative rounded-lg mb-4 overflow-hidden">
+                    <Image
+                        src={service.image}
+                        alt={service.title}
+                        fill
+                        sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                        className="object-cover"
+                        priority={false}
+                    />
+                </div>
             )}
             <h3 className="text-xl font-semibold text-[var(--color-text)] mb-2">
                 {service.title}

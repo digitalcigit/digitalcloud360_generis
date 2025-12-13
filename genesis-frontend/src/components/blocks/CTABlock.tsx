@@ -1,6 +1,6 @@
 import { CTASectionContent } from '@/types/blocks/cta';
 
-interface CTABlockProps extends CTASectionContent { }
+type CTABlockProps = CTASectionContent;
 
 export default function CTABlock({
     headline,
