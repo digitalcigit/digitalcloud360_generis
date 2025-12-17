@@ -9,7 +9,7 @@ import BlockRenderer from '@/components/BlockRenderer';
 
 function SiteContent() {
     const params = useParams();
-    const siteId = parseInt(params.id as string);
+    const siteId = params.id as string;
     const token = useAuthStore((state) => state.token);
     const [site, setSite] = useState<SiteDefinition | null>(null);
     const [loading, setLoading] = useState(true);
@@ -25,7 +25,7 @@ function SiteContent() {
 
             try {
                 const siteData = await getSite(siteId, token);
-                setSite(siteData);
+                setSite(siteData.site_definition);
             } catch (err) {
                 setError('Impossible de charger le site');
                 console.error(err);

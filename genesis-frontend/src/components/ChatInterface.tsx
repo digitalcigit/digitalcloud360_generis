@@ -2,6 +2,13 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { SiteDefinition } from '@/types/site-definition';
+import { generateSite } from '@/utils/api';
+import { useAuthStore } from '@/stores/useAuthStore';
+
+export interface BriefGeneratedPayload {
+    siteId: string;
+    siteDefinition: SiteDefinition;
+}
 
 interface Message {
     id: string;
@@ -11,10 +18,24 @@ interface Message {
 }
 
 interface ChatInterfaceProps {
-    onBriefGenerated: (data: SiteDefinition) => void;
+    onBriefGenerated: (data: BriefGeneratedPayload) => void;
+}
+
+function getCookieValue(name: string): string | null {
+    if (typeof document === 'undefined') return null;
+    const match = document.cookie
+        .split(';')
+        .map((c) => c.trim())
+        .find((c) => c.startsWith(`${name}=`));
+
+    if (!match) return null;
+    return decodeURIComponent(match.substring(name.length + 1));
 }
 
 export default function ChatInterface({ onBriefGenerated }: ChatInterfaceProps) {
+    const storeToken = useAuthStore((state) => state.token);
+    const token = storeToken || getCookieValue('access_token');
+
     const [messages, setMessages] = useState<Message[]>([
         {
             id: '1',
@@ -37,6 +58,16 @@ export default function ChatInterface({ onBriefGenerated }: ChatInterfaceProps) 
     
     const sendMessage = async () => {
         if (!input.trim() || isLoading) return;
+
+        if (!token) {
+            setMessages(prev => [...prev, {
+                id: (Date.now() + 1).toString(),
+                role: 'assistant',
+                content: "Vous n'êtes pas authentifié. Veuillez vous reconnecter.",
+                timestamp: new Date()
+            }]);
+            return;
+        }
         
         const userMessage: Message = {
             id: Date.now().toString(),
@@ -52,7 +83,10 @@ export default function ChatInterface({ onBriefGenerated }: ChatInterfaceProps) 
         try {
             const response = await fetch('/api/chat', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({
                     message: input,
                     // userId supprimé : Le backend extrait l'identité du JWT (Security Fix)
@@ -72,8 +106,12 @@ export default function ChatInterface({ onBriefGenerated }: ChatInterfaceProps) 
             setMessages(prev => [...prev, assistantMessage]);
             
             // Si un brief a été généré
-            if (data.briefGenerated && data.siteData) {
-                onBriefGenerated(data.siteData);
+            if (data.briefGenerated && data.briefId) {
+                const generated = await generateSite(data.briefId, token);
+                onBriefGenerated({
+                    siteId: generated.site_id,
+                    siteDefinition: generated.site_definition,
+                });
             }
             
         } catch (error) {

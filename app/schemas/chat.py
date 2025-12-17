@@ -35,4 +35,5 @@ class ChatResponse(BaseModel):
     """Chat endpoint response schema"""
     response: str
     brief_generated: bool = False
+    brief_id: Optional[str] = None
     site_data: Optional[dict[str, Any]] = None

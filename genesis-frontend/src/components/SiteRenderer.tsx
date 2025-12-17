@@ -1,6 +1,6 @@
 import { SiteDefinition } from '@/types/site-definition';
-import PageRenderer from './PageRenderer';
-import ThemeProvider from './ThemeProvider';
+import PageRenderer from '@/components/PageRenderer';
+import ThemeProvider from '@/components/ThemeProvider';
 
 interface SiteRendererProps {
     site: SiteDefinition;

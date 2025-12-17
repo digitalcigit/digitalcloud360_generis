@@ -3,13 +3,17 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { redirect } from 'next/navigation';
-import ChatInterface from '@/components/ChatInterface';
+import ChatInterface, { type BriefGeneratedPayload } from '@/components/ChatInterface';
 import { SiteDefinition } from '@/types/site-definition';
+import SiteRenderer from '@/components/SiteRenderer';
+import { useRouter } from 'next/navigation';
 
 export default function ChatPage() {
     const { user, isLoading, isAuthenticated } = useAuth();
     const [briefGenerated, setBriefGenerated] = useState(false);
     const [siteData, setSiteData] = useState<SiteDefinition | null>(null);
+    const [siteId, setSiteId] = useState<string | null>(null);
+    const router = useRouter();
     
     if (isLoading) {
         return <LoadingSpinner />;
@@ -42,9 +46,10 @@ export default function ChatPage() {
                 {/* Chat Panel */}
                 <div className="w-1/2 border-r border-gray-700">
                     <ChatInterface 
-                        onBriefGenerated={(data) => {
+                        onBriefGenerated={(data: BriefGeneratedPayload) => {
                             setBriefGenerated(true);
-                            setSiteData(data);
+                            setSiteId(data.siteId);
+                            setSiteData(data.siteDefinition);
                         }}
                     />
                 </div>
@@ -52,7 +57,11 @@ export default function ChatPage() {
                 {/* Preview Panel */}
                 <div className="w-1/2 bg-gray-950">
                     {briefGenerated && siteData ? (
-                        <SitePreview data={siteData} />
+                        <SitePreview
+                            data={siteData}
+                            onOpenPreview={siteId ? () => router.push(`/preview/${siteId}`) : undefined}
+                            canOpenPreview={!!siteId}
+                        />
                     ) : (
                         <div className="flex items-center justify-center h-full text-gray-500">
                             <div className="text-center">
@@ -76,18 +85,38 @@ function LoadingSpinner() {
     );
 }
 
-function SitePreview({ data }: { data: SiteDefinition }) {
+function SitePreview({
+    data,
+    onOpenPreview,
+    canOpenPreview,
+}: {
+    data: SiteDefinition;
+    onOpenPreview?: () => void;
+    canOpenPreview: boolean;
+}) {
     void data;
     return (
-        <div className="p-8">
-            <div className="bg-gray-800 rounded-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">🎉 Votre site est prêt !</h2>
-                <p className="text-gray-300 mb-4">
-                    Genesis a créé votre site web à partir de vos informations.
-                </p>
-                <button className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-lg">
-                    Voir mon site
-                </button>
+        <div className="h-full overflow-auto">
+            <div className="border-b border-gray-800 bg-gray-900 p-4">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h2 className="text-base font-semibold">🎉 Votre site est prêt !</h2>
+                        <p className="text-sm text-gray-300">Genesis a créé votre site web à partir de vos informations.</p>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={onOpenPreview}
+                        disabled={!canOpenPreview || !onOpenPreview}
+                        className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg"
+                    >
+                        Voir mon site
+                    </button>
+                </div>
+            </div>
+
+            <div className="bg-white text-black">
+                <SiteRenderer site={data} />
             </div>
         </div>
     );

@@ -1,3 +1,4 @@
+import { describe, expect, it, jest } from '@jest/globals';
 import { render } from '@testing-library/react';
 import BlockRenderer from '@/components/BlockRenderer';
 import { SiteSection } from '@/types/site-definition';
@@ -117,7 +118,7 @@ describe('BlockRenderer Smoke Tests', () => {
         };
 
         const { container } = render(<BlockRenderer section={unknownSection} />);
-        expect(container).toBeEmptyDOMElement();
+        expect(container.innerHTML).toBe('');
         expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Unknown section type'));
         consoleSpy.mockRestore();
     });
