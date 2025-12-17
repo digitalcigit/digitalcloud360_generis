@@ -13,6 +13,21 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         const { message, history } = body;
+
+        const conversation_history = Array.isArray(history)
+            ? history
+                  .filter((m) => m && typeof m === 'object')
+                  .map((m) => ({
+                      role: (m as { role?: unknown }).role,
+                      content: (m as { content?: unknown }).content,
+                  }))
+                  .filter(
+                      (m): m is { role: 'user' | 'assistant' | 'system'; content: string } =>
+                          (m.role === 'user' || m.role === 'assistant' || m.role === 'system') &&
+                          typeof m.content === 'string' &&
+                          m.content.trim().length > 0
+                  )
+            : [];
         
         // Appeler le backend Genesis avec propagation du token
         const response = await fetch(`${GENESIS_API_URL}/api/v1/chat/`, {
@@ -24,7 +39,7 @@ export async function POST(request: NextRequest) {
             body: JSON.stringify({
                 // user_id supprimé : Le backend décode l'identité depuis le JWT (Security Rule #1)
                 message,
-                conversation_history: history
+                conversation_history
             })
         });
         
@@ -37,6 +52,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
             response: data.response || data.message,
             briefGenerated: data.brief_generated || false,
+            briefId: data.brief_id || null,
             siteData: data.site_data || null
         });
         
