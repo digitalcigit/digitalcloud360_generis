@@ -3,22 +3,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getSitePreview } from '@/utils/api';
+import { getCookieValue, isValidSiteId } from '@/utils/cookies';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { SiteDefinition } from '@/types/site-definition';
 import SiteRenderer from '@/components/SiteRenderer';
 import PreviewToolbar, { ViewportSize } from '@/components/PreviewToolbar';
 import SiteRendererSkeleton from '@/components/SiteRendererSkeleton';
-
-function getCookieValue(name: string): string | null {
-    if (typeof document === 'undefined') return null;
-    const match = document.cookie
-        .split(';')
-        .map((c) => c.trim())
-        .find((c) => c.startsWith(`${name}=`));
-
-    if (!match) return null;
-    return decodeURIComponent(match.substring(name.length + 1));
-}
 
 export default function PreviewPage() {
     const params = useParams();
@@ -36,6 +26,13 @@ export default function PreviewPage() {
 
     useEffect(() => {
         async function fetchPreview() {
+            // SECURITY: Validate siteId format before API call
+            if (!isValidSiteId(siteId)) {
+                setError('ID de site invalide');
+                setLoading(false);
+                return;
+            }
+
             if (!token) {
                 setError('Non authentifié');
                 setLoading(false);
@@ -46,7 +43,7 @@ export default function PreviewPage() {
                 const siteDefinition = await getSitePreview(siteId, token);
                 setSite(siteDefinition);
             } catch (err) {
-                console.error(err);
+                console.error('Preview fetch error:', err);
                 setError('Impossible de charger le site');
             } finally {
                 setLoading(false);

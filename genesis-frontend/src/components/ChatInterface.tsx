@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { SiteDefinition } from '@/types/site-definition';
 import { generateSite } from '@/utils/api';
+import { getCookieValue } from '@/utils/cookies';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 export interface BriefGeneratedPayload {
@@ -19,17 +20,6 @@ interface Message {
 
 interface ChatInterfaceProps {
     onBriefGenerated: (data: BriefGeneratedPayload) => void;
-}
-
-function getCookieValue(name: string): string | null {
-    if (typeof document === 'undefined') return null;
-    const match = document.cookie
-        .split(';')
-        .map((c) => c.trim())
-        .find((c) => c.startsWith(`${name}=`));
-
-    if (!match) return null;
-    return decodeURIComponent(match.substring(name.length + 1));
 }
 
 export default function ChatInterface({ onBriefGenerated }: ChatInterfaceProps) {
