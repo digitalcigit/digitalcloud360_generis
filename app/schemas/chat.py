@@ -37,3 +37,7 @@ class ChatResponse(BaseModel):
     brief_generated: bool = False
     brief_id: Optional[str] = None
     site_data: Optional[dict[str, Any]] = None
+    
+    # New fields for orchestration transparency
+    orchestration_confidence: Optional[float] = None
+    agents_status: Optional[dict[str, Any]] = None
