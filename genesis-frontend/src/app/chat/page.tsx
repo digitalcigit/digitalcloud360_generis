@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { redirect } from 'next/navigation';
 import ChatInterface, { type BriefGeneratedPayload } from '@/components/ChatInterface';
@@ -15,12 +15,18 @@ export default function ChatPage() {
     const [siteId, setSiteId] = useState<string | null>(null);
     const router = useRouter();
     
+    useEffect(() => {
+        if (!isLoading && !isAuthenticated) {
+            router.push('/');
+        }
+    }, [isLoading, isAuthenticated, router]);
+    
     if (isLoading) {
         return <LoadingSpinner />;
     }
     
     if (!isAuthenticated) {
-        redirect('/');
+        return null;
     }
     
     return (

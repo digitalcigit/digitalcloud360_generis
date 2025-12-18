@@ -57,6 +57,45 @@ services:
       - genesis-ai-network
 
   # =============================================================================
+  # Genesis AI Test API Server (pour E2E et Frontend)
+  # =============================================================================
+  genesis-test-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: genesis-test-server
+    environment:
+      - TESTING_MODE=true
+      - ENVIRONMENT=testing_docker
+      - TEST_PROFILE=docker
+      - DEBUG=true
+      - TEST_DATABASE_URL=postgresql+asyncpg://test_user:test_password@test-db:5432/test_db
+      - DATABASE_URL=postgresql+asyncpg://test_user:test_password@test-db:5432/test_db
+      - REDIS_URL=redis://redis:6379/0
+      - STRICT_HEALTH_CHECKS=false
+      - VALIDATE_EXTERNAL_APIS=false
+      - LOG_LEVEL=DEBUG
+      - OPENAI_API_KEY=sk-test-openai-development-key
+      - ANTHROPIC_API_KEY=sk-ant-test-anthropic-development-key
+      - TAVILY_API_KEY=tvly-test-tavily-development-key
+      - DIGITALCLOUD360_SERVICE_SECRET=test-service-secret-genesis-ai
+    depends_on:
+      test-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./:/app
+      - ./logs/test:/app/logs
+    networks:
+      - genesis-ai-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # =============================================================================
   # Services Tests Spécialisés
   # =============================================================================
   
@@ -161,6 +200,86 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+
+  # =============================================================================
+  # Frontend pour Tests E2E
+  # =============================================================================
+  frontend-test:
+    build:
+      context: ./genesis-frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://genesis-test-server:8000/api/v1
+        NEXT_PUBLIC_DC360_URL: http://frontend-test:3000
+    container_name: frontend-test
+    environment:
+      - DC360_API_URL=http://genesis-test-server:8000/api
+      - GENESIS_API_URL=http://genesis-test-server:8000
+      - NODE_ENV=production
+    depends_on:
+      genesis-test-server:
+        condition: service_healthy
+    networks:
+      - genesis-ai-network
+    ports:
+      - "3000:3000"
+
+  # =============================================================================
+  # Playwright E2E Tests
+  # =============================================================================
+  e2e-tests:
+    image: mcr.microsoft.com/playwright:v1.57.0-jammy
+    container_name: genesis-e2e-tests
+    working_dir: /app
+    environment:
+      PLAYWRIGHT_BASE_URL: "http://frontend-test:3000"
+      GENESIS_API_URL: "http://genesis-test-server:8000"
+      CI: "true"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    command: >
+      bash -c '
+        echo " Playwright E2E Tests - Genesis Frontend" &&
+        echo "==========================================" &&
+        echo "Base URL: $$PLAYWRIGHT_BASE_URL" &&
+        echo "Genesis API: $$GENESIS_API_URL" &&
+        echo "" &&
+        
+        echo " Waiting for services to be ready..." &&
+        apt-get update && apt-get install -y curl &&
+        
+        echo "Checking Genesis API ($$GENESIS_API_URL/health)..." &&
+        until curl -s -f "$$GENESIS_API_URL/health" > /dev/null; do
+          echo "Waiting for Genesis API..."
+          sleep 5
+        done &&
+        echo " Genesis API is ready!" &&
+        
+        echo "Checking Frontend ($$PLAYWRIGHT_BASE_URL)..." &&
+        until curl -s -f "$$PLAYWRIGHT_BASE_URL" > /dev/null; do
+          echo "Waiting for Frontend..."
+          sleep 5
+        done &&
+        echo " Frontend is ready!" &&
+        
+        echo "" &&
+        echo " Installing dependencies..." &&
+        npm install &&
+        echo "" &&
+        echo " Running E2E tests (Chromium only)..." &&
+        npx playwright test --project=chromium --reporter=list,html
+      '
+    depends_on:
+      - frontend-test
+      - genesis-test-server
+      - test-db
+      - redis
+    volumes:
+      - ./genesis-frontend:/app
+      - /app/node_modules
+    networks:
+      - genesis-ai-network
 
 # =============================================================================
 # Volumes pour Tests (temporaires)

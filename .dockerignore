@@ -5,3 +5,25 @@ __pycache__/
 .git/
 docs/
 .pytest_cache/
+
+# Node / Frontend
+node_modules/
+genesis-frontend/node_modules/
+.next/
+genesis-frontend/.next/
+dist/
+build/
+coverage/
+
+# Logs & Tests
+logs/
+*.log
+test-results/
+playwright-report/
+blob-report/
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -33,11 +33,18 @@ async def lifespan(app: FastAPI):
     
     # Initialize database (skip if SKIP_DB_INIT=true for manual testing)
     skip_db_init = os.getenv("SKIP_DB_INIT", "false").lower() == "true"
+    logger.info(f"DB Init Config: Environment={settings.ENVIRONMENT}, Skip={skip_db_init}, DB_URL={settings.DATABASE_URL.split('@')[-1] if settings.DATABASE_URL else 'None'}")
+    
     if settings.ENVIRONMENT != "testing" and not skip_db_init:
         try:
+            logger.info("Attempting to create database tables...")
             await create_tables()
-            logger.info("Database tables created")
+            logger.info("Database tables created successfully")
         except Exception as e:
+            logger.error("Database initialization FAILED", error=str(e))
+            # In testing_docker, we want to know if this fails
+            if settings.ENVIRONMENT == "testing_docker":
+                raise e
             logger.warning("Database initialization skipped", error=str(e))
 
     # Initialize Redis connection

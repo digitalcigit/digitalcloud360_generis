@@ -30,6 +30,9 @@ async def create_tables():
     import app.models.user
     import app.models.business
     import app.models.coaching
+    
+    logger.info(f"Registered tables: {list(Base.metadata.tables.keys())}")
+    
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     logger.info("Database tables created")
