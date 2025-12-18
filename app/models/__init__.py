@@ -4,6 +4,7 @@ from .base import Base
 from .user import User, UserProfile
 from .coaching import CoachingSession, CoachingStep, BusinessBrief
 from .business import Business, BusinessContext
+from .embedding import UserEmbedding
 
 __all__ = [
     "Base",
@@ -13,5 +14,6 @@ __all__ = [
     "CoachingStep", 
     "BusinessBrief",
     "Business",
-    "BusinessContext"
+    "BusinessContext",
+    "UserEmbedding"
 ]

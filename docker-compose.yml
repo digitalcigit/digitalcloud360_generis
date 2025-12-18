@@ -44,7 +44,7 @@ services:
   # PostgreSQL Database Dédiée
   # =============================================================================
   postgres:
-    image: postgres:15-alpine
+    image: pgvector/pgvector:pg15
     container_name: postgres
     restart: unless-stopped
     environment:
@@ -89,7 +89,7 @@ services:
   # Test Database
   # =============================================================================
   test-db:
-    image: postgres:15-alpine
+    image: pgvector/pgvector:pg15
     container_name: test-db
     restart: unless-stopped
     environment:
