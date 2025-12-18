@@ -153,9 +153,12 @@ async def chat_endpoint(
             brief_generated=False
         )
 
+    except HTTPException:
+        raise  # Re-raise HTTP exceptions as-is
     except Exception as e:
         logger.error(f"Error processing chat request: {str(e)}", exc_info=True)
+        # SECURITY: Ne pas exposer les détails d'erreur au client
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Une erreur interne est survenue: {str(e)}"
+            detail="Une erreur interne est survenue. Veuillez réessayer."
         )
