@@ -6,6 +6,7 @@ from . import (
     dependencies,
     genesis,
     integrations,
+    memory,
     modules,
     sites,
     users,

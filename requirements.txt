@@ -20,6 +20,7 @@ sqlalchemy
 alembic
 asyncpg==0.29.0
 aiosqlite
+pgvector>=0.2.0
 
 # Redis & Caching
 redis[hiredis]

@@ -16,6 +16,7 @@ class User(BaseModel):
     # Relationship to profile
     profile = relationship("UserProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
     coaching_sessions = relationship("CoachingSession", back_populates="user", cascade="all, delete-orphan")
+    embeddings = relationship("UserEmbedding", back_populates="user", cascade="all, delete-orphan")
 
 class UserProfile(BaseModel):
     """Extended user profile for Genesis AI coaching"""

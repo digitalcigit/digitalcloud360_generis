@@ -9,6 +9,7 @@ from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from asgi_lifespan import LifespanManager
 
+from sqlalchemy import text
 from app.main import app
 from app.config.settings import settings, Settings
 from app.config.database import get_db
