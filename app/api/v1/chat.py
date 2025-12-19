@@ -12,9 +12,11 @@ import uuid
 from typing import Dict, Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.api.v1.dependencies import get_current_user, get_redis_vfs, get_orchestrator
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.api.v1.dependencies import get_current_user, get_redis_vfs, get_orchestrator, get_db
 from app.core.integrations.redis_fs import RedisVirtualFileSystem
 from app.core.orchestration.langgraph_orchestrator import LangGraphOrchestrator
+from app.core.memory.vector_store import VectorStore
 from app.services.transformer import BriefToSiteTransformer
 from app.models.user import User
 from app.schemas.chat import ChatRequest, ChatResponse
@@ -22,6 +24,7 @@ from app.utils.logger import logger
 
 router = APIRouter()
 transformer = BriefToSiteTransformer()
+vector_store = VectorStore()
 
 def extract_business_context(message: str) -> Dict[str, Any]:
     """
@@ -46,6 +49,7 @@ async def chat_endpoint(
     current_user: User = Depends(get_current_user),  # ✅ SECURITY: Source of Truth
     redis_fs: RedisVirtualFileSystem = Depends(get_redis_vfs),
     orchestrator: LangGraphOrchestrator = Depends(get_orchestrator),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Secure Chat Endpoint.
@@ -138,6 +142,22 @@ async def chat_endpoint(
                 else:
                     status_code = 'pending'
                 agents_status[agent_name] = status_code
+
+            # 6. Stocker l'embedding pour mémoire sémantique (GEN-16)
+            try:
+                text_to_embed = f"{brief_adapter.business_name} - {brief_adapter.sector} - {brief_adapter.mission[:200] if brief_adapter.mission else ''}"
+                template_used = site_definition.get('template', {}).get('id', 'default') if isinstance(site_definition, dict) else 'default'
+                await vector_store.store_embedding(
+                    db=db,
+                    user_id=current_user.id,
+                    brief_id=brief_id,
+                    text=text_to_embed,
+                    embedding_type="brief",
+                    metadata={"sector": brief_adapter.sector, "template": template_used}
+                )
+                logger.info(f"Stored embedding for brief_id={brief_id}")
+            except Exception as embed_error:
+                logger.warning(f"Failed to store embedding (non-blocking): {embed_error}")
 
             return ChatResponse(
                 response=f"J'ai analysé votre demande pour '{brief_adapter.business_name}'. Mes agents ont travaillé sur votre projet (Confiance: {result_state.get('overall_confidence', 0):.2f}). Voici le résultat préliminaire.",

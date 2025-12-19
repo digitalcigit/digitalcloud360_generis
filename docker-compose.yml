@@ -150,10 +150,6 @@ services:
       - NEXT_PUBLIC_API_URL=http://localhost:8002/api/v1
     depends_on:
       - genesis-api
-    volumes:
-      - ./genesis-frontend:/app
-      - /app/node_modules
-      - /app/.next
     networks:
       - genesis-ai-network
 
