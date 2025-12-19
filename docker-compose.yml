@@ -140,7 +140,7 @@ services:
     container_name: genesis-frontend
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3002:3000"
     environment:
       # DC360 Hub
       - DC360_API_URL=http://web:8000/api
