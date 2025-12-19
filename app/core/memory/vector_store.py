@@ -137,7 +137,7 @@ class VectorStore:
         ))
         
         params = {
-            "query_embedding": str(query_embedding),
+            "query_embedding": json.dumps(query_embedding),
             "threshold": threshold,
             "limit": limit
         }

@@ -18,7 +18,11 @@ class SimilarSearchRequest(BaseModel):
     query: str = Field(..., min_length=1, max_length=2000)
     limit: int = Field(default=5, ge=1, le=20)
     threshold: float = Field(default=0.7, ge=0.0, le=1.0)
-    include_all_users: bool = Field(default=False)
+    include_all_users: bool = Field(
+        default=False,
+        description="Si True, recherche dans TOUS les briefs (pour recommandations anonymisées). "
+                    "Par défaut False = recherche limitée à l'utilisateur courant."
+    )
     
     model_config = ConfigDict(extra="forbid")
 

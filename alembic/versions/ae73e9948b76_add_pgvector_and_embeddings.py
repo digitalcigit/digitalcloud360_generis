@@ -42,9 +42,18 @@ def upgrade() -> None:
     op.create_index(op.f('ix_user_embeddings_brief_id'), 'user_embeddings', ['brief_id'], unique=False)
     op.create_index(op.f('ix_user_embeddings_id'), 'user_embeddings', ['id'], unique=False)
     op.create_index(op.f('ix_user_embeddings_user_id'), 'user_embeddings', ['user_id'], unique=False)
+    
+    # Create HNSW index for fast vector similarity search
+    op.execute('''
+        CREATE INDEX ix_user_embeddings_embedding 
+        ON user_embeddings 
+        USING hnsw (embedding vector_cosine_ops)
+    ''')
+
     op.drop_column('user_profiles', 'experience_level')
     op.drop_column('user_profiles', 'business_stage')
     op.drop_column('user_profiles', 'sector')
+    op.execute('DROP INDEX IF EXISTS ix_user_embeddings_embedding')
     op.add_column('users', sa.Column('name', sa.String(), nullable=False))
     # ### end Alembic commands ###
 
