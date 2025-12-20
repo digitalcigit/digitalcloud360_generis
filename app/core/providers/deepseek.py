@@ -32,7 +32,7 @@ class DeepseekProvider(BaseLLMProvider):
         api_key: str, 
         model: str = "deepseek-chat",
         base_url: str = "https://api.deepseek.com",
-        timeout: int = 30,
+        timeout: int = 90,
         **kwargs
     ):
         super().__init__(api_key, model, **kwargs)

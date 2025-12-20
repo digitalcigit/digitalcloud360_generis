@@ -61,6 +61,36 @@ SECTOR_MAPPINGS: Dict[str, Dict[str, Any]] = {
         "cta_text": "Découvrir nos produits",
         "about_title": "Qualité & Service",
     },
+    "salon": {
+        "default_colors": {
+            "primary": "#EC4899",    # Pink
+            "secondary": "#8B5CF6",  # Purple
+        },
+        "default_icons": ["scissors", "sparkles", "heart", "star", "droplet", "crown"],
+        "section_order": ["hero", "about", "services", "gallery", "testimonials", "contact", "footer"],
+        "cta_text": "Prendre rendez-vous",
+        "about_title": "Notre Savoir-Faire",
+    },
+    "artisanat": {
+        "default_colors": {
+            "primary": "#D97706",    # Amber
+            "secondary": "#92400E",  # Brown
+        },
+        "default_icons": ["hammer", "palette", "gem", "hand", "brush", "scissors"],
+        "section_order": ["hero", "about", "gallery", "services", "contact", "footer"],
+        "cta_text": "Découvrir nos créations",
+        "about_title": "L'Art de Nos Mains",
+    },
+    "transport": {
+        "default_colors": {
+            "primary": "#0891B2",    # Cyan
+            "secondary": "#0D9488",  # Teal
+        },
+        "default_icons": ["truck", "map-pin", "clock", "package", "route", "navigation"],
+        "section_order": ["hero", "services", "features", "about", "contact", "footer"],
+        "cta_text": "Demander un devis",
+        "about_title": "Votre Partenaire Mobilité",
+    },
     "default": {
         "default_colors": {
             "primary": "#3B82F6",    # Blue

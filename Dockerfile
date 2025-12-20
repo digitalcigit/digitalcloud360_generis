@@ -11,7 +11,9 @@ RUN apt-get update && apt-get install -y \
     g++ \
     libpq-dev \
     curl \
+    ca-certificates \
     postgresql-client \
+    && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd -r genesisai && useradd -r -g genesisai genesisai
