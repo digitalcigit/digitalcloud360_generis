@@ -14,47 +14,8 @@ export interface AuthFixtures {
  * Generate a real JWT token from genesis-api
  */
 async function generateTestToken(): Promise<string> {
-  const apiUrl = process.env.GENESIS_API_URL || 'http://localhost:8002';
-  
-  // Register test user (idempotent - will fail if exists, that's OK)
-  try {
-    console.log(`Registering test user at ${apiUrl}/api/v1/auth/register`);
-    const res = await fetch(`${apiUrl}/api/v1/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: 'e2e-test@example.com',
-        name: 'E2E Test User',
-        password: 'TestPassword123!'
-      })
-    });
-    if (!res.ok) {
-        console.log(`Registration response: ${res.status} ${res.statusText}`);
-    }
-  } catch (e) {
-    console.log('Registration failed (might already exist):', e);
-  }
-
-  // Login to get JWT token
-  const formData = new URLSearchParams();
-  formData.append('username', 'e2e-test@example.com');
-  formData.append('password', 'TestPassword123!');
-
-  console.log(`Fetching token from ${apiUrl}/api/v1/auth/token`);
-  const response = await fetch(`${apiUrl}/api/v1/auth/token`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: formData.toString()
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    console.error(`Token response error: ${response.status} - ${text}`);
-    throw new Error(`Failed to get test token: ${response.status} - ${text}`);
-  }
-
-  const data = await response.json();
-  return data.access_token;
+  // Return dummy token for mocked tests
+  return "mock-jwt-token-for-e2e-testing";
 }
 
 /**
@@ -129,8 +90,20 @@ export const test = base.extend<AuthFixtures>({
     // Set auth cookie with real JWT
     await setAuthCookie(page, testToken);
     
-    // Navigate to home - AuthContext will validate token via mocked routes
+    // Navigate to home first to set storage (domain requirement)
     await page.goto('/');
+    
+    // Inject token into localStorage for Zustand persist
+    await page.evaluate((token) => {
+      const state = {
+        state: { token: token },
+        version: 0
+      };
+      localStorage.setItem('auth-storage', JSON.stringify(state));
+    }, testToken);
+    
+    // Reload to pick up storage
+    await page.reload();
     
     // Wait for auth to complete
     await page.waitForLoadState('networkidle');

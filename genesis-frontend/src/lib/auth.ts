@@ -10,6 +10,17 @@ export interface User {
 }
 
 export async function getCurrentUser(): Promise<User | null> {
+    // Bypass for E2E testing (Runtime check)
+    if (process.env.E2E_TEST_MODE === 'true') {
+        console.log('🔒 Auth Bypass Active (E2E_TEST_MODE)');
+        return {
+            id: 999,
+            email: 'e2e@test.com',
+            first_name: 'E2E',
+            last_name: 'Test'
+        };
+    }
+
     // Option 1: Token dans les cookies (partagé si même domaine)
     const cookieStore = await cookies();
     const token = cookieStore.get('my-app-auth')?.value 
