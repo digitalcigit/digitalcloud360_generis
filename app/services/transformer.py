@@ -120,16 +120,41 @@ class BriefToSiteTransformer:
             "sections": sections
         }
     
-    def _map_hero_section(self, brief: BusinessBrief, sector_config: Dict) -> Dict[str, Any]:
-        """Génère la section Hero"""
-        cta_text = sector_config.get("cta_text", "Nous contacter")
+    def _map_hero_section(self, brief: Union[BusinessBrief, BusinessBriefData], sector_config: Dict) -> Dict[str, Any]:
+        """Génère la section Hero en utilisant le contenu LLM généré s'il existe"""
         
+        # PRIORITÉ 1: Contenu généré par ContentSubAgent
+        if brief.content_generation and isinstance(brief.content_generation, dict):
+            homepage = brief.content_generation.get("homepage", {})
+            hero = homepage.get("hero_section", {})
+            
+            if hero and isinstance(hero, dict):
+                return {
+                    "id": "hero",
+                    "type": "hero",
+                    "content": {
+                        "title": hero.get("title") or brief.value_proposition or brief.business_name,
+                        "subtitle": hero.get("subtitle") or brief.mission[:120] if brief.mission else "",
+                        "description": hero.get("hero_paragraph") or brief.differentiation[:200] if brief.differentiation else None,
+                        "image": self._extract_hero_image(brief),
+                        "cta": {
+                            "text": hero.get("primary_cta") or sector_config.get("cta_text", "Nous contacter"),
+                            "link": "#contact",
+                            "variant": "primary"
+                        },
+                        "alignment": "center",
+                        "overlay": False
+                    }
+                }
+        
+        # FALLBACK: Valeurs brutes du brief
+        cta_text = sector_config.get("cta_text", "Nous contacter")
         return {
             "id": "hero",
             "type": "hero",
             "content": {
                 "title": brief.value_proposition or brief.business_name,
-                "subtitle": brief.mission,
+                "subtitle": brief.mission[:120] if brief.mission else "",
                 "description": brief.differentiation[:200] if brief.differentiation else None,
                 "image": self._extract_hero_image(brief),
                 "cta": {

@@ -18,18 +18,19 @@ services:
       - TEST_DATABASE_URL=postgresql+asyncpg://test_user:test_password@test-db:5432/test_db
       - DATABASE_URL=postgresql+asyncpg://test_user:test_password@test-db:5432/test_db
       - REDIS_URL=redis://redis:6379/0
-      
+
       # Configuration test stricte
       - STRICT_HEALTH_CHECKS=false
       - VALIDATE_EXTERNAL_APIS=false
       - LOG_LEVEL=DEBUG
-      
+
       # API Keys test
       - OPENAI_API_KEY=sk-test-openai-development-key
       - ANTHROPIC_API_KEY=sk-ant-test-anthropic-development-key
       - TAVILY_API_KEY=tvly-test-tavily-development-key
       - DIGITALCLOUD360_SERVICE_SECRET=test-service-secret-genesis-ai
-    
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+
     # Commande par défaut : exécuter tous les tests
     command: >
       bash -c '
@@ -42,17 +43,17 @@ services:
         echo "📊 Exécution de la suite de tests complète..." &&
         pytest tests/ -v --tb=short --disable-warnings
       '
-    
+
     depends_on:
       test-db:
         condition: service_healthy
       redis:
         condition: service_healthy
-    
+
     volumes:
       - ./:/app
       - ./logs/test:/app/logs
-    
+
     networks:
       - genesis-ai-network
 
@@ -79,6 +80,7 @@ services:
       - ANTHROPIC_API_KEY=sk-ant-test-anthropic-development-key
       - TAVILY_API_KEY=tvly-test-tavily-development-key
       - DIGITALCLOUD360_SERVICE_SECRET=test-service-secret-genesis-ai
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
     depends_on:
       test-db:
         condition: service_healthy
@@ -90,7 +92,7 @@ services:
     networks:
       - genesis-ai-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -98,7 +100,7 @@ services:
   # =============================================================================
   # Services Tests Spécialisés
   # =============================================================================
-  
+
   # Tests d'authentification uniquement
   genesis-test-auth:
     build:
@@ -163,7 +165,7 @@ services:
   # Test Database (PostgreSQL)
   # =============================================================================
   test-db:
-    image: postgres:15-alpine
+    image: pgvector/pgvector:pg15
     container_name: test-db
     restart: unless-stopped
     environment:
@@ -171,11 +173,11 @@ services:
       POSTGRES_PASSWORD: test_password
       POSTGRES_DB: test_db
     ports:
-      - "5433:5432"  # Exposition pour tests locaux
+      - "5433:5432" # Exposition pour tests locaux
     networks:
       - genesis-ai-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U test_user -d test_db"]
+      test: [ "CMD-SHELL", "pg_isready -U test_user -d test_db" ]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -192,11 +194,11 @@ services:
     restart: unless-stopped
     command: redis-server --appendonly no --maxmemory 256mb --maxmemory-policy allkeys-lru
     ports:
-      - "6382:6379"  # Exposition pour tests locaux
+      - "6382:6379" # Exposition pour tests locaux
     networks:
       - genesis-ai-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
       timeout: 3s
       retries: 5

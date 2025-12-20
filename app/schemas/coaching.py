@@ -25,6 +25,7 @@ class SessionStatusEnum(str, Enum):
 class CoachingRequest(BaseModel):
     """Requête démarrage ou continuation coaching"""
     session_id: Optional[str] = Field(None, description="ID session existante")
+    message: Optional[str] = Field(None, description="Message facultatif pour démarrer avec contexte")
 
 class CoachingStepRequest(BaseModel):
     """Requête pour soumettre une réponse à une étape de coaching"""
@@ -41,6 +42,8 @@ class CoachingResponse(BaseModel):
     progress: Dict[str, bool] = Field(default_factory=dict, description="Progression étapes")
     confidence_score: float = Field(0.0, description="Score confiance réponse")
     is_step_complete: bool = Field(False, description="Étape terminée")
+    site_data: Optional[Dict[str, Any]] = Field(None, description="Données du site généré (si terminé)")
+    clickable_choices: List[Dict[str, str]] = Field(default_factory=list, description="Pistes thématiques cliquables (Niveau Argent)")
     
 class CoachingStepResponse(BaseModel):
     """Réponse détaillée d'une étape coaching"""
@@ -61,3 +64,44 @@ class SessionCompleteResponse(BaseModel):
     website_ready: bool = Field(..., description="Site web prêt génération")
     next_steps: List[str] = Field(..., description="Étapes suivantes")
     conversation_summary: str = Field(..., description="Résumé conversation")
+
+# --- NOUVEAUX SCHÉMAS NIVEAU ARGENT (Sprint 2) ---
+
+class ClickableChoice(BaseModel):
+    id: str
+    text: str
+    description: Optional[str] = None
+
+class SocraticQuestion(BaseModel):
+    question: str
+    context_hint: Optional[str] = None
+    choices: List[ClickableChoice] = Field(default_factory=list)
+
+class CoachingHelpResponse(BaseModel):
+    session_id: str
+    current_step: CoachingStepEnum
+    socratic_questions: List[SocraticQuestion]
+    suggestion: str
+
+class ReformulateRequest(BaseModel):
+    session_id: str
+    text: str
+    target_step: Optional[CoachingStepEnum] = None
+
+class ReformulateResponse(BaseModel):
+    original_text: str
+    reformulated_text: str
+    is_better: bool
+    suggestions: List[str] = Field(default_factory=list)
+
+class Proposal(BaseModel):
+    id: str
+    title: str
+    content: str
+    justification: str
+
+class GenerateProposalsResponse(BaseModel):
+    session_id: str
+    step: CoachingStepEnum
+    proposals: List[Proposal]
+    coach_advice: str

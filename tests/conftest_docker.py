@@ -2,20 +2,22 @@
 
 import os
 import asyncio
+import uuid
 from typing import AsyncGenerator
 
 import pytest
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from asgi_lifespan import LifespanManager
-
 from sqlalchemy import text
-from app.main import app
+
+import app.models # Register models first
 from app.config.settings import settings, Settings
 from app.config.database import get_db
 from app.models.base import Base
 from app.models.user import User
 from app.core.security import get_password_hash
+from app.main import app as fastapi_app
 
 # Configuration pour environnement DOCKER
 # PostgreSQL accessible depuis le conteneur via test-db:5432
@@ -33,8 +35,9 @@ async def test_engine_docker():
     """Create a test SQLAlchemy engine using PostgreSQL DOCKER."""
     engine = create_async_engine(TEST_DATABASE_URL_DOCKER, echo=False)
     
-    # Create tables
+    # Create extension and tables
     async with engine.begin() as conn:
+        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         await conn.run_sync(Base.metadata.create_all)
     
     yield engine
@@ -64,11 +67,11 @@ async def client_docker(db_session_docker: AsyncSession, test_engine_docker) -> 
         yield db_session_docker
 
     # Override dependencies
-    app.dependency_overrides[get_db] = override_get_db
+    fastapi_app.dependency_overrides[get_db] = override_get_db
     
     try:
         # Client configuration optimisée pour environnement Docker
-        transport = ASGITransport(app=app)
+        transport = ASGITransport(app=fastapi_app)
         client_config = {
             "transport": transport,
             "base_url": "http://testserver"
@@ -77,7 +80,7 @@ async def client_docker(db_session_docker: AsyncSession, test_engine_docker) -> 
             yield async_client
     finally:
         # Clean up overrides
-        app.dependency_overrides.clear()
+        fastapi_app.dependency_overrides.clear()
 
 @pytest.fixture(scope="function")
 def test_password_docker() -> str:
@@ -87,7 +90,7 @@ def test_password_docker() -> str:
 async def test_user_docker(db_session_docker: AsyncSession, test_password_docker: str) -> User:
     """Create a test user in the database - DOCKER."""
     user = User(
-        email="test@example.com",
+        email=f"test_{uuid.uuid4()}@example.com",
         hashed_password=get_password_hash(test_password_docker),
         name="Test User Docker",
     )
