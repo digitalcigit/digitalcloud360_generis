@@ -346,6 +346,10 @@ async def get_coaching_help(
         raise HTTPException(status_code=404, detail="Session non trouvée")
     
     session_data = json.loads(session_data_json)
+
+    if session_data["user_id"] != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to access this session")
+    
     llm_service = CoachingLLMService()
     
     # Récupérer contexte
@@ -400,6 +404,10 @@ async def generate_proposals(
         raise HTTPException(status_code=404, detail="Session non trouvée")
     
     session_data = json.loads(session_data_json)
+
+    if session_data["user_id"] != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to access this session")
+    
     llm_service = CoachingLLMService()
     
     # Récupérer contexte
