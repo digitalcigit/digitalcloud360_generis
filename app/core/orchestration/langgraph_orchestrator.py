@@ -159,15 +159,18 @@ class LangGraphOrchestrator:
 
     async def run_logo_agent(self, state: AgentState) -> AgentState:
         """
-        Exécute LogoAgent legacy (à migrer Sprint 2+).
+        Exécute LogoAgent avec DALL-E 3 (Sprint 3 refactored).
         """
-        logger.info("Executing Logo Agent (legacy)")
+        logger.info("Executing Logo Agent (DALL-E 3)")
         
         brief = state['business_brief']
         try:
             result = await self.logo_agent.run(
-                brief.get('business_name', 'Mon Business'),
-                brief.get('slogan', brief.get('vision', ''))
+                company_name=brief.get('business_name', 'Mon Business'),
+                industry=brief.get('industry_sector', 'Services'),
+                style='modern',  # Style par défaut, sera adapté par agent selon industrie
+                company_slogan=brief.get('slogan', brief.get('vision', '')),
+                use_cache=True
             )
             return {"logo_creation": result}
         except Exception as e:
@@ -175,30 +178,41 @@ class LangGraphOrchestrator:
             return {
                 "logo_creation": {
                     'error': str(e),
-                    'fallback_mode': True
+                    'fallback_mode': True,
+                    'logo_url': 'https://placehold.co/400x400/3B82F6/FFFFFF/png?text=Logo'
                 }
             }
 
     async def run_seo_agent(self, state: AgentState) -> AgentState:
         """
-        Exécute SeoAgent legacy (à migrer Sprint 2+).
+        Exécute SeoAgent avec Deepseek LLM (Sprint 3 refactored).
         """
-        logger.info("Executing SEO Agent (legacy)")
+        logger.info("Executing SEO Agent (Deepseek LLM)")
         
         brief = state['business_brief']
         try:
-            # Adapter format pour agent legacy
-            company_description = f"{brief.get('vision', '')} - {brief.get('mission', '')}"
-            market_focus = f"{brief.get('industry_sector', '')} - {brief.get('target_market', '')}"
+            # Construire description business complète
+            business_description = f"{brief.get('vision', '')} {brief.get('mission', '')}".strip()
+            if not business_description:
+                business_description = brief.get('description', 'Professional business services')
             
-            result = await self.seo_agent.run(company_description, market_focus)
+            result = await self.seo_agent.run(
+                business_name=brief.get('business_name', 'Mon Business'),
+                business_description=business_description,
+                industry_sector=brief.get('industry_sector', 'Services'),
+                target_location=brief.get('location'),  # Dict avec country, city
+                unique_value_proposition=brief.get('competitive_advantage')
+            )
             return {"seo_optimization": result}
         except Exception as e:
             logger.error("SEO agent failed", error=str(e))
             return {
                 "seo_optimization": {
                     'error': str(e),
-                    'fallback_mode': True
+                    'fallback_mode': True,
+                    'primary_keywords': [brief.get('industry_sector', 'business')],
+                    'meta_title': brief.get('business_name', 'Business'),
+                    'meta_description': business_description[:150] if business_description else 'Professional services'
                 }
             }
 
