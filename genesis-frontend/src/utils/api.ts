@@ -54,3 +54,17 @@ export async function getSitePreview(siteId: string, token: string): Promise<Sit
 
     return response.json();
 }
+
+export async function getCoachingSite(sessionId: string, token: string): Promise<SiteDefinition> {
+    const response = await fetch(`${API_BASE_URL}/coaching/${sessionId}/site`, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to fetch coaching site');
+    }
+
+    return response.json();
+}
