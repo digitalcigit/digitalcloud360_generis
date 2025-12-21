@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getSitePreview, getCoachingSite } from '@/utils/api';
-import { getCookieValue, isValidSiteId } from '@/utils/cookies';
+import { getCookieValue } from '@/utils/cookies';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { SiteDefinition } from '@/types/site-definition';
 import SiteRenderer from '@/components/SiteRenderer';

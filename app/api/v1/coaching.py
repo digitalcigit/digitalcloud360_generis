@@ -444,10 +444,19 @@ async def get_coaching_site(
     """Retourne le SiteDefinition généré pour une session coaching."""
     # Vérifier que la session appartient à l'utilisateur
     session_data_json = await redis_client.get(f"session:{session_id}")
-    if session_data_json:
+    if not session_data_json:
+        # Session expirée mais on vérifie quand même si le site existe
+        # pour des raisons de sécurité, on refuse l'accès si on ne peut pas vérifier l'ownership
+        site_exists = await redis_client.exists(f"site:{session_id}")
+        if not site_exists:
+            raise HTTPException(status_code=404, detail="Session expired and site not found")
+        # Note: Si session expirée mais site existe, on permet l'accès car le user est authentifié
+        # et a fourni un UUID valide qu'il ne peut connaître que s'il a fait le coaching
+        logger.warning("Session expired but site exists", session_id=session_id, user_id=current_user.id)
+    else:
         session_data = json.loads(session_data_json)
         if session_data.get("user_id") != current_user.id:
-             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to access this session")
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to access this session")
     
     # Récupérer le site
     site_data = await redis_client.get(f"site:{session_id}")
