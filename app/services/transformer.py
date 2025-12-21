@@ -206,18 +206,21 @@ class BriefToSiteTransformer:
         # Extract services from brief.services or content_generation
         raw_services = []
         if brief.services:
-            # Services can be a list of strings or dicts
-            raw_services = brief.services if isinstance(brief.services, list) else []
+            # Services can be a list of strings or dicts - convert to list explicitly
+            raw_services = list(brief.services) if brief.services else []
         
         if brief.content_generation and isinstance(brief.content_generation, dict):
             gen_services = brief.content_generation.get("services", [])
-            if gen_services:
+            if gen_services and isinstance(gen_services, list):
                 raw_services = gen_services
         
         if not raw_services:
             return None
         
-        for i, service in enumerate(raw_services[:6]):  # Max 6 services
+        # Ensure raw_services is a list before slicing
+        services_to_process = list(raw_services)[:6] if raw_services else []
+        
+        for i, service in enumerate(services_to_process):  # Max 6 services
             if isinstance(service, str):
                 # Simple string service
                 services.append({

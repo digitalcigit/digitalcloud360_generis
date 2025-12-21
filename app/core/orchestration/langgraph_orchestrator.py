@@ -66,17 +66,12 @@ class LangGraphOrchestrator:
         workflow.add_node("seo", self.run_seo_agent)
         workflow.add_node("template", self.run_template_agent)
 
-        # Define the execution flow
+        # Define the execution flow: Sequential to ensure all agents execute
         workflow.set_entry_point("research")
         workflow.add_edge("research", "content")
-        workflow.add_edge("research", "logo")
-        workflow.add_edge("research", "seo")
-        workflow.add_edge("research", "template")
-        
-        # All parallel tasks lead to the end
-        workflow.add_edge("content", END)
-        workflow.add_edge("logo", END)
-        workflow.add_edge("seo", END)
+        workflow.add_edge("content", "logo")
+        workflow.add_edge("logo", "seo")
+        workflow.add_edge("seo", "template")
         workflow.add_edge("template", END)
 
         # Compile the graph

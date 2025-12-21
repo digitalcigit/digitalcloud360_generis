@@ -202,3 +202,44 @@ class RedisVirtualFileSystem:
             logger.info("Redis connection closed")
         except Exception as e:
             logger.error("Error closing Redis connection", error=str(e))
+
+    async def read_file(self, file_path: str) -> Optional[str]:
+        """
+        Lecture générique fichier/clé Redis
+        
+        Args:
+            file_path: Clé Redis complète
+            
+        Returns:
+            Contenu (str) ou None
+        """
+        try:
+            data = await self.redis.get(file_path)
+            if data:
+                return data
+            return None
+        except Exception as e:
+            logger.error("Failed to read file from Redis", key=file_path, error=str(e))
+            return None
+
+    async def write_file(self, file_path: str, content: str, ttl: int = None) -> bool:
+        """
+        Écriture générique fichier/clé Redis
+        
+        Args:
+            file_path: Clé Redis complète
+            content: Contenu à écrire (str)
+            ttl: TTL en secondes (optionnel)
+            
+        Returns:
+            bool: True si succès
+        """
+        try:
+            if ttl:
+                await self.redis.set(file_path, content, ex=ttl)
+            else:
+                await self.redis.set(file_path, content)
+            return True
+        except Exception as e:
+            logger.error("Failed to write file to Redis", key=file_path, error=str(e))
+            return False

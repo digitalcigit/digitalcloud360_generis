@@ -28,10 +28,7 @@ class LogoAgent:
             api_key=settings.OPENAI_API_KEY,
             model="dall-e-3"
         )
-        self.redis_fs = RedisVirtualFileSystem(
-            redis_url=settings.REDIS_URL,
-            db_index=settings.REDIS_GENESIS_AI_DB
-        )
+        self.redis_fs = RedisVirtualFileSystem()
         logger.info("LogoAgent initialized with DALL-E 3")
 
     async def run(

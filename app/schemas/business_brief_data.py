@@ -69,11 +69,12 @@ class BusinessBriefData(BaseModel):
     phone: Optional[str] = None
     address: Optional[Dict[str, str]] = None
     
-    # Résultats sub-agents
-    content_generation: Optional[ContentGenerationData] = None
-    logo_creation: Optional[LogoCreationData] = None
-    seo_optimization: Optional[SEOOptimizationData] = None
-    template_selection: Optional[TemplateSelectionData] = None
+    # Résultats sub-agents (gardés comme dicts pour compatibilité transformer)
+    content_generation: Optional[Dict[str, Any]] = None
+    logo_creation: Optional[Dict[str, Any]] = None
+    seo_optimization: Optional[Dict[str, Any]] = None
+    template_selection: Optional[Dict[str, Any]] = None
+    location: Optional[Dict[str, Any]] = None
     
     class Config:
         extra = "allow"  # Permet des champs additionnels

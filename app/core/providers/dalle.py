@@ -98,8 +98,8 @@ class DALLEImageProvider(BaseImageProvider):
         )
         
         # Configuration génération logo
-        size = kwargs.get("size", "1024x1024")  # Carré pour logo
-        quality = kwargs.get("quality", "hd")  # HD recommandé logos
+        size = kwargs.pop("size", "1024x1024")  # Carré pour logo
+        quality = kwargs.pop("quality", "hd")  # HD recommandé logos
         
         try:
             result = await self.generate_image(

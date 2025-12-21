@@ -75,7 +75,7 @@ async def start_coaching_session(request: CoachingRequest, db: AsyncSession = De
             current_step=CoachingStepEnum.VISION
         )
         db.add(session_db)
-        await db.flush()
+        await db.commit()
         await db.refresh(session_db)
         session_data["id"] = session_db.id # Add db id to session data
 
@@ -187,7 +187,7 @@ async def process_coaching_step(request: CoachingStepRequest, db: AsyncSession =
             current_step=session_data["current_step"]
         )
         await db.execute(stmt)
-        await db.flush()
+        await db.commit()
         await redis_client.set(f"session:{session_data['session_id']}", json.dumps(session_data), ex=7200)
 
         # Générer guidage pour étape suivante
@@ -220,7 +220,7 @@ async def process_coaching_step(request: CoachingStepRequest, db: AsyncSession =
     # Update session in DB
     stmt = update(CoachingSession).where(CoachingSession.session_id == request.session_id).values(status=SessionStatusEnum.COMPLETED)
     await db.execute(stmt)
-    await db.flush()
+    await db.commit()
 
     # ============ NOUVEAU: Trigger Site Generation (GEN-WO-002) ============
     logger.info("triggering_site_generation", session_id=request.session_id)
@@ -258,6 +258,15 @@ async def process_coaching_step(request: CoachingStepRequest, db: AsyncSession =
     )
     
     site_definition = transformer.transform(enriched_brief)
+    
+    # DEBUG: Log site_definition structure
+    logger.info(
+        "Site definition generated",
+        has_metadata=bool(site_definition.get("metadata")),
+        has_theme=bool(site_definition.get("theme")),
+        pages_count=len(site_definition.get("pages", [])),
+        first_page_sections=len(site_definition.get("pages", [{}])[0].get("sections", [])) if site_definition.get("pages") else 0
+    )
         
     # 4. Sauvegarder en Redis pour le frontend
     await redis_client.set(

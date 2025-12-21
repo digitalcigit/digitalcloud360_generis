@@ -70,8 +70,7 @@ class SeoAgent:
             )
             
             competitive_data = await self.tavily_client.search_market(
-                query=search_query,
-                topic="seo_analysis"
+                query=search_query
             )
             
             # 2. Générer SEO optimisé via LLM
@@ -112,7 +111,7 @@ class SeoAgent:
                     "business_name": business_name,
                     "industry": industry_sector,
                     "location": location_str,
-                    "competitive_sources": len(competitive_data.get("results", [])),
+                    "competitive_sources": len(competitive_data) if isinstance(competitive_data, list) else 0,
                     "llm_provider": "deepseek"
                 }
             }
@@ -166,7 +165,7 @@ class SeoAgent:
             prompt_parts.append(f"Proposition de valeur: {unique_value_proposition}")
         
         # Ajouter insights concurrentiels
-        if competitive_insights and competitive_insights.get("results"):
+        if competitive_insights and isinstance(competitive_insights, list) and len(competitive_insights) > 0:
             prompt_parts.append("\nAnalyse concurrentielle disponible (utilise ces données pour affiner le SEO).")
         
         prompt_parts.extend([
