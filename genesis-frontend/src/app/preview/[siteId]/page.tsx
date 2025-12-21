@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getSitePreview } from '@/utils/api';
+import { getSitePreview, getCoachingSite } from '@/utils/api';
 import { getCookieValue, isValidSiteId } from '@/utils/cookies';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { SiteDefinition } from '@/types/site-definition';
@@ -27,8 +27,9 @@ export default function PreviewPage() {
     useEffect(() => {
         async function fetchPreview() {
             // SECURITY: Validate siteId format before API call
-            if (!isValidSiteId(siteId)) {
-                setError('ID de site invalide');
+            // Allow both site_ID and UUID (session ID)
+            if (!siteId) {
+                setError('ID manquant');
                 setLoading(false);
                 return;
             }
@@ -40,7 +41,18 @@ export default function PreviewPage() {
             }
 
             try {
-                const siteDefinition = await getSitePreview(siteId, token);
+                // If siteId starts with "site_", it's a generated site ID.
+                // Otherwise, assume it's a coaching session UUID.
+                // We can also check if it contains '-' but UUIDs do, and site_ also might.
+                // Logic: Session IDs (UUIDs) don't usually start with "site_".
+                let siteDefinition: SiteDefinition;
+                
+                if (siteId.startsWith('site_')) {
+                    siteDefinition = await getSitePreview(siteId, token);
+                } else {
+                    siteDefinition = await getCoachingSite(siteId, token);
+                }
+                
                 setSite(siteDefinition);
             } catch (err) {
                 console.error('Preview fetch error:', err);
