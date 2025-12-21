@@ -213,6 +213,9 @@ export default function CoachingInterface() {
 
     // Success State (Site Generated)
     if (coachingState.site_data) {
+        // Extract sessionId from coachingState to ensure it's available
+        const currentSessionId = sessionId || coachingState.session_id;
+        
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-8 animate-in fade-in zoom-in duration-500">
                 <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(34,197,94,0.4)]">
@@ -226,7 +229,10 @@ export default function CoachingInterface() {
                     <p className="text-gray-400 mb-4">Votre business brief est complet.</p>
                     <button 
                         className="w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold rounded-xl transition-all shadow-lg hover:scale-105"
-                        onClick={() => router.push(`/preview/${sessionId}`)}
+                        onClick={() => {
+                            console.log('Redirecting to preview with sessionId:', currentSessionId);
+                            router.push(`/preview/${currentSessionId}`);
+                        }}
                     >
                         Voir mon site
                     </button>
