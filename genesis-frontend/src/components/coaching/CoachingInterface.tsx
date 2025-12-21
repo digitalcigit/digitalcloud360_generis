@@ -226,7 +226,7 @@ export default function CoachingInterface() {
                     <p className="text-gray-400 mb-4">Votre business brief est complet.</p>
                     <button 
                         className="w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold rounded-xl transition-all shadow-lg hover:scale-105"
-                        onClick={() => router.push('/preview')} // Assuming a preview page exists or will exist
+                        onClick={() => router.push(`/preview/${sessionId}`)}
                     >
                         Voir mon site
                     </button>
