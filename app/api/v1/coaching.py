@@ -434,3 +434,24 @@ async def generate_proposals(
         proposals=proposals_data["proposals"],
         coach_advice=proposals_data["coach_advice"]
     )
+
+@router.get("/{session_id}/site", response_model=Dict[str, Any])
+async def get_coaching_site(
+    session_id: str,
+    current_user: User = Depends(get_current_user),
+    redis_client: redis.Redis = Depends(get_redis_client)
+) -> Dict[str, Any]:
+    """Retourne le SiteDefinition généré pour une session coaching."""
+    # Vérifier que la session appartient à l'utilisateur
+    session_data_json = await redis_client.get(f"session:{session_id}")
+    if session_data_json:
+        session_data = json.loads(session_data_json)
+        if session_data.get("user_id") != current_user.id:
+             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to access this session")
+    
+    # Récupérer le site
+    site_data = await redis_client.get(f"site:{session_id}")
+    if not site_data:
+        raise HTTPException(status_code=404, detail="Site not found for this session")
+    
+    return json.loads(site_data)
