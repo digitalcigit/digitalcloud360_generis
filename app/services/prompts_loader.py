@@ -1,10 +1,10 @@
 """
-PromptsLoader - Chargement prompts coaching depuis fichier spec technique
+PromptsLoader - Chargement prompts coaching depuis fichier local
 """
 
 from typing import Dict, Any
 import structlog
-from docs.genesis_ai_technical_specification.PROMPTS_COACHING_METHODOLOGIE import (
+from app.services.coaching_prompts_data import (
     COACH_SYSTEM_PROMPT,
     VISION_COACHING_PROMPT,
     VISION_EXAMPLES_BY_SECTOR,
