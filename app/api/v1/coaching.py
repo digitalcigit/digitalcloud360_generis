@@ -35,6 +35,73 @@ from app.services.prompts_loader import PromptsLoader
 router = APIRouter()
 logger = structlog.get_logger()
 
+
+# ========= Onboarding (Phase 2 - GEN-WO-006) =========
+from pydantic import BaseModel, Field
+
+class OnboardingRequest(BaseModel):
+    business_name: Optional[str] = Field(None, description="Nom du projet/entreprise")
+    sector: str = Field(..., description="Secteur d'activité sélectionné")
+    sector_other: Optional[str] = Field(None, description="Secteur libre si 'Autre'")
+    logo_source: Optional[str] = Field(None, description="upload | generate | later")
+    logo_url: Optional[str] = Field(None, description="URL du logo si upload")
+
+class OnboardingResponse(BaseModel):
+    session_id: str
+    onboarding: Dict[str, Any]
+
+@router.post("/onboarding", response_model=OnboardingResponse, status_code=status.HTTP_201_CREATED)
+async def onboarding_coaching(
+    request: OnboardingRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    redis_client: redis.Redis = Depends(get_redis_client)
+):
+    """
+    Étape 0 Onboarding (Phase 2 - GEN-WO-006)
+    - Crée une session de coaching
+    - Stocke les informations de base (nom, secteur, intention logo)
+    """
+    # 1) Préparer données secteur
+    sector_value = request.sector_other.strip() if request.sector == "other" and request.sector_other else request.sector
+
+    # 2) Créer session en base (comme /start)
+    new_session_id = str(uuid.uuid4())
+    session_db = CoachingSession(
+        user_id=current_user.id,
+        session_id=new_session_id,
+        status=SessionStatusEnum.INITIALIZED,
+        current_step=CoachingStepEnum.VISION
+    )
+    db.add(session_db)
+    await db.commit()
+    await db.refresh(session_db)
+
+    # 3) Préparer et sauvegarder en Redis (TTL 2h)
+    session_data = {
+        "user_id": current_user.id,
+        "session_id": new_session_id,
+        "status": SessionStatusEnum.INITIALIZED.value,
+        "current_step": CoachingStepEnum.VISION.value,
+        "id": session_db.id,
+    }
+
+    onboarding_data = {
+        "business_name": request.business_name,
+        "sector": request.sector,
+        "sector_resolved": sector_value,
+        "logo_source": request.logo_source,
+        "logo_url": request.logo_url,
+    }
+
+    await redis_client.set(
+        f"session:{new_session_id}",
+        json.dumps({**session_data, "onboarding": onboarding_data}),
+        ex=7200
+    )
+
+    return OnboardingResponse(session_id=new_session_id, onboarding=onboarding_data)
+
 @router.post("/start", response_model=CoachingResponse)
 async def start_coaching_session(request: CoachingRequest, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user), redis_client: redis.Redis = Depends(get_redis_client)):
     """Starts or continues a coaching session."""
@@ -92,20 +159,12 @@ async def start_coaching_session(request: CoachingRequest, db: AsyncSession = De
     return CoachingResponse(
         session_id=session_data["session_id"],
         current_step=session_data["current_step"],
-        coach_message=vision_guidance["prompt_text"],
-        examples=vision_guidance["examples"],
+        coach_message=vision_guidance.get("user_message", vision_guidance.get("prompt_text")),
+        examples=vision_guidance.get("user_choices", vision_guidance.get("examples", [])),
         next_questions=[],
         progress={step.value: False for step in CoachingStepEnum},
         is_step_complete=False,
-        clickable_choices=vision_guidance.get("clickable_choices", [])
-    )
-
-    # Placeholder for other steps
-    return CoachingResponse(
-        session_id=session_data["session_id"],
-        current_step=session_data["current_step"],
-        coach_message="Étape non implémentée.",
-        progress={step.value: False for step in CoachingStepEnum}
+        clickable_choices=vision_guidance.get("user_clickable", vision_guidance.get("clickable_choices", []))
     )
 
 @router.post("/step", response_model=CoachingResponse)
@@ -120,7 +179,7 @@ async def process_coaching_step(request: CoachingStepRequest, db: AsyncSession =
     if session_data["user_id"] != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to access this session")
 
-    # --- LOGIQUE IA PROACTIVE (GEN-WO-002) ---
+    # --- LOGIQUE IA PROACTIVE (GEN-WO-002 + Messages épurés GEN-WO-006) ---
     llm_service = CoachingLLMService()
     prompts_loader = PromptsLoader()
     
@@ -190,7 +249,7 @@ async def process_coaching_step(request: CoachingStepRequest, db: AsyncSession =
         await db.commit()
         await redis_client.set(f"session:{session_data['session_id']}", json.dumps(session_data), ex=7200)
 
-        # Générer guidage pour étape suivante
+        # Générer guidage pour étape suivante (avec messages épurés)
         next_guidance = prompts_loader.get_step_prompt(
             step=session_data["current_step"],
             sector=detected_sector,
@@ -206,12 +265,12 @@ async def process_coaching_step(request: CoachingStepRequest, db: AsyncSession =
         return CoachingResponse(
             session_id=session_data["session_id"],
             current_step=session_data["current_step"],
-            coach_message=next_guidance["prompt_text"],
-            examples=next_guidance["examples"],
+            coach_message=next_guidance.get("user_message", next_guidance.get("prompt_text")),
+            examples=next_guidance.get("user_choices", next_guidance.get("examples", [])),
             progress=progress,
             is_step_complete=True,
             confidence_score=extraction_result.confidence_score,
-            clickable_choices=next_guidance.get("clickable_choices", [])
+            clickable_choices=next_guidance.get("user_clickable", next_guidance.get("clickable_choices", []))
         )
 
     # --- ÉTAPE OFFRE COMPLÉTÉE -> DÉCLENCHER GÉNÉRATION SITE ---

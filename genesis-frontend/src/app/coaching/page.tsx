@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
 import CoachingInterface from '@/components/coaching/CoachingInterface';
+import Link from 'next/link';
 
 export const metadata = {
     title: 'Coach Genesis AI - DigitalCloud360',
@@ -41,6 +42,17 @@ export default async function CoachingPage() {
                 </header>
                 
                 <div className="bg-gray-900/50 backdrop-blur-xl border border-gray-800 rounded-3xl p-4 md:p-8 shadow-2xl">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+                        <div className="text-sm text-gray-300">
+                            Démarrez par l'onboarding pour personnaliser vos questions.
+                        </div>
+                        <Link
+                            href="/coaching/onboarding"
+                            className="inline-flex items-center justify-center rounded-lg border border-purple-500/50 bg-purple-500/10 px-3 py-2 text-sm font-semibold text-purple-100 hover:border-purple-400 hover:bg-purple-500/20 transition-colors"
+                        >
+                            Étape 0 Onboarding
+                        </Link>
+                    </div>
                     <CoachingInterface />
                 </div>
 

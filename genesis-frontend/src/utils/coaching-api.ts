@@ -29,10 +29,26 @@ class CoachingApi {
         return response.json();
     }
 
-    async start(token: string, message?: string): Promise<CoachingResponse> {
+    async onboarding(
+        token: string,
+        payload: {
+            business_name?: string;
+            sector: string;
+            sector_other?: string;
+            logo_source?: 'upload' | 'generate' | 'later';
+            logo_url?: string | null;
+        }
+    ): Promise<{ session_id: string; onboarding: Record<string, any> }> {
+        return this.fetchWithAuth('/onboarding', token, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+        });
+    }
+
+    async start(token: string, params?: { message?: string; session_id?: string }): Promise<CoachingResponse> {
         return this.fetchWithAuth<CoachingResponse>('/start', token, {
             method: 'POST',
-            body: JSON.stringify({ message }),
+            body: JSON.stringify(params ?? {}),
         });
     }
 

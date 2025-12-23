@@ -29,6 +29,14 @@ function debounce<T extends (...args: any[]) => any>(func: T, wait: number) {
     };
 }
 
+const SKIP_DEFAULTS: Record<CoachingStepEnum, string> = {
+    [CoachingStepEnum.VISION]: 'Créer un business à impact positif pour ma communauté',
+    [CoachingStepEnum.MISSION]: 'Offrir un service de qualité accessible à tous',
+    [CoachingStepEnum.CLIENTELE]: 'Familles et professionnels de ma région',
+    [CoachingStepEnum.DIFFERENTIATION]: 'Un accompagnement personnalisé et authentique',
+    [CoachingStepEnum.OFFRE]: 'Des services adaptés aux besoins locaux',
+};
+
 export default function CoachingInterface() {
     const router = useRouter();
     const token = useAuthStore((state) => state.token);
@@ -150,21 +158,9 @@ export default function CoachingInterface() {
 
     // 3. Generate Proposals ("I don't know")
     const handleDontKnow = async () => {
-        if (!sessionId || !token) return;
-        setIsProposalsLoading(true);
-        try {
-            const response = await coachingApi.generateProposals(token, sessionId);
-            setProposalsData({
-                proposals: response.proposals,
-                coachAdvice: response.coach_advice
-            });
-            setShowProposals(true);
-        } catch (err: any) {
-            console.error('Proposals failed:', err);
-            setError(err.message || "Impossible de générer des propositions.");
-        } finally {
-            setIsProposalsLoading(false);
-        }
+        if (!sessionId || !token || !coachingState) return;
+        const defaultText = SKIP_DEFAULTS[coachingState.current_step] || "Je passe cette question";
+        await submitResponse(defaultText);
     };
 
     const handleProposalSelect = (proposal: Proposal) => {

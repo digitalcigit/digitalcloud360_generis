@@ -2,7 +2,7 @@
 PromptsLoader - Chargement prompts coaching depuis fichier spec technique
 """
 
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any
 import structlog
 from docs.genesis_ai_technical_specification.PROMPTS_COACHING_METHODOLOGIE import (
     COACH_SYSTEM_PROMPT,
@@ -15,6 +15,7 @@ from docs.genesis_ai_technical_specification.PROMPTS_COACHING_METHODOLOGIE impor
     DIFFERENTIATION_COACHING_PROMPT,
     OFFRE_COACHING_PROMPT,
 )
+from app.services.prompts_user_messages import get_user_message
 
 logger = structlog.get_logger(__name__)
 
@@ -60,8 +61,10 @@ class PromptsLoader:
         sector: str = "default",
         user_name: str = "cher entrepreneur",
         validated_previous: str = "",
-        location: Dict[str, str] = None
-    ) -> Dict[str, Any]:
+        location: Dict[str, str] = None,
+        user_profile: str = "Entrepreneur", 
+        experience_level: str = "Débutant"
+        ) -> Dict[str, Any]:
         """
         Retourne le prompt formaté pour une étape donnée.
         """
@@ -97,11 +100,21 @@ class PromptsLoader:
             {"id": f"choice-{i}", "text": ex} 
             for i, ex in enumerate(sector_examples_list[:5])
         ]
-        
+
+        # Messages épurés pour l'utilisateur
+        user_msg = get_user_message(step)
+        user_choices = user_msg["choices"]
+        user_clickable = [
+            {"id": f"user-choice-{i}", "text": choice} for i, choice in enumerate(user_choices)
+        ]
+
         return {
-            "prompt_text": prompt_text,
-            "examples": sector_examples_list[:5],
+            "prompt_text": prompt_text,                 # Pour l'IA
+            "examples": sector_examples_list[:5],       # Exemples sectoriels (optionnel)
             "validation_criteria": step_config["validation_criteria"],
             "system_prompt": self.system_prompt,
-            "clickable_choices": clickable_choices
+            "clickable_choices": clickable_choices,     # Ancien format
+            "user_message": user_msg["user_message"],   # Texte épuré pour UI
+            "user_choices": user_choices,               # Choix épurés pour UI
+            "user_clickable": user_clickable,           # Choix cliquables UI
         }
