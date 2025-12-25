@@ -95,7 +95,7 @@ export default function PreviewPage() {
             <PreviewToolbar
                 currentViewport={viewport}
                 onViewportChange={setViewport}
-                onBack={() => router.push('/chat')}
+                onBack={() => router.push('/coaching')}
                 onFullscreen={handleFullscreen}
             />
 

@@ -21,14 +21,22 @@ export default function HeaderBlock({
                     {/* Logo */}
                     <div className="flex-shrink-0 flex items-center">
                         {logo ? (
-                            <Image
-                                src={logo}
-                                alt={companyName}
-                                width={128}
-                                height={32}
-                                className="h-8 w-auto"
-                                priority
-                            />
+                            logo.includes('placehold.co') || logo.includes('placeholder') ? (
+                                <img
+                                    src={logo}
+                                    alt="Logo"
+                                    className="h-10 w-auto"
+                                />
+                            ) : (
+                                <Image
+                                    src={logo}
+                                    alt="Logo"
+                                    width={120}
+                                    height={40}
+                                    className="h-10 w-auto"
+                                    priority
+                                />
+                            )
                         ) : (
                             <span className="text-2xl font-bold text-[var(--color-primary)] font-[family-name:var(--font-heading)]">
                                 {companyName}

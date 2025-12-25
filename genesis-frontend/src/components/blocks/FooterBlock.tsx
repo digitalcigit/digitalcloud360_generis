@@ -30,13 +30,21 @@ export default function FooterBlock({
                     {/* Brand Column */}
                     <div className="space-y-4">
                         {logo ? (
-                            <Image
-                                src={logo}
-                                alt={companyName ?? 'Logo de la marque'}
-                                width={128}
-                                height={32}
-                                className="h-8 w-auto brightness-0 invert"
-                            />
+                            logo.includes('placehold.co') || logo.includes('placeholder') ? (
+                                <img
+                                    src={logo}
+                                    alt={companyName ?? 'Logo de la marque'}
+                                    className="h-8 w-auto brightness-0 invert"
+                                />
+                            ) : (
+                                <Image
+                                    src={logo}
+                                    alt={companyName ?? 'Logo de la marque'}
+                                    width={128}
+                                    height={32}
+                                    className="h-8 w-auto brightness-0 invert"
+                                />
+                            )
                         ) : (
                             <span className="text-2xl font-bold font-[family-name:var(--font-heading)]">{companyName}</span>
                         )}

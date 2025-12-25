@@ -56,3 +56,20 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 async def read_users_me(current_user: User = Depends(get_current_user)):
     """Get current user."""
     return UserResponse.model_validate(current_user)
+
+@router.get("/dev-token", response_model=Token)
+async def get_dev_token(db: AsyncSession = Depends(get_db)):
+    """Get a development token for user ID 1 (E2E testing only)."""
+    # Get user with ID 1
+    result = await db.execute(select(User).filter(User.id == 1))
+    user = result.scalars().first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    
+    # Create a valid access token
+    access_token = create_access_token(data={"sub": str(user.id), "user_id": user.id})
+    return {"access_token": access_token, "token_type": "bearer"}

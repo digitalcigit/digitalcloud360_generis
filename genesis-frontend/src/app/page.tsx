@@ -4,9 +4,9 @@ import { getCurrentUser } from '@/lib/auth';
 export default async function HomePage() {
     const user = await getCurrentUser();
     
-    // Si authentifié, rediriger vers le chat
+    // Si authentifié, rediriger vers l'onboarding (flux officiel)
     if (user) {
-        redirect('/chat');
+        redirect('/coaching/onboarding');
     }
     
     // Sinon, afficher la page de connexion/redirection

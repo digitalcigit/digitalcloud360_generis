@@ -66,13 +66,21 @@ export default function HeroBlock({
                     {/* Side Image (only if not overlay) */}
                     {image && !overlay && (
                         <div className="relative h-96 rounded-2xl overflow-hidden shadow-2xl">
-                            <Image
-                                src={image}
-                                alt={title}
-                                fill
-                                className="object-cover"
-                                sizes="(min-width: 1024px) 50vw, 100vw"
-                            />
+                            {image.includes('placehold.co') || image.includes('placeholder') ? (
+                                <img
+                                    src={image}
+                                    alt={title || 'Image du héros'}
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <Image
+                                    src={image}
+                                    alt={title || 'Image du héros'}
+                                    fill
+                                    className="object-cover"
+                                    sizes="(min-width: 1024px) 50vw, 100vw"
+                                />
+                            )}
                         </div>
                     )}
                 </div>

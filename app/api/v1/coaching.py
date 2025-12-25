@@ -36,6 +36,33 @@ router = APIRouter()
 logger = structlog.get_logger()
 
 
+# GEN-WO-006: Helper pour préserver TOUJOURS l'onboarding lors des mises à jour Redis
+async def preserve_onboarding_on_save(session_id: str, session_data: Dict[str, Any], redis_client: redis.Redis, ttl: int = 7200):
+    """Sauvegarde session_data en Redis en préservant TOUJOURS les données d'onboarding"""
+    onboarding_data = None
+
+    current_json = await redis_client.get(f"session:{session_id}")
+    if current_json:
+        current_data = json.loads(current_json)
+        if "onboarding" in current_data:
+            onboarding_data = current_data["onboarding"]
+
+    # Fallback: clé dédiée onboarding:{session_id}
+    if onboarding_data is None:
+        onboarding_json = await redis_client.get(f"onboarding:{session_id}")
+        if onboarding_json:
+            onboarding_data = json.loads(onboarding_json)
+
+    if onboarding_data is not None:
+        session_data["onboarding"] = onboarding_data
+    
+    await redis_client.set(f"session:{session_id}", json.dumps(session_data), ex=ttl)
+    if onboarding_data is not None:
+        await redis_client.set(f"onboarding:{session_id}", json.dumps(onboarding_data), ex=ttl)
+
+
+
+
 # ========= Onboarding (Phase 2 - GEN-WO-006) =========
 from pydantic import BaseModel, Field
 
@@ -94,11 +121,11 @@ async def onboarding_coaching(
         "logo_url": request.logo_url,
     }
 
-    await redis_client.set(
-        f"session:{new_session_id}",
-        json.dumps({**session_data, "onboarding": onboarding_data}),
-        ex=7200
-    )
+    payload = {**session_data, "onboarding": onboarding_data}
+    await redis_client.set(f"session:{new_session_id}", json.dumps(payload), ex=7200)
+    # Stockage redondant pour récupération robuste
+    await redis_client.set(f"onboarding:{new_session_id}", json.dumps(onboarding_data), ex=7200)
+    logger.info("onboarding_saved", session_id=new_session_id, business_name=request.business_name, sector=sector_value)
 
     return OnboardingResponse(session_id=new_session_id, onboarding=onboarding_data)
 
@@ -106,18 +133,18 @@ async def onboarding_coaching(
 async def start_coaching_session(request: CoachingRequest, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user), redis_client: redis.Redis = Depends(get_redis_client)):
     """Starts or continues a coaching session."""
     session_id = request.session_id
-    session_data = None
 
-    if session_id:
-        session_data_json = await redis_client.get(f"session:{session_id}")
-        if session_data_json:
-            session_data = json.loads(session_data_json)
-        else:
-            # Fallback to DB if not in Redis
-            result = await db.execute(select(CoachingSession).filter(CoachingSession.session_id == session_id, CoachingSession.user_id == current_user.id))
-            session_db = result.scalars().first()
-            if not session_db:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Coaching session not found")
+    # Récupérer ou créer la session (GEN-WO-006: préserver onboarding)
+    session_data_json = await redis_client.get(f"session:{session_id}")
+    session_data = None
+    
+    if session_data_json:
+        session_data = json.loads(session_data_json)
+    elif session_id:
+        # Fallback to DB if not in Redis
+        result = await db.execute(select(CoachingSession).filter(CoachingSession.session_id == session_id, CoachingSession.user_id == current_user.id))
+        session_db = result.scalars().first()
+        if session_db:
             session_data = {
                 "user_id": session_db.user_id,
                 "session_id": session_db.session_id,
@@ -145,8 +172,14 @@ async def start_coaching_session(request: CoachingRequest, db: AsyncSession = De
         await db.commit()
         await db.refresh(session_db)
         session_data["id"] = session_db.id # Add db id to session data
+    
+    # Recharger onboarding si présent en clé dédiée
+    onboarding_json = await redis_client.get(f"onboarding:{session_data['session_id']}")
+    if onboarding_json and "onboarding" not in session_data:
+        session_data["onboarding"] = json.loads(onboarding_json)
 
-    await redis_client.set(f"session:{session_data['session_id']}", json.dumps(session_data), ex=7200) # 2h TTL
+    # GEN-WO-006: Sauvegarder session_data avec onboarding préservé
+    await preserve_onboarding_on_save(session_data['session_id'], session_data, redis_client) # 2h TTL
 
     # Load first step guidance (VISION)
     prompts_loader = PromptsLoader()
@@ -191,7 +224,7 @@ async def process_coaching_step(request: CoachingStepRequest, db: AsyncSession =
     detected_sector = await llm_service.detect_sector(previous_msgs)
     
     # 2. Valider et extraire avec LLM
-    brief_context = await _build_brief_from_coaching_steps(session_data["id"], db)
+    brief_context = await _build_brief_from_coaching_steps(session_data["id"], db, session_data, redis_client)
     extraction_result = await llm_service.extract_and_validate(
         step=session_data["current_step"],
         user_response=request.user_response,
@@ -247,7 +280,8 @@ async def process_coaching_step(request: CoachingStepRequest, db: AsyncSession =
         )
         await db.execute(stmt)
         await db.commit()
-        await redis_client.set(f"session:{session_data['session_id']}", json.dumps(session_data), ex=7200)
+        # GEN-WO-006: Préserver onboarding lors de la mise à jour Redis
+        await preserve_onboarding_on_save(session_data['session_id'], session_data, redis_client)
 
         # Générer guidage pour étape suivante (avec messages épurés)
         next_guidance = prompts_loader.get_step_prompt(
@@ -287,7 +321,17 @@ async def process_coaching_step(request: CoachingStepRequest, db: AsyncSession =
     # 1. Construire le business_brief depuis les étapes coaching
     business_brief_dict = await _build_brief_from_coaching_steps(
         session_id=session_data["id"],
-        db=db
+        db=db,
+        session_data=session_data,
+        redis_client=redis_client
+    )
+    
+    # DEBUG GEN-WO-006: Vérifier business_name
+    logger.info(
+        "business_brief_constructed",
+        business_name=business_brief_dict.get("business_name"),
+        has_onboarding=bool(session_data.get("onboarding")),
+        onboarding_name=session_data.get("onboarding", {}).get("business_name") if session_data.get("onboarding") else None
     )
     
     # 2. Exécuter l'orchestrateur LangGraph
@@ -298,13 +342,22 @@ async def process_coaching_step(request: CoachingStepRequest, db: AsyncSession =
         "business_brief": business_brief_dict
     })
     
+    # GEN-WO-006 FIX: Forcer business_name et secteur depuis onboarding
+    # L'orchestrateur peut écraser ces valeurs, on les restaure explicitement
+    if session_data and "onboarding" in session_data:
+        onboarding = session_data["onboarding"]
+        if onboarding.get("business_name"):
+            orchestration_result["business_brief"]["business_name"] = onboarding["business_name"]
+        if onboarding.get("sector_resolved") or onboarding.get("sector"):
+            orchestration_result["business_brief"]["industry_sector"] = onboarding.get("sector_resolved") or onboarding.get("sector")
+    
     # 3. Transformer en SiteDefinition
     transformer = BriefToSiteTransformer()
     
     # Créer un objet brief data enrichi
     enriched_brief = BusinessBriefData(
-        business_name=business_brief_dict.get("business_name", "Mon Business"),
-        sector=business_brief_dict.get("industry_sector", "default"),
+        business_name=orchestration_result["business_brief"].get("business_name", "Mon Business"),
+        sector=orchestration_result["business_brief"].get("industry_sector", "default"),
         vision=business_brief_dict.get("vision", ""),
         mission=business_brief_dict.get("mission", ""),
         target_audience=business_brief_dict.get("target_market", ""),
@@ -338,8 +391,9 @@ async def process_coaching_step(request: CoachingStepRequest, db: AsyncSession =
     coach_message = "Félicitations ! Vous avez terminé votre session de coaching Genesis AI. Votre site personnalisé a été généré !"
     
     progress = {step.value: True for step in CoachingStepEnum}
-
-    await redis_client.set(f"session:{session_data['session_id']}", json.dumps(session_data), ex=7200)
+    
+    # GEN-WO-006: Préserver onboarding lors de la mise à jour Redis
+    await preserve_onboarding_on_save(session_data['session_id'], session_data, redis_client)
 
     return CoachingResponse(
         session_id=session_data["session_id"],
@@ -360,8 +414,8 @@ async def process_coaching_step(request: CoachingStepRequest, db: AsyncSession =
         progress={step.value: False for step in CoachingStepEnum}
     )
 
-async def _build_brief_from_coaching_steps(session_id: int, db: AsyncSession) -> Dict[str, Any]:
-    """Construit le business_brief depuis les étapes coaching sauvegardées"""
+async def _build_brief_from_coaching_steps(session_id: int, db: AsyncSession, session_data: Dict[str, Any] = None, redis_client: redis.Redis = None) -> Dict[str, Any]:
+    """Construit le business_brief depuis les étapes coaching sauvegardées + onboarding"""
     from sqlalchemy import select
     from app.models.coaching import CoachingStep, CoachingStepEnum
     
@@ -373,9 +427,18 @@ async def _build_brief_from_coaching_steps(session_id: int, db: AsyncSession) ->
     )
     steps = result.scalars().all()
     
+    # GEN-WO-008: Toujours récupérer business_name depuis l'onboarding (sinon fallback)
+    onboarding = (session_data or {}).get("onboarding", {})
+    if not onboarding and redis_client:
+        onboarding_json = await redis_client.get(f"onboarding:{session_data.get('session_id') if session_data else session_id}")
+        if onboarding_json:
+            onboarding = json.loads(onboarding_json)
+    business_name = onboarding.get("business_name", "Projet Sans Nom")
+    industry_sector = onboarding.get("sector_resolved") or onboarding.get("sector") or "default"
+    
     brief = {
-        "business_name": "Projet Sans Nom", # Fallback
-        "industry_sector": "default",
+        "business_name": business_name,
+        "industry_sector": industry_sector,
         "vision": "",
         "mission": "",
         "target_market": "",
@@ -421,7 +484,7 @@ async def get_coaching_help(
     llm_service = CoachingLLMService()
     
     # Récupérer contexte
-    brief = await _build_brief_from_coaching_steps(session_data["id"], db)
+    brief = await _build_brief_from_coaching_steps(session_data["id"], db, session_data, redis_client)
     
     help_result = await llm_service.get_socratic_help(
         step=session_data["current_step"],
@@ -478,8 +541,8 @@ async def generate_proposals(
     
     llm_service = CoachingLLMService()
     
-    # Récupérer contexte
-    brief = await _build_brief_from_coaching_steps(session_data["id"], db)
+    # Récupérer contexte (avec fallback onboarding en Redis)
+    brief = await _build_brief_from_coaching_steps(session_data["id"], db, session_data, redis_client)
     
     proposals_data = await llm_service.generate_proposals(
         step=session_data["current_step"],

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { coachingApi } from '@/utils/coaching-api';
@@ -23,6 +23,7 @@ const SECTORS = [
 export default function CoachingOnboardingPage() {
     const router = useRouter();
     const token = useAuthStore((s) => s.token);
+    const setToken = useAuthStore((s) => s.setToken);
     const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
     const [businessName, setBusinessName] = useState('');
@@ -32,6 +33,24 @@ export default function CoachingOnboardingPage() {
     const [logoUrl, setLogoUrl] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Auto-fetch dev token if not authenticated
+    useEffect(() => {
+        const ensureToken = async () => {
+            if (!token || !isAuthenticated()) {
+                try {
+                    const response = await fetch('/api/auth/dev-token');
+                    if (response.ok) {
+                        const data = await response.json();
+                        setToken(data.access_token);
+                    }
+                } catch (err) {
+                    console.error('Failed to get dev token:', err);
+                }
+            }
+        };
+        ensureToken();
+    }, [token, isAuthenticated, setToken]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -50,9 +69,8 @@ export default function CoachingOnboardingPage() {
                 logo_url: logoUrl,
             };
             const res = await coachingApi.onboarding(token, payload);
-            // Rediriger vers coaching en passant la session_id
-            await coachingApi.start(token, { session_id: res.session_id });
-            router.push('/coaching');
+            // Rediriger vers coaching en passant la session_id via query param
+            router.push(`/coaching?session_id=${res.session_id}`);
         } catch (err: any) {
             setError(err.message || 'Erreur lors de la sauvegarde.');
         } finally {

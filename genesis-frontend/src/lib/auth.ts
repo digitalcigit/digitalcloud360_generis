@@ -46,6 +46,24 @@ export async function getCurrentUser(): Promise<User | null> {
         return await response.json();
     } catch (error) {
         console.error('SSO validation error:', error);
+        // Fallback: Si DC360 n'est pas accessible, valider le token localement via Genesis API
+        console.log('🔄 Fallback: Validating token via Genesis API...');
+        try {
+            const genesisApiUrl = process.env.GENESIS_API_URL || 'http://genesis-api:8000';
+            const genesisResponse = await fetch(`${genesisApiUrl}/api/v1/auth/me`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (genesisResponse.ok) {
+                const user = await genesisResponse.json();
+                console.log('✅ Token validated via Genesis API');
+                return user;
+            }
+        } catch (genesisError) {
+            console.error('Genesis API validation also failed:', genesisError);
+        }
         return null;
     }
 }

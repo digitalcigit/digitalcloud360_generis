@@ -4,6 +4,8 @@ import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/stores/useAuthStore';
 
+export const dynamic = 'force-dynamic';
+
 function CallbackContent() {
     const router = useRouter();
     const searchParams = useSearchParams();

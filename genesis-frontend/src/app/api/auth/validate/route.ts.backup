@@ -1,0 +1,59 @@
+import { NextRequest, NextResponse } from 'next/server';
+
+/**
+ * SSO Token Validation Endpoint
+ * Validates a JWT token from DC360 Hub and returns user data
+ */
+export async function POST(request: NextRequest) {
+    try {
+        const body = await request.json();
+        const { token } = body;
+
+        if (!token) {
+            return NextResponse.json(
+                { error: 'Token is required' },
+                { status: 400 }
+            );
+        }
+
+        // Validate the token with DC360 backend
+        // Dans Docker: utiliser 'web' (nom du container DC360), pas localhost
+        const dc360ApiUrl = process.env.DC360_API_URL || 'http://web:8000';
+        
+        const response = await fetch(`${dc360ApiUrl}/api/auth/user/`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            console.error('SSO: Token validation failed with DC360:', response.status);
+            return NextResponse.json(
+                { error: 'Invalid token' },
+                { status: 401 }
+            );
+        }
+
+        const userData = await response.json();
+        console.log('SSO: Token validated successfully for user:', userData.email);
+
+        return NextResponse.json({
+            success: true,
+            user: {
+                id: userData.id,
+                email: userData.email,
+                first_name: userData.first_name,
+                last_name: userData.last_name
+            }
+        });
+
+    } catch (error) {
+        console.error('SSO: Token validation error:', error);
+        return NextResponse.json(
+            { error: 'Internal server error' },
+            { status: 500 }
+        );
+    }
+}

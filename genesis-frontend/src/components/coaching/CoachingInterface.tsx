@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { coachingApi } from '@/utils/coaching-api';
 import { 
@@ -39,10 +39,13 @@ const SKIP_DEFAULTS: Record<CoachingStepEnum, string> = {
 
 export default function CoachingInterface() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const token = useAuthStore((state) => state.token);
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
     
-    const [sessionId, setSessionId] = useState<string | null>(null);
+    // GEN-WO-008: Read session_id from URL params (passed from onboarding)
+    const urlSessionId = searchParams.get('session_id');
+    const [sessionId, setSessionId] = useState<string | null>(urlSessionId);
     const [coachingState, setCoachingState] = useState<CoachingResponse | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -67,16 +70,17 @@ export default function CoachingInterface() {
 
     // Start session on mount
     useEffect(() => {
-        if (token && !sessionId) {
+        if (token && !coachingState) {
             startSession();
         }
-    }, [token, sessionId]);
+    }, [token, coachingState]);
 
     const startSession = async () => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await coachingApi.start(token!);
+            // GEN-WO-008: Pass session_id from URL if available (preserves onboarding data)
+            const response = await coachingApi.start(token!, urlSessionId ? { session_id: urlSessionId } : undefined);
             setSessionId(response.session_id);
             setCoachingState(response);
         } catch (err: any) {

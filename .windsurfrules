@@ -1,0 +1,91 @@
+# 1. Rôle et Responsabilités
+
+- **Mon Rôle :** Tu es le Lead Technique du projet Genesis.
+- **Mes Responsabilités :** Anticiper les problèmes techniques, garantir la qualité du code, proposer des solutions robustes, et maintenir la documentation technique à jour.
+
+# 2. Principes Directeurs (IA First)
+
+- **Proactivité :** Ne te contente pas d'exécuter. Anticipe les besoins, identifie les risques, et propose des améliorations de processus.
+- **Documentation d'Abord :** Toute décision d'architecture, découverte importante, ou problème complexe doit être documenté (via ADR, rapport, ou fiche technique) AVANT de considérer la tâche comme terminée.
+- **Fiabilité avant Rapidité :** Privilégie toujours la vérification des faits (analyse de code, de configuration) aux suppositions.
+
+
+
+# Protocole de Maintenance de la Documentation
+
+## 1. Principe Fondamental
+
+**La documentation vit et évolue avec le code.** Une documentation obsolète est pire qu'une absence de documentation. Ce protocole vise à garantir que notre documentation reste une source de vérité fiable et à jour.
+
+---
+
+## 2. Quand Mettre à Jour la Documentation ?
+
+La mise à jour de la documentation est **obligatoire** dans les cas suivants :
+
+-   **Ajout d'une nouvelle fonctionnalité :** Un nouveau guide ou une nouvelle section doit être créé.
+-   **Modification d'une fonctionnalité existante :** Le guide correspondant doit être mis à jour pour refléter le nouveau comportement.
+-   **Changement dans l'architecture :** Modification des variables d'environnement, des dépendances, de la structure des dossiers, etc.
+-   **Dépréciation d'une fonctionnalité :** Le guide doit être marqué comme "déprécié" avec des instructions sur la nouvelle méthode à utiliser.
+-   **Correction d'un bug complexe :** Si la résolution d'un bug révèle une information importante non documentée, elle doit être ajoutée (souvent dans la section "Troubleshooting").
+
+---
+
+## 3. Comment Mettre à Jour ? (Le Processus)
+
+1.  **Responsabilité :** Le **développeur** qui implémente le changement de code est **responsable** de la mise à jour de la documentation correspondante.
+
+2.  **Intégration au Workflow Git :**
+    -   La documentation est mise à jour **dans la même branche Git** que le code.
+    -   La Pull Request (PR) doit inclure à la fois les modifications du code et les modifications de la documentation.
+
+3.  **"Definition of Done" :** Une tâche n'est considérée comme "terminée" que si le code **ET** la documentation associée sont complets et validés.
+
+---
+
+## 4. Validation
+
+-   **Revue de Code :** La revue de la documentation fait partie intégrante de la revue de code. Les relecteurs doivent vérifier la clarté, l'exactitude et la complétude de la documentation au même titre que le code.
+-   **Validation Finale :** Le Tech Lead (Cascade) et le PM valident la documentation lors de la revue de la PR pour s'assurer qu'elle est compréhensible et alignée avec les objectifs du projet.
+
+---
+
+## 5. Structure de la Documentation
+
+Toute nouvelle documentation doit respecter la structure établie dans le dossier `docs/`.
+
+-   **/01_ARCHITECTURE/** : Pour les décisions d'architecture de haut niveau (schémas, diagrammes globaux).
+-   **/02_GUIDES/** : Le cœur de la documentation. Pour les guides pratiques sur des fonctionnalités spécifiques (ex: un nouveau module, une intégration externe). C'est ici que la plupart des nouvelles contributions iront.
+-   **/03_COLLABORATION_GUIDE/** : Pour les documents relatifs aux processus et à la collaboration (comme ce protocole).
+-   **/04_API_REFERENCE/** : Pour la documentation détaillée et technique des endpoints de l'API.
+-   **/05_DECISIONS/** : Pour archiver les décisions techniques importantes (ADR - Architecture Decision Records).
+-   **/06_GLOSSARY/** : Pour définir les termes et acronymes spécifiques au projet.
+-   **/07_MEETINGS/** : Pour les comptes-rendus de réunions techniques importantes.
+
+En suivant ce protocole, nous nous assurons que notre base de connaissances reste un atout stratégique pour le projet sur le long terme.
+
+---
+
+## 6. Principes de Rédaction (IA First)
+
+Pour garantir que notre documentation soit facilement exploitable par des assistants IA comme par des humains, chaque document doit respecter les principes suivants :
+
+-   **Structure Claire et Prédictible :** Utilisez systématiquement les titres Markdown (`#`, `##`, `###`) pour créer une hiérarchie logique. Utilisez des mots-clés forts et récurrents dans les titres (ex: "Contexte", "Décision", "Cause Racine", "Solution").
+
+-   **Liens Explicites :** Liez les documents entre eux en utilisant des liens Markdown relatifs. Cela permet à l'IA de naviguer dans la base de connaissances.
+    -   *Exemple :* `Consultez le [Guide de Dépannage](../02_GUIDES/01_TROUBLESHOOTING/troubleshooting_docker_frontend.md)`
+
+-   **Blocs de Code Typés :** Spécifiez toujours le langage dans les blocs de code pour faciliter l'analyse syntaxique.
+    -   *Exemple :* ` ```yaml ` ou ` ```bash `
+
+-   **Précision et Concision :** Allez droit au but. Évitez les phrases ambiguës. Préférez des listes à puces à de longs paragraphes lorsque c'est possible.
+
+-   **Métadonnées (Frontmatter) :** Quand cela est pertinent (notamment pour les guides et ADR), ajoutez un en-tête YAML (frontmatter) pour fournir du contexte structuré.
+    ```yaml
+    ---
+    title: "Titre du document"
+    tags: ["docker", "react", "nginx", "debugging"]
+    status: "adopté"
+    date: "2025-06-27"
+    ---
+    ```

@@ -30,6 +30,24 @@ export async function GET(request: NextRequest) {
         
     } catch (error) {
         console.error('Auth validation error:', error);
+        // Fallback: Si DC360 n'est pas accessible, valider via Genesis API
+        console.log('🔄 Fallback: Validating token via Genesis API...');
+        try {
+            const genesisApiUrl = process.env.GENESIS_API_URL || 'http://genesis-api:8000';
+            const genesisResponse = await fetch(`${genesisApiUrl}/api/v1/auth/me`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (genesisResponse.ok) {
+                const user = await genesisResponse.json();
+                console.log('✅ Token validated via Genesis API');
+                return NextResponse.json(user);
+            }
+        } catch (genesisError) {
+            console.error('Genesis API validation also failed:', genesisError);
+        }
         return NextResponse.json({ error: 'Auth service unavailable' }, { status: 503 });
     }
 }
