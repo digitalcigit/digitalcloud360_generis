@@ -25,6 +25,9 @@ export interface CoachingResponse {
     site_data?: SiteDefinition;
     clickable_choices: ClickableChoice[];
     next_questions?: string[];
+    status?: string;
+    brief_id?: number;
+    redirect_url?: string;
 }
 
 export interface CoachingHelpResponse {

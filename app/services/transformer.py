@@ -15,24 +15,22 @@ import json
 class BriefToSiteTransformer:
     """Transform a BusinessBrief into a SiteDefinition JSON structure"""
     
-    def transform(self, brief: Union[BusinessBrief, BusinessBriefData]) -> Dict[str, Any]:
+    def transform(self, brief: Union[BusinessBrief, BusinessBriefData], theme: Any = None) -> Dict[str, Any]:
         """
         Convert a BusinessBrief to a SiteDefinition.
         
         Args:
             brief: BusinessBrief model instance
+            theme: Optional Theme model instance
             
         Returns:
             Dictionary matching SiteDefinition Pydantic schema
-            
-        Raises:
-            ValidationError: Si le JSON généré ne respecte pas le schema
         """
         # Get sector configuration
         sector_config = get_sector_config(brief.sector if brief.sector else "default")
         
-        # Extract theme colors from content generation or use sector defaults
-        theme_colors = self._extract_theme_colors(brief, sector_config)
+        # Extract theme colors
+        theme_colors = self._extract_theme_colors(brief, sector_config, theme)
         
         # Build the site definition
         site_dict = {
@@ -43,11 +41,15 @@ class BriefToSiteTransformer:
                 "ogImage": self._extract_hero_image(brief)
             },
             "theme": {
+                "id": str(theme.id) if theme else "default",
+                "slug": theme.slug if theme else "default",
+                "name": theme.name if theme else "Default",
                 "colors": theme_colors,
                 "fonts": {
-                    "heading": "Inter",
+                    "heading": theme.heading_font if theme and hasattr(theme, 'heading_font') else "Inter",
                     "body": "Inter"
-                }
+                },
+                "config": theme.features if theme else {}
             },
             "pages": [
                 self._build_home_page(brief, sector_config)
@@ -59,18 +61,22 @@ class BriefToSiteTransformer:
         
         return site_dict
     
-    def _extract_theme_colors(self, brief: BusinessBrief, sector_config: Dict) -> Dict[str, str]:
-        """Extract theme colors from brief or use sector defaults"""
+    def _extract_theme_colors(self, brief: BusinessBrief, sector_config: Dict, theme: Any = None) -> Dict[str, str]:
+        """Extract theme colors from brief, theme or use sector defaults"""
         # Start with sector-based defaults
         sector_colors = sector_config.get("default_colors", {})
+        
+        # Priority 1: Theme colors from the selected Theme model
+        primary_color = theme.primary_color if theme and hasattr(theme, 'primary_color') else sector_colors.get("primary", "#3B82F6")
+        
         default_colors = {
-            "primary": sector_colors.get("primary", "#3B82F6"),
+            "primary": primary_color,
             "secondary": sector_colors.get("secondary", "#10B981"),
             "background": "#FFFFFF",
             "text": "#1F2937"
         }
         
-        # Override with colors from content_generation if available
+        # Priority 2: Override with colors from content_generation if available
         if brief.content_generation and isinstance(brief.content_generation, dict):
             colors = brief.content_generation.get("theme_colors", {})
             if colors:

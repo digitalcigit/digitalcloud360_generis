@@ -4,10 +4,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { coachingApi } from '@/utils/coaching-api';
-import { 
-    CoachingResponse, 
-    CoachingStepEnum, 
-    ClickableChoice, 
+import {
+    CoachingResponse,
+    CoachingStepEnum,
+    ClickableChoice,
     SocraticQuestion,
     Proposal
 } from '@/types/coaching';
@@ -42,21 +42,21 @@ export default function CoachingInterface() {
     const searchParams = useSearchParams();
     const token = useAuthStore((state) => state.token);
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-    
+
     // GEN-WO-008: Read session_id from URL params (passed from onboarding)
     const urlSessionId = searchParams.get('session_id');
     const [sessionId, setSessionId] = useState<string | null>(urlSessionId);
     const [coachingState, setCoachingState] = useState<CoachingResponse | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    
+
     // Modals & Features state
     const [showHelp, setShowHelp] = useState(false);
-    const [helpData, setHelpData] = useState<{questions: SocraticQuestion[], suggestion: string} | null>(null);
+    const [helpData, setHelpData] = useState<{ questions: SocraticQuestion[], suggestion: string } | null>(null);
     const [isHelpLoading, setIsHelpLoading] = useState(false);
 
     const [showProposals, setShowProposals] = useState(false);
-    const [proposalsData, setProposalsData] = useState<{proposals: Proposal[], coachAdvice: string} | null>(null);
+    const [proposalsData, setProposalsData] = useState<{ proposals: Proposal[], coachAdvice: string } | null>(null);
     const [isProposalsLoading, setIsProposalsLoading] = useState(false);
 
     const [reformulatedText, setReformulatedText] = useState('');
@@ -99,10 +99,11 @@ export default function CoachingInterface() {
             const response = await coachingApi.step(token, sessionId, userResponse);
             setCoachingState(response);
             setReformulatedText(''); // Clear previous reformulation
-            
-            // If session complete (site generated), handle it (e.g. redirect or show confetti)
-            if (response.current_step === CoachingStepEnum.OFFRE && response.is_step_complete) {
-                // For now, the UI will show the "Site Generated" state if we handle it in render
+
+            // If session complete (brief generated), redirect to theme selection
+            if (response.status === 'BRIEF_COMPLETED' && response.redirect_url) {
+                console.log('Brief completed, redirecting to theme selection');
+                router.push(response.redirect_url);
             }
         } catch (err: any) {
             console.error('Failed to submit response:', err);
@@ -199,7 +200,7 @@ export default function CoachingInterface() {
             <div className="text-center p-8 bg-red-900/20 border border-red-800 rounded-2xl">
                 <h3 className="text-red-400 font-bold mb-2">Une erreur est survenue</h3>
                 <p className="text-gray-300 mb-4">{error}</p>
-                <button 
+                <button
                     onClick={startSession}
                     className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                 >
@@ -215,7 +216,7 @@ export default function CoachingInterface() {
     if (coachingState.site_data) {
         // Extract sessionId from coachingState to ensure it's available
         const currentSessionId = sessionId || coachingState.session_id;
-        
+
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-8 animate-in fade-in zoom-in duration-500">
                 <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(34,197,94,0.4)]">
@@ -227,7 +228,7 @@ export default function CoachingInterface() {
                 </div>
                 <div className="bg-gray-800 p-6 rounded-2xl border border-gray-700 max-w-md w-full">
                     <p className="text-gray-400 mb-4">Votre business brief est complet.</p>
-                    <button 
+                    <button
                         className="w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold rounded-xl transition-all shadow-lg hover:scale-105"
                         onClick={() => {
                             console.log('Redirecting to preview with sessionId:', currentSessionId);
@@ -243,25 +244,25 @@ export default function CoachingInterface() {
 
     return (
         <div className="w-full max-w-4xl mx-auto pb-20">
-            <ProgressBar 
-                progress={coachingState.progress} 
-                currentStep={coachingState.current_step} 
+            <ProgressBar
+                progress={coachingState.progress}
+                currentStep={coachingState.current_step}
             />
 
             <div className="mt-8 space-y-6">
-                <CoachMessage 
-                    message={coachingState.coach_message} 
-                    examples={coachingState.examples} 
+                <CoachMessage
+                    message={coachingState.coach_message}
+                    examples={coachingState.examples}
                 />
 
-                <ClickableChoices 
-                    choices={coachingState.clickable_choices} 
+                <ClickableChoices
+                    choices={coachingState.clickable_choices}
                     onSelect={handleChoiceSelect}
                     isLoading={isLoading}
                 />
 
                 <div className="mt-8" data-testid="user-input-area">
-                    <UserInput 
+                    <UserInput
                         onSubmit={submitResponse}
                         onReformulate={handleReformulate}
                         onHelp={handleHelp}
@@ -273,7 +274,7 @@ export default function CoachingInterface() {
             </div>
 
             {/* Modals */}
-            <SocraticHelp 
+            <SocraticHelp
                 isOpen={showHelp}
                 onClose={() => setShowHelp(false)}
                 questions={helpData?.questions || []}

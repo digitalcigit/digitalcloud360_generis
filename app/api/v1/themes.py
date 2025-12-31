@@ -155,7 +155,7 @@ async def select_theme_and_generate(
         "selected_theme_slug": theme.slug
     })
     
-    # 4. Transformer en SiteDefinition
+    # 4. Transformer en SiteDefinition avec injection du thème
     transformer = BriefToSiteTransformer()
     
     enriched_brief = BusinessBriefData(
@@ -172,14 +172,8 @@ async def select_theme_and_generate(
         seo_optimization=orchestration_result.get("seo_optimization", {})
     )
     
-    # Injection du thème dans la définition finale (le transformateur devra le gérer)
-    site_definition = transformer.transform(enriched_brief)
-    site_definition["theme"] = {
-        "id": theme.id,
-        "slug": theme.slug,
-        "name": theme.name,
-        "config": theme.features
-    }
+    # Le transformateur s'occupe maintenant de configurer le thème proprement
+    site_definition = transformer.transform(enriched_brief, theme=theme)
     
     # 5. Sauvegarder en Redis pour le frontend
     await redis_client.set(
