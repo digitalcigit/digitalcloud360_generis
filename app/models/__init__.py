@@ -5,6 +5,7 @@ from .user import User, UserProfile
 from .coaching import CoachingSession, CoachingStep, BusinessBrief
 from .business import Business, BusinessContext
 from .embedding import UserEmbedding
+from .theme import Theme
 
 __all__ = [
     "Base",
@@ -15,5 +16,6 @@ __all__ = [
     "BusinessBrief",
     "Business",
     "BusinessContext",
-    "UserEmbedding"
+    "UserEmbedding",
+    "Theme"
 ]
