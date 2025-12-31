@@ -66,20 +66,20 @@ class BriefToSiteTransformer:
         # Start with sector-based defaults
         sector_colors = sector_config.get("default_colors", {})
         
-    # Priority 1: Theme colors from the selected Theme model (stored in features JSON)
-    primary_color = None
-    if theme and hasattr(theme, 'features') and isinstance(theme.features, dict):
-        primary_color = theme.features.get('primary_color')
-    
-    if not primary_color:
-        primary_color = sector_colors.get("primary", "#3B82F6")
+        # Priority 1: Theme colors from the selected Theme model (stored in features JSON)
+        primary_color = None
+        if theme and hasattr(theme, 'features') and isinstance(theme.features, dict):
+            primary_color = theme.features.get('primary_color')
         
-    default_colors = {
-        "primary": primary_color,
-        "secondary": sector_colors.get("secondary", "#10B981"),
-        "background": "#FFFFFF",
-        "text": "#1F2937"
-    }
+        if not primary_color:
+            primary_color = sector_colors.get("primary", "#3B82F6")
+        
+        default_colors = {
+            "primary": primary_color,
+            "secondary": sector_colors.get("secondary", "#10B981"),
+            "background": "#FFFFFF",
+            "text": "#1F2937"
+        }
         
         # Priority 2: Override with colors from content_generation if available
         if brief.content_generation and isinstance(brief.content_generation, dict):
