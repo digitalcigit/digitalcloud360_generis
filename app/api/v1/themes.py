@@ -54,16 +54,27 @@ async def recommend_themes(
     if not brief_id:
         raise HTTPException(status_code=400, detail="brief_id is required")
 
-    # Charger le brief
-    result = await db.execute(select(BusinessBrief).filter(BusinessBrief.id == brief_id))
+    # Security Check: Ensure brief belongs to current user
+    result = await db.execute(
+        select(BusinessBrief)
+        .join(CoachingSession)
+        .filter(BusinessBrief.id == brief_id)
+        .filter(CoachingSession.user_id == current_user.id)
+    )
     brief = result.scalars().first()
     
     if not brief:
-        raise HTTPException(status_code=404, detail="BusinessBrief not found")
+        # Check if brief exists but belongs to another user (security ambiguity)
+        # or doesn't exist at all. For security, we return 404 in both cases.
+        raise HTTPException(status_code=404, detail="Brief not found or access denied")
 
     # Charger tous les thèmes
     themes_result = await db.execute(select(Theme).where(Theme.is_active == True))
     themes = themes_result.scalars().all()
+
+    if not themes:
+        logger.error("No active themes found in database")
+        raise HTTPException(status_code=503, detail="No active themes available. Please contact support.")
     
     # Appeler l'agent de recommandation
     agent = ThemeRecommendationAgent()
@@ -112,8 +123,13 @@ async def select_theme_and_generate(
     """
     logger.info("theme_selected_triggering_generation", brief_id=request.brief_id, theme_id=request.theme_id)
     
-    # 1. Charger brief et thème
-    brief_result = await db.execute(select(BusinessBrief).filter(BusinessBrief.id == request.brief_id))
+    # 1. Security & Data Check: Ensure brief belongs to current user
+    brief_result = await db.execute(
+        select(BusinessBrief)
+        .join(CoachingSession)
+        .filter(BusinessBrief.id == request.brief_id)
+        .filter(CoachingSession.user_id == current_user.id)
+    )
     brief = brief_result.scalars().first()
     
     theme_result = await db.execute(select(Theme).filter(Theme.id == request.theme_id))
