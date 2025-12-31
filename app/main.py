@@ -14,7 +14,7 @@ from contextlib import asynccontextmanager
 from app.config.settings import settings
 from app.config.database import engine, create_tables
 from app.api.middleware import PrometheusMiddleware, LoggingMiddleware
-from app.api.v1 import auth, coaching, business, users, integrations, genesis, modules, sites, chat, memory
+from app.api.v1 import auth, coaching, business, users, integrations, genesis, modules, sites, themes, chat, memory
 from app.api import dc360_adapter
 from app.utils.exceptions import GenesisAIException
 from app.utils.logger import setup_logging
@@ -281,6 +281,11 @@ app.include_router(
     coaching.router, 
     prefix=f"{settings.API_V1_STR}/coaching", 
     tags=["Coaching"]
+)
+app.include_router(
+    themes.router,
+    prefix=f"{settings.API_V1_STR}/themes",
+    tags=["Themes"]
 )
 app.include_router(
     business.router, 

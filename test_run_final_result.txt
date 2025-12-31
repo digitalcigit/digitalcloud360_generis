@@ -1,0 +1,72 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.14, pytest-9.0.2, pluggy-1.6.0
+rootdir: /app
+configfile: pytest.ini
+plugins: anyio-4.12.0, mock-3.15.1, Faker-39.0.0, asyncio-1.3.0, langsmith-0.5.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 6 items
+
+tests/test_e2e/test_coaching_flow.py ..                                  [ 33%]
+tests/test_e2e/test_coaching_silver_features.py ...F                     [100%]
+
+=================================== FAILURES ===================================
+____________ TestSilverCoachingFeaturesE2E.test_generate_proposals _____________
+tests/test_e2e/test_coaching_silver_features.py:90: in test_generate_proposals
+    assert len(data["proposals"]) == 3
+E   assert 0 == 3
+E    +  where 0 = len([])
+---------------------------- Captured stdout setup -----------------------------
+2025-12-20 09:37:07 [info     ] Request started                client_ip=127.0.0.1 method=POST url=http://testserver/api/v1/auth/token
+2025-12-20 09:37:07 [info     ] Request completed              duration_seconds=0.4832603931427002 method=POST status_code=200 url=http://testserver/api/v1/auth/token
+---------------------------- Captured stderr setup -----------------------------
+INFO:httpx:HTTP Request: POST http://testserver/api/v1/auth/token "HTTP/1.1 200 OK"
+------------------------------ Captured log setup ------------------------------
+INFO     httpx:_client.py:1740 HTTP Request: POST http://testserver/api/v1/auth/token "HTTP/1.1 200 OK"
+----------------------------- Captured stdout call -----------------------------
+2025-12-20 09:37:07 [info     ] Request started                client_ip=127.0.0.1 method=POST url=http://testserver/api/v1/coaching/start
+2025-12-20 09:37:07 [info     ] PromptsLoader initialized with 5 coaching steps
+2025-12-20 09:37:07 [info     ] Request completed              duration_seconds=0.047188758850097656 method=POST status_code=200 url=http://testserver/api/v1/coaching/start
+2025-12-20 09:37:07 [info     ] Request started                client_ip=127.0.0.1 method=POST url=http://testserver/api/v1/coaching/step
+2025-12-20 09:37:07 [info     ] Création LLM provider          model=deepseek-chat plan=genesis_basic provider=deepseek
+2025-12-20 09:37:07 [info     ] DeepseekProvider initialized   base_url=https://api.deepseek.com model=deepseek-chat
+2025-12-20 09:37:07 [info     ] PromptsLoader initialized with 5 coaching steps
+2025-12-20 09:37:07 [info     ] CoachingLLMService initialized with Deepseek provider
+2025-12-20 09:37:07 [info     ] PromptsLoader initialized with 5 coaching steps
+2025-12-20 09:37:07 [info     ] Deepseek generate request      model=deepseek-chat prompt_length=756 temperature=0.1
+2025-12-20 09:37:09 [info     ] Deepseek generate success      response_length=10 tokens_used=242
+2025-12-20 09:37:09 [info     ] sector_detected                sector=restaurant
+2025-12-20 09:37:09 [info     ] requesting_llm_extraction      sector=restaurant step=vision
+2025-12-20 09:37:09 [info     ] Deepseek generate_structured request
+2025-12-20 09:37:09 [info     ] Deepseek generate request      model=deepseek-chat prompt_length=1451 temperature=0.3
+2025-12-20 09:37:19 [info     ] Deepseek generate success      response_length=1048 tokens_used=1184
+2025-12-20 09:37:19 [info     ] Deepseek structured response parsed successfully
+2025-12-20 09:37:19 [info     ] llm_extraction_completed       clarification=False confidence=0.85 is_valid=True step=vision
+2025-12-20 09:37:19 [info     ] Request completed              duration_seconds=11.711816787719727 method=POST status_code=200 url=http://testserver/api/v1/coaching/step
+2025-12-20 09:37:19 [info     ] Request started                client_ip=127.0.0.1 method=POST url=http://testserver/api/v1/coaching/generate-proposals
+2025-12-20 09:37:19 [info     ] Création LLM provider          model=deepseek-chat plan=genesis_basic provider=deepseek
+2025-12-20 09:37:19 [info     ] DeepseekProvider initialized   base_url=https://api.deepseek.com model=deepseek-chat
+2025-12-20 09:37:19 [info     ] PromptsLoader initialized with 5 coaching steps
+2025-12-20 09:37:19 [info     ] CoachingLLMService initialized with Deepseek provider
+2025-12-20 09:37:19 [info     ] Deepseek generate_structured request
+2025-12-20 09:37:19 [info     ] Deepseek generate request      model=deepseek-chat prompt_length=759 temperature=0.3
+2025-12-20 09:37:50 [info     ] Deepseek generate success      response_length=3453 tokens_used=1332
+2025-12-20 09:37:50 [error    ] Failed to parse Deepseek structured response error="Expecting ',' delimiter: line 20 column 5 (char 2977)" response_text='{\n    "proposals": [\n        {\n            "id": "p1",\n            "title": "Ambassadeur de la Côte d\'Ivoire à Dakar",\n            "content": "Notre mission est d\'être l\'ambassadeur incontournable de la gastronomie ivoirienne à Dakar, en offrant une expérience culinaire authentique, raffinée et mémorable. Nous nous engageons à célébrer et partager la richesse de notre patrimoine culinaire à travers des plats réinventés avec élégance, un service chaleureux et une atmosphère qui marie modernité et'
+2025-12-20 09:37:50 [error    ] proposals_generation_failed    error="Invalid JSON in Deepseek response: Expecting ',' delimiter: line 20 column 5 (char 2977)"
+2025-12-20 09:37:50 [info     ] Request completed              duration_seconds=30.55909299850464 method=POST status_code=200 url=http://testserver/api/v1/coaching/generate-proposals
+----------------------------- Captured stderr call -----------------------------
+INFO:httpx:HTTP Request: POST http://testserver/api/v1/coaching/start "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://testserver/api/v1/coaching/step "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://testserver/api/v1/coaching/generate-proposals "HTTP/1.1 200 OK"
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1740 HTTP Request: POST http://testserver/api/v1/coaching/start "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST http://testserver/api/v1/coaching/step "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST http://testserver/api/v1/coaching/generate-proposals "HTTP/1.1 200 OK"
+=========================== short test summary info ============================
+FAILED tests/test_e2e/test_coaching_silver_features.py::TestSilverCoachingFeaturesE2E::test_generate_proposals
+============= 1 failed, 5 passed, 21 warnings in 180.91s (0:03:00) =============

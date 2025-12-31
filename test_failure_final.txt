@@ -1,0 +1,100 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.14, pytest-9.0.2, pluggy-1.6.0
+rootdir: /app
+configfile: pytest.ini
+plugins: anyio-4.12.0, mock-3.15.1, Faker-39.0.0, asyncio-1.3.0, langsmith-0.5.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 2 items
+
+tests/test_e2e/test_coaching_flow.py F.                                  [100%]
+
+=================================== FAILURES ===================================
+__________ TestCoachingFlowE2E.test_full_coaching_to_site_generation ___________
+
+self = <tests.test_e2e.test_coaching_flow.TestCoachingFlowE2E object at 0x7fbeed6e58d0>
+client = <httpx.AsyncClient object at 0x7fbeeda38950>
+auth_headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzY4ODEzMzMzfQ.7kyXxhhJL-I0Xps5YUurJADwik2_kpqoVQmvkVKZ-Ao'}
+test_user = <app.models.user.User object at 0x7fbeed572dd0>
+
+    async def test_full_coaching_to_site_generation(self, client: AsyncClient, auth_headers: dict, test_user: User):
+        """ Tests a complete coaching journey for a fictional salon. """
+    
+        # 1. Start session
+        start_response = await client.post(
+            "/api/v1/coaching/start",
+            json={"message": "Je veux ouvrir un salon de coiffure moderne à Dakar."},
+            headers=auth_headers
+        )
+        assert start_response.status_code == 200
+        data = start_response.json()
+        session_id = data["session_id"]
+        assert data["current_step"] == CoachingStepEnum.VISION.value
+        assert len(data["clickable_choices"]) > 0
+    
+        # Steps to complete (Simulating user responses with more detail for better LLM validation)
+        steps = [
+            (CoachingStepEnum.VISION, "Ma vision est de devenir le salon de référence pour la coiffure africaine moderne à Dakar, en valorisant la beauté naturelle de chaque femme."),
+            (CoachingStepEnum.MISSION, "Ma mission est d'offrir des soins capillaires de haute qualité tout en préservant les traditions ancestrales et en utilisant des technologies modernes."),
+            (CoachingStepEnum.CLIENTELE, "Je cible les femmes actives de Dakar, âgées de 25 à 45 ans, qui recherchent à la fois l'élégance, le respect de leurs racines et un service rapide."),
+            (CoachingStepEnum.DIFFERENTIATION, "Nous nous différencions par l'utilisation exclusive de produits 100% locaux et bio, ainsi qu'une application de réservation qui réduit l'attente."),
+            (CoachingStepEnum.OFFRE, "Nous proposons des tresses artistiques, des soins profonds aux huiles naturelles, et des manucures de luxe inspirées de l'art local.")
+        ]
+    
+        for step_enum, response_text in steps:
+            step_response = await client.post(
+                "/api/v1/coaching/step",
+                json={
+                    "session_id": session_id,
+                    "user_response": response_text
+                },
+                headers=auth_headers
+            )
+            assert step_response.status_code == 200
+            step_data = step_response.json()
+    
+            # If it's not the last step, check transition
+            if step_enum != CoachingStepEnum.OFFRE:
+>               assert step_data["is_step_complete"] is True
+E               assert False is True
+
+tests/test_e2e/test_coaching_flow.py:54: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+2025-12-20 09:02:12 [info     ] Request started                client_ip=127.0.0.1 method=POST url=http://testserver/api/v1/auth/token
+2025-12-20 09:02:13 [info     ] Request completed              duration_seconds=0.5087206363677979 method=POST status_code=200 url=http://testserver/api/v1/auth/token
+---------------------------- Captured stderr setup -----------------------------
+INFO:httpx:HTTP Request: POST http://testserver/api/v1/auth/token "HTTP/1.1 200 OK"
+------------------------------ Captured log setup ------------------------------
+INFO     httpx:_client.py:1740 HTTP Request: POST http://testserver/api/v1/auth/token "HTTP/1.1 200 OK"
+----------------------------- Captured stdout call -----------------------------
+2025-12-20 09:02:13 [info     ] Request started                client_ip=127.0.0.1 method=POST url=http://testserver/api/v1/coaching/start
+2025-12-20 09:02:13 [info     ] PromptsLoader initialized with 5 coaching steps
+2025-12-20 09:02:13 [info     ] Request completed              duration_seconds=0.07116246223449707 method=POST status_code=200 url=http://testserver/api/v1/coaching/start
+2025-12-20 09:02:13 [info     ] Request started                client_ip=127.0.0.1 method=POST url=http://testserver/api/v1/coaching/step
+2025-12-20 09:02:13 [info     ] Création LLM provider          model=deepseek-chat plan=genesis_basic provider=deepseek
+2025-12-20 09:02:13 [info     ] DeepseekProvider initialized   base_url=https://api.deepseek.com model=deepseek-chat
+2025-12-20 09:02:13 [info     ] PromptsLoader initialized with 5 coaching steps
+2025-12-20 09:02:13 [info     ] CoachingLLMService initialized with Deepseek provider
+2025-12-20 09:02:13 [info     ] PromptsLoader initialized with 5 coaching steps
+2025-12-20 09:02:13 [info     ] Deepseek generate request      model=deepseek-chat prompt_length=761 temperature=0.1
+2025-12-20 09:02:15 [info     ] Deepseek generate success      response_length=5 tokens_used=242
+2025-12-20 09:02:15 [info     ] sector_detected                sector=salon
+2025-12-20 09:02:15 [info     ] requesting_llm_extraction      sector=salon step=vision
+2025-12-20 09:02:15 [info     ] Deepseek generate_structured request
+2025-12-20 09:02:15 [info     ] Deepseek generate request      model=deepseek-chat prompt_length=1451 temperature=0.3
+2025-12-20 09:02:24 [info     ] Deepseek generate success      response_length=984 tokens_used=1173
+2025-12-20 09:02:24 [info     ] Deepseek structured response parsed successfully
+2025-12-20 09:02:24 [info     ] llm_extraction_completed       clarification=False confidence=0.85 is_valid=True step=vision
+2025-12-20 09:02:24 [info     ] Request completed              duration_seconds=11.167391538619995 method=POST status_code=200 url=http://testserver/api/v1/coaching/step
+----------------------------- Captured stderr call -----------------------------
+INFO:httpx:HTTP Request: POST http://testserver/api/v1/coaching/start "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://testserver/api/v1/coaching/step "HTTP/1.1 200 OK"
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1740 HTTP Request: POST http://testserver/api/v1/coaching/start "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST http://testserver/api/v1/coaching/step "HTTP/1.1 200 OK"
+=========================== short test summary info ============================
+FAILED tests/test_e2e/test_coaching_flow.py::TestCoachingFlowE2E::test_full_coaching_to_site_generation
+================== 1 failed, 1 passed, 21 warnings in 28.14s ===================

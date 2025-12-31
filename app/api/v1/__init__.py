@@ -9,5 +9,6 @@ from . import (
     memory,
     modules,
     sites,
+    themes,
     users,
 )

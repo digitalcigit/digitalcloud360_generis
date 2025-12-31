@@ -18,21 +18,26 @@ class TemplateAgent:
         ]
         logger.info("TemplateAgent initialized.")
 
-    async def run(self, business_type: str) -> dict:
+    async def run(self, business_type: str, theme_id: int = None, theme_slug: str = None) -> dict:
         """
-        Sélectionne un template de site web approprié.
+        Sélectionne un template de site web approprié ou utilise celui spécifié.
 
         Args:
             business_type: Le type d'entreprise (ex: "e-commerce", "portfolio", "service").
+            theme_id: ID du thème sélectionné par l'utilisateur (optionnel).
+            theme_slug: Slug du thème sélectionné par l'utilisateur (optionnel).
 
         Returns:
             Un dictionnaire contenant les informations du template sélectionné.
         """
         try:
+            if theme_id and theme_slug:
+                logger.info("Using pre-selected theme", theme_id=theme_id, theme_slug=theme_slug)
+                return {"id": theme_slug, "theme_id": theme_id, "name": theme_slug.capitalize()}
+
             logger.info("Selecting website template...", business_type=business_type)
             
             # Logique de sélection de template simplifiée
-            # Dans une version avancée, on utiliserait un modèle de matching ou des règles plus complexes.
             selected_template = self._select_template(business_type)
             
             logger.info("Template selected successfully.", template=selected_template)

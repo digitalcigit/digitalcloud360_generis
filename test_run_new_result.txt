@@ -1,0 +1,285 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.14, pytest-9.0.2, pluggy-1.6.0
+rootdir: /app
+configfile: pytest.ini
+plugins: anyio-4.12.0, mock-3.15.1, Faker-39.0.0, asyncio-1.3.0, langsmith-0.5.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 6 items
+
+tests/test_e2e/test_coaching_flow.py F.                                  [ 33%]
+tests/test_e2e/test_coaching_silver_features.py ...F                     [100%]
+
+=================================== FAILURES ===================================
+__________ TestCoachingFlowE2E.test_full_coaching_to_site_generation ___________
+tests/test_e2e/test_coaching_flow.py:60: in test_full_coaching_to_site_generation
+    assert "blocks" in step_data["site_data"]
+E   assert 'blocks' in {'metadata': {'description': "Ma mission est d'offrir des soins capillaires de haute qualité tout en préservant les tr...FF', 'primary': '#3B82F6', 'secondary': '#10B981', 'text': '#1F2937'}, 'fonts': {'body': 'Inter', 'heading': 'Inter'}}}
+---------------------------- Captured stdout setup -----------------------------
+2025-12-20 09:28:42 [info     ] Request started                client_ip=127.0.0.1 method=POST url=http://testserver/api/v1/auth/token
+2025-12-20 09:28:42 [info     ] Request completed              duration_seconds=0.4768025875091553 method=POST status_code=200 url=http://testserver/api/v1/auth/token
+---------------------------- Captured stderr setup -----------------------------
+INFO:httpx:HTTP Request: POST http://testserver/api/v1/auth/token "HTTP/1.1 200 OK"
+------------------------------ Captured log setup ------------------------------
+INFO     httpx:_client.py:1740 HTTP Request: POST http://testserver/api/v1/auth/token "HTTP/1.1 200 OK"
+----------------------------- Captured stdout call -----------------------------
+2025-12-20 09:28:42 [info     ] Request started                client_ip=127.0.0.1 method=POST url=http://testserver/api/v1/coaching/start
+2025-12-20 09:28:42 [info     ] PromptsLoader initialized with 5 coaching steps
+2025-12-20 09:28:42 [info     ] Request completed              duration_seconds=0.0539708137512207 method=POST status_code=200 url=http://testserver/api/v1/coaching/start
+2025-12-20 09:28:42 [info     ] Request started                client_ip=127.0.0.1 method=POST url=http://testserver/api/v1/coaching/step
+2025-12-20 09:28:42 [info     ] Création LLM provider          model=deepseek-chat plan=genesis_basic provider=deepseek
+2025-12-20 09:28:42 [info     ] DeepseekProvider initialized   base_url=https://api.deepseek.com model=deepseek-chat
+2025-12-20 09:28:42 [info     ] PromptsLoader initialized with 5 coaching steps
+2025-12-20 09:28:42 [info     ] CoachingLLMService initialized with Deepseek provider
+2025-12-20 09:28:42 [info     ] PromptsLoader initialized with 5 coaching steps
+2025-12-20 09:28:42 [info     ] Deepseek generate request      model=deepseek-chat prompt_length=761 temperature=0.1
+2025-12-20 09:28:44 [info     ] Deepseek generate success      response_length=5 tokens_used=242
+2025-12-20 09:28:44 [info     ] sector_detected                sector=salon
+2025-12-20 09:28:44 [info     ] requesting_llm_extraction      sector=salon step=vision
+2025-12-20 09:28:44 [info     ] Deepseek generate_structured request
+2025-12-20 09:28:44 [info     ] Deepseek generate request      model=deepseek-chat prompt_length=1451 temperature=0.3
+2025-12-20 09:28:53 [info     ] Deepseek generate success      response_length=842 tokens_used=1135
+2025-12-20 09:28:53 [info     ] Deepseek structured response parsed successfully
+2025-12-20 09:28:53 [info     ] llm_extraction_completed       clarification=False confidence=0.85 is_valid=True step=vision
+2025-12-20 09:28:53 [info     ] Request completed              duration_seconds=10.350824117660522 method=POST status_code=200 url=http://testserver/api/v1/coaching/step
+2025-12-20 09:28:53 [info     ] Request started                client_ip=127.0.0.1 method=POST url=http://testserver/api/v1/coaching/step
+2025-12-20 09:28:53 [info     ] Création LLM provider          model=deepseek-chat plan=genesis_basic provider=deepseek
+2025-12-20 09:28:53 [info     ] DeepseekProvider initialized   base_url=https://api.deepseek.com model=deepseek-chat
+2025-12-20 09:28:53 [info     ] PromptsLoader initialized with 5 coaching steps
+2025-12-20 09:28:53 [info     ] CoachingLLMService initialized with Deepseek provider
+2025-12-20 09:28:53 [info     ] PromptsLoader initialized with 5 coaching steps
+2025-12-20 09:28:53 [info     ] Deepseek generate request      model=deepseek-chat prompt_length=913 temperature=0.1
+2025-12-20 09:28:55 [info     ] Deepseek generate success      response_length=5 tokens_used=275
+2025-12-20 09:28:55 [info     ] sector_detected                sector=salon
+2025-12-20 09:28:55 [info     ] requesting_llm_extraction      sector=salon step=mission
+2025-12-20 09:28:55 [info     ] Deepseek generate_structured request
+2025-12-20 09:28:55 [info     ] Deepseek generate request      model=deepseek-chat prompt_length=1588 temperature=0.3
+2025-12-20 09:29:03 [info     ] Deepseek generate success      response_length=858 tokens_used=1155
+2025-12-20 09:29:03 [info     ] Deepseek structured response parsed successfully
+2025-12-20 09:29:03 [info     ] llm_extraction_completed       clarification=False confidence=0.85 is_valid=True step=mission
+2025-12-20 09:29:03 [info     ] Request completed              duration_seconds=10.68378496170044 method=POST status_code=200 url=http://testserver/api/v1/coaching/step
+2025-12-20 09:29:03 [info     ] Request started                client_ip=127.0.0.1 method=POST url=http://testserver/api/v1/coaching/step
+2025-12-20 09:29:04 [info     ] Création LLM provider          model=deepseek-chat plan=genesis_basic provider=deepseek
+2025-12-20 09:29:04 [info     ] DeepseekProvider initialized   base_url=https://api.deepseek.com model=deepseek-chat
+2025-12-20 09:29:04 [info     ] PromptsLoader initialized with 5 coaching steps
+2025-12-20 09:29:04 [info     ] CoachingLLMService initialized with Deepseek provider
+2025-12-20 09:29:04 [info     ] PromptsLoader initialized with 5 coaching steps
+2025-12-20 09:29:04 [info     ] Deepseek generate request      model=deepseek-chat prompt_length=1061 temperature=0.1
+2025-12-20 09:29:05 [info     ] Deepseek generate success      response_length=5 tokens_used=321
+2025-12-20 09:29:05 [info     ] sector_detected                sector=salon
+2025-12-20 09:29:05 [info     ] requesting_llm_extraction      sector=salon step=clientele
+2025-12-20 09:29:05 [info     ] Deepseek generate_structured request
+2025-12-20 09:29:05 [info     ] Deepseek generate request      model=deepseek-chat prompt_length=1742 temperature=0.3
+2025-12-20 09:29:15 [info     ] Deepseek generate success      response_length=891 tokens_used=1228
+2025-12-20 09:29:15 [info     ] Deepseek structured response parsed successfully
+2025-12-20 09:29:15 [info     ] llm_extraction_completed       clarification=False confidence=0.85 is_valid=True step=clientele
+2025-12-20 09:29:15 [info     ] Request completed              duration_seconds=11.43805456161499 method=POST status_code=200 url=http://testserver/api/v1/coaching/step
+2025-12-20 09:29:15 [info     ] Request started                client_ip=127.0.0.1 method=POST url=http://testserver/api/v1/coaching/step
+2025-12-20 09:29:15 [info     ] Création LLM provider          model=deepseek-chat plan=genesis_basic provider=deepseek
+2025-12-20 09:29:15 [info     ] DeepseekProvider initialized   base_url=https://api.deepseek.com model=deepseek-chat
+2025-12-20 09:29:15 [info     ] PromptsLoader initialized with 5 coaching steps
+2025-12-20 09:29:15 [info     ] CoachingLLMService initialized with Deepseek provider
+2025-12-20 09:29:15 [info     ] PromptsLoader initialized with 5 coaching steps
+2025-12-20 09:29:15 [info     ] Deepseek generate request      model=deepseek-chat prompt_length=1207 temperature=0.1
+2025-12-20 09:29:17 [info     ] Deepseek generate success      response_length=5 tokens_used=356
+2025-12-20 09:29:17 [info     ] sector_detected                sector=salon
+2025-12-20 09:29:17 [info     ] requesting_llm_extraction      sector=salon step=differentiation
+2025-12-20 09:29:17 [info     ] Deepseek generate_structured request
+2025-12-20 09:29:17 [info     ] Deepseek generate request      model=deepseek-chat prompt_length=1897 temperature=0.3
+2025-12-20 09:29:28 [info     ] Deepseek generate success      response_length=1242 tokens_used=1333
+2025-12-20 09:29:28 [info     ] Deepseek structured response parsed successfully
+2025-12-20 09:29:28 [info     ] llm_extraction_completed       clarification=False confidence=0.85 is_valid=True step=differentiation
+2025-12-20 09:29:28 [info     ] Request completed              duration_seconds=12.927594184875488 method=POST status_code=200 url=http://testserver/api/v1/coaching/step
+2025-12-20 09:29:28 [info     ] Request started                client_ip=127.0.0.1 method=POST url=http://testserver/api/v1/coaching/step
+2025-12-20 09:29:28 [info     ] Création LLM provider          model=deepseek-chat plan=genesis_basic provider=deepseek
+2025-12-20 09:29:28 [info     ] DeepseekProvider initialized   base_url=https://api.deepseek.com model=deepseek-chat
+2025-12-20 09:29:28 [info     ] PromptsLoader initialized with 5 coaching steps
+2025-12-20 09:29:28 [info     ] CoachingLLMService initialized with Deepseek provider
+2025-12-20 09:29:28 [info     ] PromptsLoader initialized with 5 coaching steps
+2025-12-20 09:29:28 [info     ] Deepseek generate request      model=deepseek-chat prompt_length=1340 temperature=0.1
+2025-12-20 09:29:30 [info     ] Deepseek generate success      response_length=5 tokens_used=391
+2025-12-20 09:29:30 [info     ] sector_detected                sector=salon
+2025-12-20 09:29:30 [info     ] requesting_llm_extraction      sector=salon step=offre
+2025-12-20 09:29:30 [info     ] Deepseek generate_structured request
+2025-12-20 09:29:30 [info     ] Deepseek generate request      model=deepseek-chat prompt_length=1999 temperature=0.3
+2025-12-20 09:29:39 [info     ] Deepseek generate success      response_length=1010 tokens_used=1320
+2025-12-20 09:29:39 [info     ] Deepseek structured response parsed successfully
+2025-12-20 09:29:39 [info     ] llm_extraction_completed       clarification=False confidence=0.85 is_valid=True step=offre
+2025-12-20 09:29:39 [info     ] triggering_site_generation     session_id=b878a9f1-a4a9-40bc-bf75-0644e5743612
+2025-12-20 09:29:39 [info     ] Création Search provider       plan=genesis_basic provider=kimi
+2025-12-20 09:29:39 [info     ] KimiProvider initialized       base_url=https://api.moonshot.ai model=moonshot-v1-128k
+2025-12-20 09:29:39 [info     ] Création LLM provider          model=deepseek-chat plan=genesis_basic provider=deepseek
+2025-12-20 09:29:39 [info     ] DeepseekProvider initialized   base_url=https://api.deepseek.com model=deepseek-chat
+2025-12-20 09:29:39 [info     ] ResearchSubAgent initialized with multi-provider architecture
+2025-12-20 09:29:39 [info     ] Création LLM provider          model=deepseek-chat plan=genesis_basic provider=deepseek
+2025-12-20 09:29:39 [info     ] DeepseekProvider initialized   base_url=https://api.deepseek.com model=deepseek-chat
+2025-12-20 09:29:39 [info     ] ContentSubAgent initialized with multi-provider architecture
+2025-12-20 09:29:39 [info     ] LogoAIClient initialized (mock).
+2025-12-20 09:29:39 [info     ] LogoAgent initialized.
+2025-12-20 09:29:39 [info     ] SeoAgent initialized.
+2025-12-20 09:29:39 [info     ] TemplateAgent initialized.
+2025-12-20 09:29:39 [info     ] LangGraphOrchestrator initialized with all agents.
+2025-12-20 09:29:39 [info     ] Starting LangGraph orchestration (Sprint 2 - nouveaux sub-agents)... brief_id=b878a9f1-a4a9-40bc-bf75-0644e5743612 business_name='Projet Sans Nom' user_id=1
+2025-12-20 09:29:39 [info     ] Executing Research Sub-Agent (Sprint 2 - multi-provider)
+2025-12-20 09:29:39 [info     ] Starting market analysis       business='Projet Sans Nom' location={'country': 'Sénégal', 'city': 'Dakar'} sector=default
+2025-12-20 09:29:39 [info     ] Searching competitors          query='concurrents default Dakar Sénégal marché entreprise'
+2025-12-20 09:29:39 [info     ] Kimi search request            include_domains=['africanentrepreneur.com', 'businessafrica.net', 'entrepreneurafrique.com', 'lesechos.fr', 'jeune-afrique.com', 'afrik.com', 'africaintelligence.fr'] query='concurrents default Dakar Sénégal marché entreprise' search_depth=advanced
+2025-12-20 09:29:39 [info     ] Searching market trends        query='tendances marché default Sénégal francophone 2025 croissance'
+2025-12-20 09:29:39 [info     ] Kimi search request            include_domains=['statista.com', 'mordorintelligence.com', 'africanentrepreneur.com', 'businessafrica.net', 'entrepreneurafrique.com', 'lesechos.fr', 'jeune-afrique.com', 'afrik.com', 'africaintelligence.fr'] query='tendances marché default Sénégal francophone 2025 croissance' search_depth=basic
+2025-12-20 09:29:39 [info     ] Searching pricing data         query='prix tarif default Sénégal coût abonnement service'
+2025-12-20 09:29:39 [info     ] Kimi search request            include_domains=None query='prix tarif default Sénégal coût abonnement service' search_depth=basic
+2025-12-20 09:29:39 [info     ] Searching opportunities        query='opportunités business default Afrique innovation startup'
+2025-12-20 09:29:39 [info     ] Kimi search request            include_domains=None query='opportunités business default Afrique innovation startup' search_depth=basic
+2025-12-20 09:29:40 [error    ] Kimi API error                 response='{"error":{"message":"Invalid Authentication","type":"invalid_authentication_error"}}' status_code=401
+2025-12-20 09:29:40 [warning  ] Competitor search failed       error='Kimi API error: 401'
+2025-12-20 09:29:40 [error    ] Kimi API error                 response='{"error":{"message":"Invalid Authentication","type":"invalid_authentication_error"}}' status_code=401
+2025-12-20 09:29:40 [error    ] Kimi API error                 response='{"error":{"message":"Invalid Authentication","type":"invalid_authentication_error"}}' status_code=401
+2025-12-20 09:29:40 [warning  ] Opportunities search failed    error='Kimi API error: 401'
+2025-12-20 09:29:40 [warning  ] Market trends search failed    error='Kimi API error: 401'
+2025-12-20 09:29:40 [error    ] Kimi API error                 response='{"error":{"message":"Invalid Authentication","type":"invalid_authentication_error"}}' status_code=401
+2025-12-20 09:29:40 [warning  ] Pricing search failed          error='Kimi API error: 401'
+2025-12-20 09:29:40 [info     ] Deepseek generate_structured request
+2025-12-20 09:29:40 [info     ] Deepseek generate request      model=deepseek-chat prompt_length=2750 temperature=0.3
+2025-12-20 09:29:53 [info     ] Deepseek generate success      response_length=1465 tokens_used=1338
+2025-12-20 09:29:53 [info     ] Deepseek structured response parsed successfully
+2025-12-20 09:29:53 [info     ] Market analysis completed successfully competitors_found=0 opportunities_found=0
+2025-12-20 09:29:53 [info     ] Research completed             competitors_found=0 opportunities_found=0
+2025-12-20 09:29:53 [info     ] Executing Content Sub-Agent (Sprint 2 - multi-provider)
+2025-12-20 09:29:53 [info     ] Generating website content     business='Projet Sans Nom' location={'country': 'Sénégal', 'city': 'Dakar'} sector=default
+2025-12-20 09:29:53 [info     ] Target languages for sénégal: ['fr', 'wo']
+2025-12-20 09:29:53 [info     ] Executing Logo Agent (legacy)
+2025-12-20 09:29:53 [info     ] Generating logo...             company_name='Projet Sans Nom'
+2025-12-20 09:29:53 [error    ] Error during logo agent execution error="LogoAIClient.generate_logo() got an unexpected keyword argument 'slogan'"
+2025-12-20 09:29:53 [error    ] Logo agent failed              error='Failed to generate logo.'
+2025-12-20 09:29:53 [info     ] Executing SEO Agent (legacy)
+2025-12-20 09:29:53 [info     ] Generating SEO data...         market_focus="default - Je cible les femmes actives de Dakar, âgées de 25 à 45 ans, qui recherchent à la fois l'élégance, le respect de leurs racines et un service rapide."
+2025-12-20 09:29:53 [error    ] Error during SEO agent execution error="TavilyClient.search_market() got an unexpected keyword argument 'topic'"
+2025-12-20 09:29:53 [error    ] SEO agent failed               error='Failed to generate SEO data.'
+2025-12-20 09:29:53 [info     ] Executing Template Agent (legacy)
+2025-12-20 09:29:53 [info     ] Selecting website template...  business_type=default
+2025-12-20 09:29:53 [info     ] Template selected successfully. template={'id': 'modern_business_01', 'name': 'Modern Business'}
+2025-12-20 09:29:53 [info     ] Deepseek generate_structured request
+2025-12-20 09:29:53 [info     ] Deepseek generate request      model=deepseek-chat prompt_length=2880 temperature=0.7
+2025-12-20 09:29:53 [info     ] Deepseek generate_structured request
+2025-12-20 09:29:53 [info     ] Deepseek generate request      model=deepseek-chat prompt_length=1375 temperature=0.75
+2025-12-20 09:29:53 [info     ] Deepseek generate_structured request
+2025-12-20 09:29:53 [info     ] Deepseek generate request      model=deepseek-chat prompt_length=980 temperature=0.6
+2025-12-20 09:30:00 [info     ] Deepseek generate success      response_length=636 tokens_used=560
+2025-12-20 09:30:00 [info     ] Deepseek structured response parsed successfully
+2025-12-20 09:30:23 [info     ] Deepseek generate success      response_length=3263 tokens_used=1871
+2025-12-20 09:30:23 [info     ] Deepseek structured response parsed successfully
+2025-12-20 09:30:24 [error    ] Deepseek request timeout       timeout=30
+2025-12-20 09:30:24 [error    ] About content generation failed error='Deepseek timeout after 30s'
+2025-12-20 09:30:24 [info     ] Website content generated successfully errors_count=0 languages=['fr', 'wo']
+2025-12-20 09:30:24 [info     ] Content generated              languages=['fr', 'wo'] sections=5
+2025-12-20 09:30:24 [info     ] LangGraph orchestration completed successfully brief_id=b878a9f1-a4a9-40bc-bf75-0644e5743612 confidence=0.6 ready_for_website=True successful_agents=3/5
+2025-12-20 09:30:24 [info     ] Request completed              duration_seconds=55.65861797332764 method=POST status_code=200 url=http://testserver/api/v1/coaching/step
+----------------------------- Captured stderr call -----------------------------
+INFO:httpx:HTTP Request: POST http://testserver/api/v1/coaching/start "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://testserver/api/v1/coaching/step "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://testserver/api/v1/coaching/step "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://testserver/api/v1/coaching/step "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://testserver/api/v1/coaching/step "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.moonshot.ai/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+INFO:httpx:HTTP Request: POST https://api.moonshot.ai/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+INFO:httpx:HTTP Request: POST https://api.moonshot.ai/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+INFO:httpx:HTTP Request: POST https://api.moonshot.ai/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://testserver/api/v1/coaching/step "HTTP/1.1 200 OK"
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1740 HTTP Request: POST http://testserver/api/v1/coaching/start "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST http://testserver/api/v1/coaching/step "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST http://testserver/api/v1/coaching/step "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST http://testserver/api/v1/coaching/step "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST http://testserver/api/v1/coaching/step "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.moonshot.ai/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.moonshot.ai/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.moonshot.ai/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.moonshot.ai/v1/chat/completions "HTTP/1.1 401 Unauthorized"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST http://testserver/api/v1/coaching/step "HTTP/1.1 200 OK"
+____________ TestSilverCoachingFeaturesE2E.test_generate_proposals _____________
+tests/test_e2e/test_coaching_silver_features.py:92: in test_generate_proposals
+    assert any(word in p["content"].lower() for p in data["proposals"] for word in ["restaurant", "cuisine", "plat", "alimentaire", "food"])
+E   assert False
+E    +  where False = any(<generator object TestSilverCoachingFeaturesE2E.test_generate_proposals.<locals>.<genexpr> at 0x7f3a1fe9cc70>)
+---------------------------- Captured stdout setup -----------------------------
+2025-12-20 09:31:02 [info     ] Request started                client_ip=127.0.0.1 method=POST url=http://testserver/api/v1/auth/token
+2025-12-20 09:31:03 [info     ] Request completed              duration_seconds=0.4977152347564697 method=POST status_code=200 url=http://testserver/api/v1/auth/token
+---------------------------- Captured stderr setup -----------------------------
+INFO:httpx:HTTP Request: POST http://testserver/api/v1/auth/token "HTTP/1.1 200 OK"
+------------------------------ Captured log setup ------------------------------
+INFO     httpx:_client.py:1740 HTTP Request: POST http://testserver/api/v1/auth/token "HTTP/1.1 200 OK"
+----------------------------- Captured stdout call -----------------------------
+2025-12-20 09:31:03 [info     ] Request started                client_ip=127.0.0.1 method=POST url=http://testserver/api/v1/coaching/start
+2025-12-20 09:31:03 [info     ] PromptsLoader initialized with 5 coaching steps
+2025-12-20 09:31:03 [info     ] Request completed              duration_seconds=0.05473160743713379 method=POST status_code=200 url=http://testserver/api/v1/coaching/start
+2025-12-20 09:31:03 [info     ] Request started                client_ip=127.0.0.1 method=POST url=http://testserver/api/v1/coaching/step
+2025-12-20 09:31:03 [info     ] Création LLM provider          model=deepseek-chat plan=genesis_basic provider=deepseek
+2025-12-20 09:31:03 [info     ] DeepseekProvider initialized   base_url=https://api.deepseek.com model=deepseek-chat
+2025-12-20 09:31:03 [info     ] PromptsLoader initialized with 5 coaching steps
+2025-12-20 09:31:03 [info     ] CoachingLLMService initialized with Deepseek provider
+2025-12-20 09:31:03 [info     ] PromptsLoader initialized with 5 coaching steps
+2025-12-20 09:31:03 [info     ] Deepseek generate request      model=deepseek-chat prompt_length=676 temperature=0.1
+2025-12-20 09:31:05 [info     ] Deepseek generate success      response_length=10 tokens_used=224
+2025-12-20 09:31:05 [info     ] sector_detected                sector=restaurant
+2025-12-20 09:31:05 [info     ] requesting_llm_extraction      sector=restaurant step=vision
+2025-12-20 09:31:05 [info     ] Deepseek generate_structured request
+2025-12-20 09:31:05 [info     ] Deepseek generate request      model=deepseek-chat prompt_length=1371 temperature=0.3
+2025-12-20 09:31:14 [info     ] Deepseek generate success      response_length=865 tokens_used=1119
+2025-12-20 09:31:14 [info     ] Deepseek structured response parsed successfully
+2025-12-20 09:31:14 [info     ] llm_extraction_completed       clarification=True confidence=0.3 is_valid=False step=vision
+2025-12-20 09:31:14 [info     ] Request completed              duration_seconds=11.284549951553345 method=POST status_code=200 url=http://testserver/api/v1/coaching/step
+2025-12-20 09:31:14 [info     ] Request started                client_ip=127.0.0.1 method=POST url=http://testserver/api/v1/coaching/generate-proposals
+2025-12-20 09:31:14 [info     ] Création LLM provider          model=deepseek-chat plan=genesis_basic provider=deepseek
+2025-12-20 09:31:14 [info     ] DeepseekProvider initialized   base_url=https://api.deepseek.com model=deepseek-chat
+2025-12-20 09:31:14 [info     ] PromptsLoader initialized with 5 coaching steps
+2025-12-20 09:31:14 [info     ] CoachingLLMService initialized with Deepseek provider
+2025-12-20 09:31:14 [info     ] Deepseek generate_structured request
+2025-12-20 09:31:14 [info     ] Deepseek generate request      model=deepseek-chat prompt_length=622 temperature=0.3
+2025-12-20 09:31:37 [info     ] Deepseek generate success      response_length=2721 tokens_used=1044
+2025-12-20 09:31:37 [info     ] Deepseek structured response parsed successfully
+2025-12-20 09:31:37 [info     ] Request completed              duration_seconds=22.625598669052124 method=POST status_code=200 url=http://testserver/api/v1/coaching/generate-proposals
+----------------------------- Captured stderr call -----------------------------
+INFO:httpx:HTTP Request: POST http://testserver/api/v1/coaching/start "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://testserver/api/v1/coaching/step "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST http://testserver/api/v1/coaching/generate-proposals "HTTP/1.1 200 OK"
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1740 HTTP Request: POST http://testserver/api/v1/coaching/start "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST http://testserver/api/v1/coaching/step "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1740 HTTP Request: POST http://testserver/api/v1/coaching/generate-proposals "HTTP/1.1 200 OK"
+=========================== short test summary info ============================
+FAILED tests/test_e2e/test_coaching_flow.py::TestCoachingFlowE2E::test_full_coaching_to_site_generation
+FAILED tests/test_e2e/test_coaching_silver_features.py::TestSilverCoachingFeaturesE2E::test_generate_proposals
+============= 2 failed, 4 passed, 21 warnings in 177.74s (0:02:57) =============

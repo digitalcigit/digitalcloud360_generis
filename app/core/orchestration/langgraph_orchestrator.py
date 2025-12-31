@@ -1,6 +1,6 @@
 import structlog
 from langgraph.graph import StateGraph, END
-from typing import TypedDict, Annotated, List, Dict, Any
+from typing import TypedDict, Annotated, List, Dict, Any, Optional
 import operator
 
 # Nouveaux sub-agents Sprint 2
@@ -31,9 +31,11 @@ class AgentState(TypedDict):
     template_selection: Dict[str, Any]
     
     # Metadata
+    selected_theme_id: Optional[int]
+    selected_theme_slug: Optional[str]
     overall_confidence: float
     is_ready_for_website: bool
-    error: str
+    error: Optional[str]
 
 class LangGraphOrchestrator:
     """
@@ -221,7 +223,11 @@ class LangGraphOrchestrator:
         try:
             # Adapter format pour agent legacy
             business_type = brief.get('industry_sector', 'general')
-            result = await self.template_agent.run(business_type)
+            result = await self.template_agent.run(
+                business_type=business_type,
+                theme_id=state.get('selected_theme_id'),
+                theme_slug=state.get('selected_theme_slug')
+            )
             return {"template_selection": result}
         except Exception as e:
             logger.error("Template agent failed", error=str(e))
@@ -264,6 +270,8 @@ class LangGraphOrchestrator:
                 "logo_creation": {},
                 "seo_optimization": {},
                 "template_selection": {},
+                "selected_theme_id": orchestration_input.get('selected_theme_id'),
+                "selected_theme_slug": orchestration_input.get('selected_theme_slug'),
                 "overall_confidence": 0.0,
                 "is_ready_for_website": False,
                 "error": None

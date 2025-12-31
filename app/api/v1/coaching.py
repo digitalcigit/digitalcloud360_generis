@@ -22,6 +22,8 @@ from app.schemas.coaching import (
     ReformulateResponse,
     GenerateProposalsResponse
 )
+from app.schemas.theme import BriefCompletedResponse
+from app.models.coaching import BusinessBrief
 from app.services.user_service import get_current_user
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -307,103 +309,67 @@ async def process_coaching_step(request: CoachingStepRequest, db: AsyncSession =
             clickable_choices=next_guidance.get("user_clickable", next_guidance.get("clickable_choices", []))
         )
 
-    # --- ÉTAPE OFFRE COMPLÉTÉE -> DÉCLENCHER GÉNÉRATION SITE ---
-    session_data["status"] = SessionStatusEnum.COMPLETED.value
+    # --- ÉTAPE OFFRE COMPLÉTÉE -> SAUVEGARDER BRIEF ET ARRÊTER ---
+    session_data["status"] = SessionStatusEnum.COACHING_COMPLETE.value
     
-    # Update session in DB
-    stmt = update(CoachingSession).where(CoachingSession.session_id == request.session_id).values(status=SessionStatusEnum.COMPLETED)
-    await db.execute(stmt)
-    await db.commit()
-
-    # ============ NOUVEAU: Trigger Site Generation (GEN-WO-002) ============
-    logger.info("triggering_site_generation", session_id=request.session_id)
-    
-    # 1. Construire le business_brief depuis les étapes coaching
+    # 1. Construire le business_brief dict depuis les étapes coaching
     business_brief_dict = await _build_brief_from_coaching_steps(
         session_id=session_data["id"],
         db=db,
         session_data=session_data,
         redis_client=redis_client
     )
+
+    # 2. Persister le BusinessBrief en base de données
+    # Vérifier s'il existe déjà pour cette session (idempotence)
+    result = await db.execute(select(BusinessBrief).filter(BusinessBrief.coaching_session_id == session_data["id"]))
+    existing_brief = result.scalars().first()
     
-    # DEBUG GEN-WO-006: Vérifier business_name
-    logger.info(
-        "business_brief_constructed",
-        business_name=business_brief_dict.get("business_name"),
-        has_onboarding=bool(session_data.get("onboarding")),
-        onboarding_name=session_data.get("onboarding", {}).get("business_name") if session_data.get("onboarding") else None
+    if existing_brief:
+        brief_db = existing_brief
+        # Update existing
+        brief_db.business_name = business_brief_dict.get("business_name")
+        brief_db.vision = business_brief_dict.get("vision")
+        brief_db.mission = business_brief_dict.get("mission")
+        brief_db.target_audience = business_brief_dict.get("target_market")
+        brief_db.differentiation = business_brief_dict.get("competitive_advantage")
+        brief_db.value_proposition = business_brief_dict.get("value_proposition")
+        brief_db.sector = business_brief_dict.get("industry_sector")
+    else:
+        # Create new
+        brief_db = BusinessBrief(
+            coaching_session_id=session_data["id"],
+            business_name=business_brief_dict.get("business_name", "Mon Business"),
+            vision=business_brief_dict.get("vision", ""),
+            mission=business_brief_dict.get("mission", ""),
+            target_audience=business_brief_dict.get("target_market", ""),
+            differentiation=business_brief_dict.get("competitive_advantage", ""),
+            value_proposition=business_brief_dict.get("value_proposition", ""),
+            sector=business_brief_dict.get("industry_sector", "default"),
+            location=business_brief_dict.get("location", {})
+        )
+        db.add(brief_db)
+    
+    # Update session status
+    stmt = update(CoachingSession).where(CoachingSession.session_id == request.session_id).values(
+        status=SessionStatusEnum.COACHING_COMPLETE
     )
+    await db.execute(stmt)
+    await db.commit()
+    await db.refresh(brief_db)
+
+    logger.info("coaching_finished_brief_saved", session_id=request.session_id, brief_id=brief_db.id)
     
-    # 2. Exécuter l'orchestrateur LangGraph
-    orchestrator = LangGraphOrchestrator()
-    orchestration_result = await orchestrator.run({
-        "user_id": current_user.id,
-        "brief_id": request.session_id,
-        "business_brief": business_brief_dict
-    })
-    
-    # GEN-WO-006 FIX: Forcer business_name et secteur depuis onboarding
-    # L'orchestrateur peut écraser ces valeurs, on les restaure explicitement
-    if session_data and "onboarding" in session_data:
-        onboarding = session_data["onboarding"]
-        if onboarding.get("business_name"):
-            orchestration_result["business_brief"]["business_name"] = onboarding["business_name"]
-        if onboarding.get("sector_resolved") or onboarding.get("sector"):
-            orchestration_result["business_brief"]["industry_sector"] = onboarding.get("sector_resolved") or onboarding.get("sector")
-    
-    # 3. Transformer en SiteDefinition
-    transformer = BriefToSiteTransformer()
-    
-    # Créer un objet brief data enrichi
-    enriched_brief = BusinessBriefData(
-        business_name=orchestration_result["business_brief"].get("business_name", "Mon Business"),
-        sector=orchestration_result["business_brief"].get("industry_sector", "default"),
-        vision=business_brief_dict.get("vision", ""),
-        mission=business_brief_dict.get("mission", ""),
-        target_audience=business_brief_dict.get("target_market", ""),
-        differentiation=business_brief_dict.get("competitive_advantage", ""),
-        value_proposition=business_brief_dict.get("value_proposition", ""),
-        location=business_brief_dict.get("location", {}),
-        content_generation=orchestration_result.get("content_generation", {}),
-        logo_creation=orchestration_result.get("logo_creation", {}),
-        seo_optimization=orchestration_result.get("seo_optimization", {})
-    )
-    
-    site_definition = transformer.transform(enriched_brief)
-    
-    # DEBUG: Log site_definition structure
-    logger.info(
-        "Site definition generated",
-        has_metadata=bool(site_definition.get("metadata")),
-        has_theme=bool(site_definition.get("theme")),
-        pages_count=len(site_definition.get("pages", [])),
-        first_page_sections=len(site_definition.get("pages", [{}])[0].get("sections", [])) if site_definition.get("pages") else 0
-    )
-        
-    # 4. Sauvegarder en Redis pour le frontend
-    await redis_client.set(
-        f"site:{request.session_id}", 
-        json.dumps(site_definition), 
-        ex=86400  # 24h
-    )
-    
-    # Prepare the final response
-    coach_message = "Félicitations ! Vous avez terminé votre session de coaching Genesis AI. Votre site personnalisé a été généré !"
-    
-    progress = {step.value: True for step in CoachingStepEnum}
-    
-    # GEN-WO-006: Préserver onboarding lors de la mise à jour Redis
+    # 3. Mettre à jour Redis
     await preserve_onboarding_on_save(session_data['session_id'], session_data, redis_client)
 
-    return CoachingResponse(
-        session_id=session_data["session_id"],
-        current_step=session_data["current_step"],
-        coach_message=coach_message,
-        examples=[],
-        next_questions=[],
-        progress=progress,
-        is_step_complete=True,
-        site_data=site_definition
+    # 4. Retourner la réponse de fin de coaching (Redirect vers thèmes)
+    return BriefCompletedResponse(
+        status="BRIEF_COMPLETED",
+        brief_id=brief_db.id,
+        session_id=request.session_id,
+        redirect_url=f"/genesis/themes?brief_id={brief_db.id}",
+        message="Analyse terminée avec succès ! Découvrons maintenant les designs qui vous correspondent."
     )
 
     # Placeholder for other steps
