@@ -22,6 +22,9 @@ export default function ThemeProvider({ theme, children }: ThemeProviderProps) {
         // Fonts (Simulation - idealement chargerait depuis Google Fonts)
         root.style.setProperty('--font-heading', theme.fonts.heading);
         root.style.setProperty('--font-body', theme.fonts.body);
+        if (theme.fonts.accent) {
+            root.style.setProperty('--font-accent', theme.fonts.accent);
+        }
 
     }, [theme]);
 

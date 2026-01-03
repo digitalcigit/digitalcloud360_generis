@@ -8,7 +8,8 @@ import {
   ContactSectionContent,
   GallerySectionContent,
   CTASectionContent,
-  FooterSectionContent
+  FooterSectionContent,
+  MenuSectionContent
 } from './blocks';
 
 // ===== BLOCK TYPES =====
@@ -22,7 +23,8 @@ export type BlockType =
   | 'contact'
   | 'gallery'
   | 'cta'
-  | 'footer';
+  | 'footer'
+  | 'menu';
 
 // ===== BLOCK CONTENT MAP =====
 export interface BlockContentMap {
@@ -36,6 +38,7 @@ export interface BlockContentMap {
   gallery: GallerySectionContent;
   cta: CTASectionContent;
   footer: FooterSectionContent;
+  menu: MenuSectionContent;
 }
 
 // ===== SECTION GÉNÉRIQUE TYPÉE =====
@@ -57,7 +60,8 @@ export type SiteSection =
   | SiteSectionGeneric<'contact'>
   | SiteSectionGeneric<'gallery'>
   | SiteSectionGeneric<'cta'>
-  | SiteSectionGeneric<'footer'>;
+  | SiteSectionGeneric<'footer'>
+  | SiteSectionGeneric<'menu'>;
 
 // ===== STYLES =====
 export interface SectionStyles {
@@ -97,6 +101,7 @@ export interface ThemeColors {
 export interface ThemeFonts {
   heading: string;
   body: string;
+  accent?: string;
 }
 
 export interface SitePage {

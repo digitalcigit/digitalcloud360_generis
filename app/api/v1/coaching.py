@@ -1,6 +1,6 @@
 """Coaching endpoints for Genesis AI Service"""
 
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Union
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import select, update
@@ -202,7 +202,7 @@ async def start_coaching_session(request: CoachingRequest, db: AsyncSession = De
         clickable_choices=vision_guidance.get("user_clickable", vision_guidance.get("clickable_choices", []))
     )
 
-@router.post("/step", response_model=CoachingResponse)
+@router.post("/step", response_model=Union[CoachingResponse, BriefCompletedResponse])
 async def process_coaching_step(request: CoachingStepRequest, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user), redis_client: redis.Redis = Depends(get_redis_client)):
     """Processes a single step of the coaching session."""
     session_data_json = await redis_client.get(f"session:{request.session_id}")
@@ -226,7 +226,7 @@ async def process_coaching_step(request: CoachingStepRequest, db: AsyncSession =
     detected_sector = await llm_service.detect_sector(previous_msgs)
     
     # 2. Valider et extraire avec LLM
-    brief_context = await _build_brief_from_coaching_steps(session_data["id"], db, session_data, redis_client)
+    brief_context = await _build_brief_from_coaching_steps(session_data["id"], request.session_id, db, session_data, redis_client)
     extraction_result = await llm_service.extract_and_validate(
         step=session_data["current_step"],
         user_response=request.user_response,
@@ -314,7 +314,8 @@ async def process_coaching_step(request: CoachingStepRequest, db: AsyncSession =
     
     # 1. Construire le business_brief dict depuis les étapes coaching
     business_brief_dict = await _build_brief_from_coaching_steps(
-        session_id=session_data["id"],
+        session_db_id=session_data["id"],
+        session_uuid=session_data["session_id"],
         db=db,
         session_data=session_data,
         redis_client=redis_client
@@ -328,7 +329,7 @@ async def process_coaching_step(request: CoachingStepRequest, db: AsyncSession =
     if existing_brief:
         brief_db = existing_brief
         # Update existing
-        brief_db.business_name = business_brief_dict.get("business_name")
+        brief_db.business_name = business_brief_dict.get("business_name") or brief_db.business_name or "Projet Sans Nom"
         brief_db.vision = business_brief_dict.get("vision")
         brief_db.mission = business_brief_dict.get("mission")
         brief_db.target_audience = business_brief_dict.get("target_market")
@@ -339,14 +340,14 @@ async def process_coaching_step(request: CoachingStepRequest, db: AsyncSession =
         # Create new
         brief_db = BusinessBrief(
             coaching_session_id=session_data["id"],
-            business_name=business_brief_dict.get("business_name", "Mon Business"),
-            vision=business_brief_dict.get("vision", ""),
-            mission=business_brief_dict.get("mission", ""),
-            target_audience=business_brief_dict.get("target_market", ""),
-            differentiation=business_brief_dict.get("competitive_advantage", ""),
-            value_proposition=business_brief_dict.get("value_proposition", ""),
-            sector=business_brief_dict.get("industry_sector", "default"),
-            location=business_brief_dict.get("location", {})
+            business_name=business_brief_dict.get("business_name") or "Mon Business",
+            vision=business_brief_dict.get("vision") or "",
+            mission=business_brief_dict.get("mission") or "",
+            target_audience=business_brief_dict.get("target_market") or "",
+            differentiation=business_brief_dict.get("competitive_advantage") or "",
+            value_proposition=business_brief_dict.get("value_proposition") or "",
+            sector=business_brief_dict.get("industry_sector") or "default",
+            location=business_brief_dict.get("location") or {}
         )
         db.add(brief_db)
     
@@ -380,7 +381,7 @@ async def process_coaching_step(request: CoachingStepRequest, db: AsyncSession =
         progress={step.value: False for step in CoachingStepEnum}
     )
 
-async def _build_brief_from_coaching_steps(session_id: int, db: AsyncSession, session_data: Dict[str, Any] = None, redis_client: redis.Redis = None) -> Dict[str, Any]:
+async def _build_brief_from_coaching_steps(session_db_id: int, session_uuid: str, db: AsyncSession, session_data: Dict[str, Any] = None, redis_client: redis.Redis = None) -> Dict[str, Any]:
     """Construit le business_brief depuis les étapes coaching sauvegardées + onboarding"""
     from sqlalchemy import select
     from app.models.coaching import CoachingStep, CoachingStepEnum
@@ -388,19 +389,33 @@ async def _build_brief_from_coaching_steps(session_id: int, db: AsyncSession, se
     # Récupérer toutes les étapes
     result = await db.execute(
         select(CoachingStep)
-        .filter(CoachingStep.session_id == session_id)
+        .filter(CoachingStep.session_id == session_db_id)
         .order_by(CoachingStep.step_order)
     )
     steps = result.scalars().all()
     
     # GEN-WO-008: Toujours récupérer business_name depuis l'onboarding (sinon fallback)
     onboarding = (session_data or {}).get("onboarding", {})
+    logger.info("building_brief_check_onboarding_start", 
+                session_uuid=session_uuid, 
+                has_onboarding_in_data=bool(onboarding))
+
     if not onboarding and redis_client:
-        onboarding_json = await redis_client.get(f"onboarding:{session_data.get('session_id') if session_data else session_id}")
+        # Utiliser l'UUID pour la clé Redis
+        onboarding_json = await redis_client.get(f"onboarding:{session_uuid}")
+        logger.info("building_brief_redis_lookup", 
+                    key=f"onboarding:{session_uuid}", 
+                    found=bool(onboarding_json))
         if onboarding_json:
             onboarding = json.loads(onboarding_json)
-    business_name = onboarding.get("business_name", "Projet Sans Nom")
+    
+    # Correction: .get(key, default) ne gère pas le cas où la valeur est None
+    business_name = onboarding.get("business_name") or "Projet Sans Nom"
     industry_sector = onboarding.get("sector_resolved") or onboarding.get("sector") or "default"
+    
+    logger.info("building_brief_final_values", 
+                business_name=business_name, 
+                industry_sector=industry_sector)
     
     brief = {
         "business_name": business_name,
@@ -450,7 +465,7 @@ async def get_coaching_help(
     llm_service = CoachingLLMService()
     
     # Récupérer contexte
-    brief = await _build_brief_from_coaching_steps(session_data["id"], db, session_data, redis_client)
+    brief = await _build_brief_from_coaching_steps(session_data["id"], request.session_id, db, session_data, redis_client)
     
     help_result = await llm_service.get_socratic_help(
         step=session_data["current_step"],
@@ -508,7 +523,7 @@ async def generate_proposals(
     llm_service = CoachingLLMService()
     
     # Récupérer contexte (avec fallback onboarding en Redis)
-    brief = await _build_brief_from_coaching_steps(session_data["id"], db, session_data, redis_client)
+    brief = await _build_brief_from_coaching_steps(session_data["id"], request.session_id, db, session_data, redis_client)
     
     proposals_data = await llm_service.generate_proposals(
         step=session_data["current_step"],

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aperçu Savor V2 - Le Délice Impérial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Lato', sans-serif; }
+        h1, h2, h3 { font-family: 'Playfair Display', serif; }
+        .font-accent { font-family: 'Great Vibes', cursive; }
+    </style>
+</head>
+<body class="bg-white text-gray-900">
+
+    <!-- HERO SPLIT -->
+    <section id="hero" class="relative min-h-[80vh] flex items-center overflow-hidden bg-[#fafafa]">
+        <div class="container mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
+            <div class="space-y-6 z-10">
+                <span class="text-amber-600 font-bold tracking-widest uppercase text-sm">Expérience Gastronomique</span>
+                <h1 class="text-6xl md:text-7xl leading-tight">L'Art de la <br><span class="text-amber-600">Gastronomie</span></h1>
+                <p class="text-xl text-gray-600 max-w-lg">Découvrez des saveurs authentiques dans un cadre d'exception. Une invitation au voyage culinaire au cœur de Paris.</p>
+                <div class="flex gap-4 pt-4">
+                    <a href="#menu" class="bg-amber-600 text-white px-8 py-4 rounded-full font-bold hover:bg-amber-700 transition">Réserver une table</a>
+                    <a href="#about" class="border-2 border-amber-600 text-amber-600 px-8 py-4 rounded-full font-bold hover:bg-amber-50 transition">Notre Histoire</a>
+                </div>
+            </div>
+            <div class="relative h-[600px] rounded-2xl overflow-hidden shadow-2xl rotate-2">
+                <img src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=800&q=80" alt="Plat Signature" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-black/10"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ABOUT ENHANCED -->
+    <section id="about" class="py-24 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row gap-16 items-center">
+                <div class="md:w-1/2">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=800&q=80" alt="Chef à l'oeuvre" class="rounded-3xl shadow-xl">
+                        <div class="absolute -bottom-8 -right-8 bg-amber-600 text-white p-8 rounded-2xl shadow-lg hidden md:block">
+                            <span class="text-5xl font-bold block">35</span>
+                            <span class="text-sm uppercase tracking-wider">Ans d'excellence</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:w-1/2 space-y-6">
+                    <h2 class="text-accent text-4xl text-amber-600 font-accent">Depuis 1985</h2>
+                    <h3 class="text-5xl leading-tight">Une Passion pour le <br>Goût et la Tradition</h3>
+                    <p class="text-gray-600 text-lg leading-relaxed">Notre restaurant est né d'une volonté simple : partager l'amour des produits vrais et de la cuisine généreuse. Chaque ingrédient est sélectionné auprès de producteurs locaux passionnés.</p>
+                    <div class="grid grid-cols-2 gap-8 pt-6">
+                        <div class="border-l-4 border-amber-600 pl-4">
+                            <span class="text-3xl font-bold block">5000+</span>
+                            <span class="text-gray-500 text-sm uppercase">Clients par an</span>
+                        </div>
+                        <div class="border-l-4 border-amber-600 pl-4">
+                            <span class="text-3xl font-bold block">12</span>
+                            <span class="text-gray-500 text-sm uppercase">Chefs Étoilés</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MENU BLOCK -->
+    <section id="menu" class="py-24 bg-[#fafafa]">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-5xl mb-4">Notre Carte</h2>
+            <p class="text-gray-500 mb-12 max-w-2xl mx-auto">Une sélection raffinée évoluant au fil des saisons.</p>
+            
+            <div class="flex justify-center gap-4 mb-12">
+                <button class="px-8 py-2 bg-amber-600 text-white rounded-full font-bold">Entrées</button>
+                <button class="px-8 py-2 bg-white text-gray-500 rounded-full font-bold hover:bg-gray-100 transition">Plats</button>
+                <button class="px-8 py-2 bg-white text-gray-500 rounded-full font-bold hover:bg-gray-100 transition">Desserts</button>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                <!-- Item 1 -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm flex justify-between items-center group hover:shadow-md transition">
+                    <div class="text-left">
+                        <h4 class="text-xl font-bold group-hover:text-amber-600 transition">Carpaccio de Saint-Jacques</h4>
+                        <p class="text-gray-500 text-sm">Huile de truffe blanche, zestes de citron vert</p>
+                    </div>
+                    <span class="text-2xl font-bold text-amber-600 italic">22€</span>
+                </div>
+                <!-- Item 2 -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm flex justify-between items-center group hover:shadow-md transition border-2 border-amber-100 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 bg-amber-600 text-white text-[10px] px-3 py-1 uppercase font-bold">Signature</div>
+                    <div class="text-left">
+                        <h4 class="text-xl font-bold group-hover:text-amber-600 transition">Foie Gras Maison</h4>
+                        <p class="text-gray-500 text-sm">Chutney de figues, pain brioché toasté</p>
+                    </div>
+                    <span class="text-2xl font-bold text-amber-600 italic">28€</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER RESTAURANT -->
+    <footer class="bg-gray-900 text-white py-16">
+        <div class="container mx-auto px-4 grid md:grid-cols-4 gap-12">
+            <div class="space-y-6">
+                <h4 class="text-2xl font-accent text-amber-600">Le Délice Impérial</h4>
+                <p class="text-gray-400">L'excellence culinaire au service de vos sens depuis plus de 30 ans.</p>
+                <div class="flex gap-4">
+                    <span class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-amber-600 cursor-pointer transition">IG</span>
+                    <span class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-amber-600 cursor-pointer transition">FB</span>
+                </div>
+            </div>
+            <div>
+                <h5 class="text-xl font-bold mb-6">Horaires</h5>
+                <ul class="space-y-4 text-gray-400">
+                    <li class="flex justify-between"><span>Lundi - Vendredi</span> <span>12h - 22h</span></li>
+                    <li class="flex justify-between"><span>Samedi</span> <span>19h - 23h</span></li>
+                    <li class="flex justify-between text-amber-500"><span>Dimanche</span> <span>Fermé</span></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="text-xl font-bold mb-6">Contact</h5>
+                <ul class="space-y-4 text-gray-400">
+                    <li>123 Avenue des Champs, Paris</li>
+                    <li>+33 1 23 45 67 89</li>
+                    <li>contact@delice-imperial.fr</li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="text-xl font-bold mb-6">Newsletter</h5>
+                <p class="text-gray-400 mb-4">Inscrivez-vous pour nos soirées spéciales.</p>
+                <div class="flex gap-2">
+                    <input type="email" placeholder="Email" class="bg-gray-800 border-none rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-amber-600">
+                    <button class="bg-amber-600 px-4 py-2 rounded-lg font-bold">OK</button>
+                </div>
+            </div>
+        </div>
+        <div class="container mx-auto px-4 mt-16 pt-8 border-t border-gray-800 text-center text-gray-500 text-sm">
+            © 2026 Le Délice Impérial. Tous droits réservés.
+        </div>
+    </footer>
+
+</body>
+</html>

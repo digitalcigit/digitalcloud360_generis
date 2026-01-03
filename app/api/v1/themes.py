@@ -174,9 +174,21 @@ async def select_theme_and_generate(
     # 4. Transformer en SiteDefinition avec injection du thème
     transformer = BriefToSiteTransformer()
     
+    # GEN-WO-SAVOR-V2: Priorité au secteur de la DB (onboarding) sur celui de l'orchestrateur
+    # L'orchestrateur peut échouer ou retourner un secteur par défaut, mais le secteur 
+    # validé lors de l'onboarding est stocké dans brief.sector et doit prévaloir.
+    resolved_sector = brief.sector or orchestration_result["business_brief"].get("industry_sector") or "default"
+    
+    logger.info("theme_generation_data", 
+                brief_sector=brief.sector, 
+                orchestrator_sector=orchestration_result["business_brief"].get("industry_sector"),
+                resolved_sector=resolved_sector,
+                theme_slug=theme.slug, 
+                theme_features=theme.features)
+
     enriched_brief = BusinessBriefData(
-        business_name=orchestration_result["business_brief"].get("business_name", brief.business_name),
-        sector=orchestration_result["business_brief"].get("industry_sector", brief.sector),
+        business_name=orchestration_result["business_brief"].get("business_name") or brief.business_name or "Projet Sans Nom",
+        sector=resolved_sector,
         vision=brief.vision,
         mission=brief.mission,
         target_audience=brief.target_audience,

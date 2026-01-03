@@ -31,6 +31,7 @@ const blockComponents: BlockComponentMap = {
     gallery: dynamic<BlockContentMap['gallery']>(() => import('./blocks/GalleryBlock')),
     cta: dynamic<BlockContentMap['cta']>(() => import('./blocks/CTABlock')),
     footer: dynamic<BlockContentMap['footer']>(() => import('./blocks/FooterBlock')),
+    menu: dynamic<BlockContentMap['menu']>(() => import('./blocks/MenuBlock')),
 };
 
 const isKnownSection = (section: SiteSection | UnknownSection): section is SiteSection =>

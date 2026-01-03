@@ -6,6 +6,7 @@ export interface AboutSectionContent {
     vision?: string;
     image?: string;
     stats?: AboutStat[];
+    variant?: 'simple' | 'enhanced';
 }
 
 export interface AboutStat {

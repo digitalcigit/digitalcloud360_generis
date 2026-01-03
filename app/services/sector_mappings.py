@@ -21,14 +21,15 @@ SECTOR_MAPPINGS: Dict[str, Dict[str, Any]] = {
     },
     "restaurant": {
         "default_colors": {
-            "primary": "#EF4444",    # Red
-            "secondary": "#F59E0B",  # Amber
+            "primary": "#D97706",    # Amber-600 (Gold/Terracotta)
+            "secondary": "#1F2937",  # Gray-800
+            "accent": "#F59E0B"      # Gold
         },
         "default_icons": ["utensils", "coffee", "wine", "cake", "pizza", "salad"],
-        "section_order": ["hero", "about", "services", "features", "contact", "footer"],
-        # gallery → Phase 2
+        "section_order": ["hero", "about", "menu", "features", "testimonials", "contact", "footer"],
         "cta_text": "Réserver une table",
         "about_title": "Notre Histoire",
+        "theme_variant": "restaurant"
     },
     "health": {
         "default_colors": {
@@ -117,7 +118,20 @@ def get_sector_config(sector: str) -> Dict[str, Any]:
     if not sector:
         return SECTOR_MAPPINGS["default"]
     
-    return SECTOR_MAPPINGS.get(sector.lower(), SECTOR_MAPPINGS["default"])
+    s = sector.lower()
+    # Gestion des alias courants (UI vs Backend)
+    if "restaurant" in s or "alimentation" in s:
+        return SECTOR_MAPPINGS["restaurant"]
+    if "tech" in s or "digital" in s:
+        return SECTOR_MAPPINGS["technology"]
+    if "santé" in s or "bien-être" in s:
+        return SECTOR_MAPPINGS["health"]
+    if "coiffure" in s or "beauté" in s or "salon" in s:
+        return SECTOR_MAPPINGS["salon"]
+    if "commerce" in s or "boutique" in s:
+        return SECTOR_MAPPINGS["ecommerce"]
+    
+    return SECTOR_MAPPINGS.get(s, SECTOR_MAPPINGS["default"])
 
 
 def get_sector_colors(sector: str) -> Dict[str, str]:

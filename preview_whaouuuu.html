@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chez Maman Afrique - Preview Phase 2 Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #D4A017;
+            --secondary: #8B4513;
+            --accent: #C41E3A;
+            --text-dark: #1a1a1a;
+            --text-light: #f5f5f5;
+            --bg-light: #FDF5E6;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+        }
+        
+        h1, h2, h3 { font-family: 'Playfair Display', serif; }
+        
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid var(--primary);
+            object-fit: cover;
+        }
+        
+        .brand-name {
+            color: var(--text-light);
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        
+        nav a {
+            color: var(--text-light);
+            text-decoration: none;
+            margin-left: 2rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        nav a:hover { color: var(--primary); }
+        
+        /* Hero */
+        .hero {
+            position: relative;
+            height: 70vh;
+            overflow: hidden;
+        }
+        
+        .hero-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(139,69,19,0.3), rgba(139,69,19,0.8));
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .hero h1 {
+            color: var(--text-light);
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+        }
+        
+        .hero p {
+            color: var(--text-light);
+            font-size: 1.4rem;
+            max-width: 600px;
+            margin-bottom: 2rem;
+        }
+        
+        .cta-button {
+            background: var(--accent);
+            color: white;
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(196,30,58,0.4);
+        }
+        
+        /* Services */
+        .services {
+            padding: 4rem 2rem;
+            background: white;
+        }
+        
+        .services h2 {
+            text-align: center;
+            color: var(--secondary);
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .service-card {
+            background: var(--bg-light);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .service-card:hover { transform: translateY(-8px); }
+        
+        .service-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .service-card h3 {
+            color: var(--secondary);
+            padding: 1.5rem 1.5rem 0.5rem;
+            font-size: 1.3rem;
+        }
+        
+        .service-card p {
+            padding: 0 1.5rem 1.5rem;
+            color: #666;
+        }
+        
+        /* Theme Info */
+        .theme-info {
+            background: var(--secondary);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+        
+        .theme-info h2 {
+            margin-bottom: 2rem;
+            color: var(--primary);
+        }
+        
+        .palette {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+        
+        .color-box {
+            width: 100px;
+            height: 100px;
+            border-radius: 16px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        .font-preview {
+            margin-top: 2rem;
+        }
+        
+        .font-preview h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: var(--primary);
+        }
+        
+        .font-preview p {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--text-dark);
+            color: var(--text-light);
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header avec Logo -->
+    <header>
+        <div class="logo-container">
+            <img src="hero_image_test.png" alt="Logo" class="logo">
+            <span class="brand-name">Chez Maman Afrique</span>
+        </div>
+        <nav>
+            <a href="#">Accueil</a>
+            <a href="#">Menu</a>
+            <a href="#">Services</a>
+            <a href="#">Contact</a>
+        </nav>
+    </header>
+    
+    <!-- Hero Section -->
+    <section class="hero">
+        <img src="hero_image_test.png" alt="Hero" class="hero-image">
+        <div class="hero-overlay">
+            <h1>Chez Maman Afrique</h1>
+            <p>LA référence de la cuisine africaine authentique à Abidjan. Recettes traditionnelles et accueil chaleureux.</p>
+            <button class="cta-button">Réserver une table</button>
+        </div>
+    </section>
+    
+    <!-- Services -->
+    <section class="services">
+        <h2>Nos Services</h2>
+        <div class="services-grid">
+            <div class="service-card">
+                <img src="hero_image_test.png" alt="Restaurant">
+                <h3>🍽️ Restaurant sur place</h3>
+                <p>Salle climatisée de 50 couverts dans une ambiance chaleureuse et familiale.</p>
+            </div>
+            <div class="service-card">
+                <img src="hero_image_test.png" alt="Livraison">
+                <h3>🛵 Livraison</h3>
+                <p>Livraison rapide dans tout Abidjan. Vos plats préférés à domicile.</p>
+            </div>
+            <div class="service-card">
+                <img src="hero_image_test.png" alt="Traiteur">
+                <h3>🎉 Traiteur</h3>
+                <p>Service traiteur pour vos événements, mariages et fêtes de famille.</p>
+            </div>
+            <div class="service-card">
+                <img src="hero_image_test.png" alt="À emporter">
+                <h3>📦 Plats à emporter</h3>
+                <p>Commandez et récupérez vos plats prêts à déguster.</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Theme Info -->
+    <section class="theme-info">
+        <h2>🎨 Thème Généré par IA</h2>
+        <div class="palette">
+            <div class="color-box" style="background: #D4A017; color: #000;">#D4A017<br>Or Africain</div>
+            <div class="color-box" style="background: #8B4513; color: #fff;">#8B4513<br>Brun Terre</div>
+            <div class="color-box" style="background: #C41E3A; color: #fff;">#C41E3A<br>Rouge Chaleureux</div>
+        </div>
+        <div class="font-preview">
+            <h3>Playfair Display - Titres élégants</h3>
+            <p>Inter - Corps de texte moderne et lisible</p>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer>
+        <p>© 2025 Chez Maman Afrique - Tous droits réservés</p>
+        <p class="badge">✨ Généré par Genesis AI - Phase 2 Premium</p>
+    </footer>
+</body>
+</html>

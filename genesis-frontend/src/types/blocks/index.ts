@@ -9,3 +9,4 @@ export * from './contact';
 export * from './gallery';
 export * from './cta';
 export * from './footer';
+export * from './menu';

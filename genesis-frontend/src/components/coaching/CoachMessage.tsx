@@ -4,6 +4,7 @@ interface CoachMessageProps {
 }
 
 export default function CoachMessage({ message, examples = [] }: CoachMessageProps) {
+    if (!message) return null;
     const [title, body] = message.split('\n\n');
 
     return (

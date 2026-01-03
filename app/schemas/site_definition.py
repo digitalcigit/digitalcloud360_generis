@@ -17,6 +17,7 @@ class BlockType(str, Enum):
     GALLERY = "gallery"
     CTA = "cta"
     FOOTER = "footer"
+    MENU = "menu"
 
 
 # ===== HEADER =====
@@ -48,6 +49,13 @@ class HeroCTA(BaseModel):
     variant: Optional[Literal["primary", "secondary", "outline"]] = "primary"
 
 
+class HeroSlide(BaseModel):
+    title: str
+    subtitle: Optional[str] = None
+    image: str
+    cta: Optional[HeroCTA] = None
+
+
 class HeroSectionContent(BaseModel):
     title: str = Field(..., description="Titre principal du hero")  # Aligné sur HeroBlock.tsx
     subtitle: Optional[str] = None  # Aligné sur HeroBlock.tsx
@@ -57,6 +65,32 @@ class HeroSectionContent(BaseModel):
     cta: Optional[HeroCTA] = None  # Single object, aligné sur HeroBlock.tsx
     alignment: Optional[Literal["left", "center", "right"]] = "center"
     overlay: Optional[bool] = False
+    # V2 Properties
+    variant: Optional[Literal["standard", "split", "slider"]] = "standard"
+    slides: Optional[List[HeroSlide]] = None
+
+
+# ===== MENU (NEW V2) =====
+class MenuItem(BaseModel):
+    title: str
+    description: Optional[str] = None
+    price: Union[str, float, int]
+    image: Optional[str] = None
+    isHighlight: Optional[bool] = False
+    dietary: Optional[List[str]] = None
+
+
+class MenuCategory(BaseModel):
+    id: str
+    title: str
+    items: List[MenuItem]
+
+
+class MenuSectionContent(BaseModel):
+    title: str
+    subtitle: Optional[str] = None
+    categories: List[MenuCategory]
+    currency: Optional[str] = "€"
 
 
 # ===== ABOUT =====
@@ -73,6 +107,7 @@ class AboutSectionContent(BaseModel):
     vision: Optional[str] = None
     image: Optional[str] = None
     stats: Optional[List[AboutStat]] = None
+    variant: Optional[Literal["simple", "enhanced"]] = "simple"
 
 
 # ===== SERVICES =====
@@ -206,6 +241,24 @@ class FooterColumn(BaseModel):
     links: List[FooterLink]
 
 
+class OpeningHours(BaseModel):
+    days: str
+    hours: str
+
+
+class NewsletterConfig(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    placeholder: Optional[str] = None
+    buttonText: Optional[str] = None
+
+
+class FooterContactInfo(BaseModel):
+    address: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+
+
 class FooterSectionContent(BaseModel):
     logo: Optional[str] = None
     companyName: Optional[str] = None  # Optional pour compatibilité
@@ -214,6 +267,11 @@ class FooterSectionContent(BaseModel):
     copyright: str = Field(..., description="Copyright text")  # Required, aligné sur FooterBlock.tsx
     socialLinks: Optional[List[SocialLink]] = None
     links: Optional[List[FooterLink]] = None  # Aligné sur FooterBlock.tsx (pas legalLinks)
+    # V2 Properties
+    variant: Optional[Literal["simple", "restaurant"]] = "simple"
+    openingHours: Optional[List[OpeningHours]] = None
+    newsletter: Optional[NewsletterConfig] = None
+    contactInfo: Optional[FooterContactInfo] = None
 
 
 # ===== SECTION CONTENT UNION =====
@@ -227,7 +285,8 @@ SectionContent = Union[
     ContactSectionContent,
     GallerySectionContent,
     CTASectionContent,
-    FooterSectionContent
+    FooterSectionContent,
+    MenuSectionContent
 ]
 
 
@@ -265,6 +324,7 @@ class ThemeColors(BaseModel):
 class ThemeFonts(BaseModel):
     heading: str = "Inter"
     body: str = "Inter"
+    accent: Optional[str] = None
 
 
 class SiteTheme(BaseModel):

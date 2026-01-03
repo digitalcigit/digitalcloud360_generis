@@ -1,13 +1,32 @@
 import { SocialLink } from './contact';
 
 export interface FooterSectionContent {
+    variant?: 'simple' | 'restaurant';
     logo?: string;
-    companyName?: string;        // Optional pour compatibilité
+    companyName?: string;        
     description?: string;
     columns?: FooterColumn[];
-    copyright: string;           // Required, aligné sur FooterBlock.tsx
+    copyright: string;           
     socialLinks?: SocialLink[];
-    links?: FooterLink[];        // Aligné sur FooterBlock.tsx (pas legalLinks)
+    links?: FooterLink[];        
+    // V2 Properties for Restaurant Theme
+    openingHours?: OpeningHours[];
+    newsletter?: {
+        title: string;
+        description: string;
+        placeholder: string;
+        buttonText: string;
+    };
+    contactInfo?: {
+        address?: string;
+        phone?: string;
+        email?: string;
+    };
+}
+
+export interface OpeningHours {
+    days: string;
+    hours: string;
 }
 
 export interface FooterColumn {
@@ -17,7 +36,7 @@ export interface FooterColumn {
 
 export interface FooterLink {
     text: string;
-    url: string;                 // Aligné sur FooterBlock.tsx (pas href)
+    url: string;                 
 }
 
 // Réutiliser SocialLink de contact.ts

@@ -81,12 +81,15 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm start -- -p 3010',
+    command: 'npm run dev -- -p 3010',
     url: 'http://localhost:3010',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
     env: {
       E2E_TEST_MODE: 'true',
+      GENESIS_API_URL: 'http://localhost:8002',
+      DC360_API_URL: 'http://localhost:8000/api',
+      NEXT_PUBLIC_API_URL: 'http://localhost:8002/api/v1'
     }
   },
 });

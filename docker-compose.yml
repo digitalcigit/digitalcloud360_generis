@@ -143,13 +143,17 @@ services:
       - "3002:3000"
     environment:
       # DC360 Hub
-      - DC360_API_URL=http://web:8000/api
+      - DC360_API_URL=http://host.docker.internal:8000/api
       - NEXT_PUBLIC_DC360_URL=http://localhost:3000
       # Genesis Backend
       - GENESIS_API_URL=http://genesis-api:8000
       - NEXT_PUBLIC_API_URL=http://localhost:8002/api/v1
     depends_on:
       - genesis-api
+    volumes:
+      - ./genesis-frontend:/app
+      - /app/node_modules
+      - /app/.next
     networks:
       - genesis-ai-network
 
