@@ -111,7 +111,7 @@ async def get_site_brief(
         value_proposition=brief.value_proposition,
         sector=brief.sector,
         location=brief.location,
-        logo_url=brief.logo_creation.get("logo_url") if brief.logo_creation else None,
+        logo_url=(brief.logo_creation.get("logo_url") if isinstance(brief.logo_creation, dict) else None) if brief.logo_creation else None,
         created_at=brief.created_at,
         updated_at=brief.updated_at,
         market_research_summary=brief.market_research
@@ -146,7 +146,7 @@ async def update_site_brief(
     
     # 2. Update fields
     has_changes = False
-    update_data = updates.dict(exclude_unset=True)
+    update_data = updates.model_dump(exclude_unset=True)
     
     for key, value in update_data.items():
         if getattr(brief, key) != value:
@@ -200,8 +200,8 @@ async def regenerate_site(
             if old_theme_slug:
                 theme_res = await db.execute(select(Theme).where(Theme.slug == old_theme_slug))
                 theme_obj = theme_res.scalars().first()
-        except:
-            pass
+        except (json.JSONDecodeError, KeyError, TypeError) as e:
+            logger.warning("Failed to parse old site theme", session_id=session_id, error=str(e))
             
     # Si pas de thème trouvé (site expiré), fallback sur Savor (défaut) ou logique plus complexe
     if not theme_obj:
