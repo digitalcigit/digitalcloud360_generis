@@ -207,7 +207,7 @@ async def select_theme_and_generate(
     await redis_client.set(
         f"site:{coaching_session.session_id}", 
         json.dumps(site_definition), 
-        ex=86400  # 24h
+        ex=604800  # 7 days (Quick fix for persistence)
     )
     
     # Mettre à jour le statut de la session

@@ -11,4 +11,5 @@ from . import (
     sites,
     themes,
     users,
+    dashboard,
 )

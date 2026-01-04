@@ -14,7 +14,7 @@ from contextlib import asynccontextmanager
 from app.config.settings import settings
 from app.config.database import engine, create_tables
 from app.api.middleware import PrometheusMiddleware, LoggingMiddleware
-from app.api.v1 import auth, coaching, business, users, integrations, genesis, modules, sites, themes, chat, memory
+from app.api.v1 import auth, coaching, business, users, integrations, genesis, modules, sites, themes, chat, memory, dashboard
 from app.api import dc360_adapter
 from app.utils.exceptions import GenesisAIException
 from app.utils.logger import setup_logging
@@ -326,6 +326,12 @@ app.include_router(
     memory.router,
     prefix=f"{settings.API_V1_STR}/memory",
     tags=["Semantic Memory"]
+)
+
+app.include_router(
+    dashboard.router,
+    prefix=f"{settings.API_V1_STR}/dashboard",
+    tags=["Dashboard"]
 )
 
 # DC360 Adapter Router (sans préfixe /v1/ - endpoint alias)
